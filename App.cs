@@ -24,7 +24,7 @@ namespace AreaCalculations
             RibbonPanel areaCalcPanel = application.CreateRibbonPanel(tabName, "Area Calculations");
 
             // create PushButon
-            PushButtonData butonData1 = new PushButtonData("Plot\nparameters", "Plot\nparameters", assembName, "AreaCalculations.Test");
+            PushButtonData butonData1 = new PushButtonData("Plot\nparameters", "Plot\nparameters", assembName, "AreaCalculations.SiteCalcs");
             butonData1.LargeImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
 
             areaCalcPanel.AddItem(butonData1);
