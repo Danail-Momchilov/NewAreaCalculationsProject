@@ -30,33 +30,64 @@ namespace AreaCalculations
                 double density;
                 double kint;
 
+                string teststring = "Проектните параметри бяха обновени успешно!\n";
 
                 // achieved area calculations
                 foreach (Area area in allAreas)
                 {
-                    if (area.LookupParameter("A Instance Area Location").AsValueString() == "НАДЗЕМНО" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНО")
+                    if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНА")
                     {
                         areasZP.Add(area);
                         buildArea += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                     }
-                    else if (area.LookupParameter("A Instance Area Location").AsValueString() == "НАЗЕМНО" || area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНО")
+                    else if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА")
                     {
                         totalBuildArea += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                     }
                 }
-
-                // determine plot area
-                if (projInfo.LookupParameter("Zone Area 1st") != null && projInfo.LookupParameter("Zone Area 2nd") != null)
-                {
-                    double area1 = projInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert;
-                    double area2 = projInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert;
-                    plotAreas.Add(area1 + area2);
-                }
-                else
-                {
-                    plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
-                }
                 
+                // determine plot type and calculate general parameters
+                switch (projInfo.LookupParameter("Plot Type").AsString())
+                {
+                    case "СТАНДАРТНО УПИ":
+                        teststring += "Тип на УПИ: Стандартно\n";
+                        plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
+                        break;
+
+                    case "ЪГЛОВО УПИ":
+                        teststring += "Тип на УПИ: Ъглово\n";
+                                                
+                        break;
+                    case "УПИ В ДВЕ ЗОНИ":
+                        teststring += "Тип на УПИ: Един имот в две устройствени зони\n";
+                        projInfo.LookupParameter("Plot Area")
+                            .Set(Math.Round(projInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert, 2) + Math.Round(projInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert, 2));
+                        projInfo.LookupParameter("Required Built up Density")
+                            .Set(projInfo.LookupParameter("Required Built up Density 1st").AsDouble() + projInfo.LookupParameter("Required Built up Density 2nd").AsDouble());
+                        projInfo.LookupParameter("Required Built up Area")
+                            .Set(projInfo.LookupParameter("Required Built up Area 1st").AsDouble() + projInfo.LookupParameter("Required Built up Area 2nd").AsDouble());
+                        projInfo.LookupParameter("Required Area Intensity")
+                            .Set(projInfo.LookupParameter("Required Area Intensity 1st").AsDouble() + projInfo.LookupParameter("Required Area Intensity 2nd").AsDouble());
+                        projInfo.LookupParameter("Required Gross External Area")
+                            .Set(projInfo.LookupParameter("Required Gross External Area 1st").AsDouble() + projInfo.LookupParameter("Required Gross External Area 2nd").AsDouble());
+                        projInfo.LookupParameter("Required Green Area Percentage")
+                            .Set(projInfo.LookupParameter("Required Green Area Percentage 1st").AsDouble() + projInfo.LookupParameter("Required Green Area Percentage 2nd").AsDouble());
+                        projInfo.LookupParameter("Required Green Area")
+                            .Set(projInfo.LookupParameter("Required Green Area 1st").AsDouble() + projInfo.LookupParameter("Required Green Area 2nd").AsDouble());
+                        teststring += "Отделните параметри 1st и 2nd бяха сумирани\n";
+                        break;
+                    case "ДВЕ УПИ В ЕДНА ЗОНА":
+                        teststring += "Тип на УПИ: Две УПИ в една зона\n";
+                        // to be continued
+                        break;
+                    default:
+                        TaskDialog error = new TaskDialog("Възникнала грешка");
+                        error.MainInstruction = "Моля, попълнете параметъра 'Plot Type' с една от следните опции: СТАНДАРТНО УПИ, ЪГЛОВО УПИ, УПИ В ДВЕ ЗОНИ, ДВЕ УПИ В ЕДНА ЗОНА";
+                        error.Show();
+                        Environment.Exit(0);
+                        break;
+                }
+
                 // calculate plot parameters
                 plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
                 density = Math.Round(buildArea / plotAreas[0], 2);
@@ -68,27 +99,24 @@ namespace AreaCalculations
 
 
 
-                /*
+                
                 // info test
-                Transaction T = new Transaction(doc, "Update Project Info");
-                T.Start();
+                /*Transaction T = new Transaction(doc, "Update Project Info");
+                T.Start(); 
 
                 projInfo.LookupParameter("Achieved Built up Area").Set(buildArea);
                 projInfo.LookupParameter("Achieved Gross External Area").Set(totalBuildArea);
                 projInfo.LookupParameter("Achieved Area Intensity").Set(kint);
                 projInfo.LookupParameter("Achieved Built up Density").Set(density);
 
-                T.Commit();
-                */
+                T.Commit(); */
+                
 
 
 
 
 
                 // test
-                string teststring = "";
-
-                //teststring += projInfo.LookupParameter("Plot Area").AsDouble();
                 
                 for (int i = 0; i < plotAreas.Count; i++)
                 {
