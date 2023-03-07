@@ -30,6 +30,8 @@ namespace AreaCalculations
                 double density;
                 double kint;
 
+                Transaction T = new Transaction(doc, "Update Project Info");
+
                 string teststring = "Проектните параметри бяха обновени успешно!\n";
 
                 // achieved area calculations
@@ -52,16 +54,28 @@ namespace AreaCalculations
                     case "СТАНДАРТНО УПИ":
                         teststring += "Тип на УПИ: Стандартно\n";
                         plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
+                        plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
+                        density = Math.Round(buildArea / plotAreas[0], 2);
+                        kint = Math.Round(totalBuildArea / plotAreas[0], 2);
                         break;
 
                     case "ЪГЛОВО УПИ":
                         teststring += "Тип на УПИ: Ъглово\n";
-                                                
+                        plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
+                        plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
+                        density = Math.Round(buildArea / plotAreas[0], 2);
+                        kint = Math.Round(totalBuildArea / plotAreas[0], 2);
                         break;
+
                     case "УПИ В ДВЕ ЗОНИ":
                         teststring += "Тип на УПИ: Един имот в две устройствени зони\n";
-                        projInfo.LookupParameter("Plot Area")
-                            .Set(Math.Round(projInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert, 2) + Math.Round(projInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert, 2));
+                        double plotAr = Math.Round( (projInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert) + (projInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert), 2 );
+                        plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
+                        plotAreas.Add(plotAr);
+                        density = Math.Round(buildArea / plotAreas[0], 2);
+                        kint = Math.Round(totalBuildArea / plotAreas[0], 2);
+                        T.Start();
+                        projInfo.LookupParameter("Plot Area").Set(plotAr);
                         projInfo.LookupParameter("Required Built up Density")
                             .Set(projInfo.LookupParameter("Required Built up Density 1st").AsDouble() + projInfo.LookupParameter("Required Built up Density 2nd").AsDouble());
                         projInfo.LookupParameter("Required Built up Area")
@@ -75,11 +89,19 @@ namespace AreaCalculations
                         projInfo.LookupParameter("Required Green Area")
                             .Set(projInfo.LookupParameter("Required Green Area 1st").AsDouble() + projInfo.LookupParameter("Required Green Area 2nd").AsDouble());
                         teststring += "Отделните параметри 1st и 2nd бяха сумирани\n";
+                        T.Commit();
                         break;
+
                     case "ДВЕ УПИ В ЕДНА ЗОНА":
                         teststring += "Тип на УПИ: Две УПИ в една зона\n";
+                        // just a test underneath
+                        plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
+                        plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
+                        density = Math.Round(buildArea / plotAreas[0], 2);
+                        kint = Math.Round(totalBuildArea / plotAreas[0], 2);
                         // to be continued
                         break;
+
                     default:
                         TaskDialog error = new TaskDialog("Възникнала грешка");
                         error.MainInstruction = "Моля, попълнете параметъра 'Plot Type' с една от следните опции: СТАНДАРТНО УПИ, ЪГЛОВО УПИ, УПИ В ДВЕ ЗОНИ, ДВЕ УПИ В ЕДНА ЗОНА";
@@ -87,11 +109,6 @@ namespace AreaCalculations
                         Environment.Exit(0);
                         break;
                 }
-
-                // calculate plot parameters
-                plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
-                density = Math.Round(buildArea / plotAreas[0], 2);
-                kint = Math.Round(totalBuildArea / plotAreas[0], 2);
 
 
 
@@ -116,33 +133,24 @@ namespace AreaCalculations
 
 
 
-                // test
-                
+                // output report
                 for (int i = 0; i < plotAreas.Count; i++)
                 {
-                    teststring = teststring + $"PLot {i} area: " + plotAreas[i].ToString() + "\n" + $"PLot {i} name: " + plotNames[i] + "\n";
+                    teststring = teststring + $"Площ на имот {i}: " + plotAreas[i].ToString() + "\n" + $"Име на имот {i}: " + plotNames[i] + "\n";
                 }
-                
 
-                teststring += $"Number of Areas included in the build area = {areasZP.Count}\n";
-                teststring += $"BuildArea = {buildArea}\n";
-                //teststring += $"Density = {density}\n";
-                teststring += $"Total number of Areas in the model = {allAreas.GetElementCount()}\n";
-                teststring += $"TBA = {totalBuildArea}\n";
-                //teststring += $"Kint = {kint}\n";
-
-                foreach (string level in areaLevels)
-                {
-                    teststring += "level\n";
-                }
+                teststring += $"Постигнато ЗП = {buildArea}\n";
+                //teststring += $"Постигната плътност = {density}\n";
+                teststring += $"Постигнато РЗП = {totalBuildArea}\n";
+                //teststring += $"Постигнат КИНТ = {kint}\n";
 
                 TaskDialog testDialog = new TaskDialog("Report");
                 testDialog.MainInstruction = teststring;
                 testDialog.Show();
-                // end of test
 
                 return Result.Succeeded;
             }
+
             catch (Exception e)
             {
                 return Result.Failed;
