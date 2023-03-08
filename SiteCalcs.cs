@@ -12,7 +12,7 @@ namespace AreaCalculations
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            Document doc = uidoc.Document;
+            Document doc = uidoc.Document;            
 
             try
             {
@@ -112,19 +112,32 @@ namespace AreaCalculations
                         T.Commit();
                         break;
 
-                    case "ДВЕ УПИ В ЕДНА ЗОНА":
-                        teststring += "Тип на УПИ: Две УПИ в една зона\n";
-                        // just a test underneath
-                        plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
-                        plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
+                    case "ДВЕ УПИ":
+                        teststring += "Тип на УПИ: Две отделни УПИ\n";
+                        // note: add the case of build and total build area
+                        plotAreas.Add(Math.Round(projInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));
+                        plotNames.Add(projInfo.LookupParameter("Plot Number 1st").AsString());
                         density.Add(Math.Round(buildArea / plotAreas[0], 2));
                         kint.Add(Math.Round(totalBuildArea / plotAreas[0], 2));
-                        // to be continued
+                        plotAreas.Add(Math.Round(projInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));
+                        plotNames.Add(projInfo.LookupParameter("Plot Number 2nd").AsString());
+                        density.Add(Math.Round(buildArea / plotAreas[1], 2));
+                        kint.Add(Math.Round(totalBuildArea / plotAreas[1], 2));
+                        T.Start();
+                        projInfo.LookupParameter("Achieved Built up Area 1st").Set(buildArea);
+                        projInfo.LookupParameter("Achieved Gross External Area 1st").Set(totalBuildArea);
+                        projInfo.LookupParameter("Achieved Area Intensity 1st").Set(kint[0]);
+                        projInfo.LookupParameter("Achieved Built up Density 1st").Set(density[0]);
+                        projInfo.LookupParameter("Achieved Built up Area 2nd").Set(buildArea);
+                        projInfo.LookupParameter("Achieved Gross External Area 2nd").Set(totalBuildArea);
+                        projInfo.LookupParameter("Achieved Area Intensity 2nd").Set(kint[1]);
+                        projInfo.LookupParameter("Achieved Built up Density 2nd").Set(density[1]);
+                        T.Commit();
                         break;
 
                     default:
                         TaskDialog error = new TaskDialog("Възникнала грешка");
-                        error.MainInstruction = "Моля, попълнете параметъра 'Plot Type' с една от следните опции: СТАНДАРТНО УПИ, ЪГЛОВО УПИ, УПИ В ДВЕ ЗОНИ, ДВЕ УПИ В ЕДНА ЗОНА";
+                        error.MainInstruction = "Моля, попълнете параметъра 'Plot Type' с една от следните опции: СТАНДАРТНО УПИ, ЪГЛОВО УПИ, УПИ В ДВЕ ЗОНИ, ДВЕ УПИ";
                         error.Show();
                         Environment.Exit(0);
                         break;
@@ -135,11 +148,24 @@ namespace AreaCalculations
                 {
                     teststring = teststring + $"Площ на имот {i}: " + plotAreas[i].ToString() + "\n" + $"Име на имот {i}: " + plotNames[i] + "\n";
                 }
-
-                teststring += $"Постигнато ЗП = {buildArea}\n";
-                teststring += $"Постигната плътност = {density[0]}\n";
-                teststring += $"Постигнато РЗП = {totalBuildArea}\n";
-                teststring += $"Постигнат КИНТ = {kint[0]}\n";
+                if (plotAreas.Count == 1)
+                {
+                    teststring += $"Постигнато ЗП = {buildArea}\n";
+                    teststring += $"Постигната плътност = {density[0]}\n";
+                    teststring += $"Постигнато РЗП = {totalBuildArea}\n";
+                    teststring += $"Постигнат КИНТ = {kint[0]}\n";
+                }
+                else
+                {
+                    teststring += $"Постигнато ЗП за имот 1 = {buildArea}\n";
+                    teststring += $"Постигната плътност за имот 1 = {density[0]}\n";
+                    teststring += $"Постигнато РЗП за имот 1 = {totalBuildArea}\n";
+                    teststring += $"Постигнат КИНТ за имот 1 = {kint[0]}\n";
+                    teststring += $"Постигнато ЗП за имот 2 = {buildArea}\n";
+                    teststring += $"Постигната плътност за имот 2 = {density[1]}\n";
+                    teststring += $"Постигнато РЗП за имот 2 = {totalBuildArea}\n";
+                    teststring += $"Постигнат КИНТ за имот 2 = {kint[1]}\n";
+                }                
 
                 TaskDialog testDialog = new TaskDialog("Report");
                 testDialog.MainInstruction = teststring;
@@ -150,6 +176,9 @@ namespace AreaCalculations
 
             catch (Exception e)
             {
+                TaskDialog exceptions = new TaskDialog("Съобщение за грешка");
+                exceptions.MainInstruction = e.Message;
+                exceptions.Show();
                 return Result.Failed;
             }
         }
