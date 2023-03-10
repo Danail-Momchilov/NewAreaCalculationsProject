@@ -16,27 +16,35 @@ namespace AreaCalculations
 
             try
             {
+                // get all areas and project info
                 FilteredElementCollector allAreas = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType();
                 ProjectInfo projInfo = doc.ProjectInformation;
 
+                // get plot numbers from project and define a list for all the plot areas
                 List<double> plotAreas = new List<double>();
                 List<string> plotNames = new List<string>();
-                List<string> areaLevels = new List<string>();
+
+                if (projInfo.LookupParameter("Plot Type").AsString() == "ДВЕ УПИ")
+                {
+                    plotNames.Add(projInfo.LookupParameter("Plot Number 1st").AsString());
+                    plotNames.Add(projInfo.LookupParameter("Plot Number 2nd").AsString());
+                }
+                else
+                {
+                    plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
+                }
+
+                // area calculation instance and additional plot parameters variables
+                AreaCollection areaCalcs = new AreaCollection(allAreas, plotNames);
                 List<double> kint = new List<double>();
                 List<double> density = new List<double>();
 
-                List<double> buildArea = new List<double>();
-                buildArea.Add(0);
-                buildArea.Add(0);
-
-                List<double> totalBuildArea = new List<double>();
-                totalBuildArea.Add(0);
-                totalBuildArea.Add(0);
-
+                // area conversion variable
                 double areaConvert = 10.763914692;
 
                 Transaction T = new Transaction(doc, "Update Project Info");
 
+                // define output report string
                 string teststring = "Проектните параметри бяха обновени успешно!\n";
 
                 TaskDialog errors = new TaskDialog("Ужас, смрад, безобразие");
@@ -46,46 +54,28 @@ namespace AreaCalculations
                 switch (projInfo.LookupParameter("Plot Type").AsString())
                 {
                     case "СТАНДАРТНО УПИ":
-                        // achieved area calculations
-                        foreach (Area area in allAreas)
-                        {
-                            if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНА")
-                                buildArea[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                            else if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА")
-                                totalBuildArea[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                        }
                         teststring += "Тип на УПИ: Стандартно\n";
                         plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
-                        plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
-                        density.Add(Math.Round(buildArea[0] / plotAreas[0], 2));
-                        kint.Add(Math.Round(totalBuildArea[0] / plotAreas[0], 2));
+                        density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
                         T.Start();
-                        projInfo.LookupParameter("Achieved Built up Area").Set(buildArea[0]);
-                        projInfo.LookupParameter("Achieved Gross External Area").Set(totalBuildArea[0]);
+                        projInfo.LookupParameter("Achieved Built up Area").Set(areaCalcs.build[0]);
+                        projInfo.LookupParameter("Achieved Gross External Area").Set(areaCalcs.totalBuild[0]);
                         projInfo.LookupParameter("Achieved Area Intensity").Set(kint[0]);
                         projInfo.LookupParameter("Achieved Built up Density").Set(density[0]);
                         T.Commit();
                         break;
 
                     case "ЪГЛОВО УПИ":
-                        // achieved area calculations
-                        foreach (Area area in allAreas)
-                        {
-                            if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНА")
-                                buildArea[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                            else if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА")
-                                totalBuildArea[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                        }
                         teststring += "Тип на УПИ: Ъглово\n";
                         plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
-                        plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
-                        density.Add(Math.Round(buildArea[0] / plotAreas[0], 2));
-                        kint.Add(Math.Round(totalBuildArea[0] / plotAreas[0], 2));
+                        density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
                         T.Start();
-                        projInfo.LookupParameter("Achieved Built up Area").Set(buildArea[0]);
-                        projInfo.LookupParameter("Required Build up Area").Set(buildArea[0]);
-                        projInfo.LookupParameter("Achieved Gross External Area").Set(totalBuildArea[0]);
-                        projInfo.LookupParameter("Required Gross External Area").Set(totalBuildArea[0]);
+                        projInfo.LookupParameter("Achieved Built up Area").Set(areaCalcs.build[0]);
+                        projInfo.LookupParameter("Required Build up Area").Set(areaCalcs.build[0]);
+                        projInfo.LookupParameter("Achieved Gross External Area").Set(areaCalcs.totalBuild[0]);
+                        projInfo.LookupParameter("Required Gross External Area").Set(areaCalcs.totalBuild[0]);
                         projInfo.LookupParameter("Achieved Area Intensity").Set(kint[0]);
                         projInfo.LookupParameter("Required Area Intensity").Set(kint[0]);
                         projInfo.LookupParameter("Achieved Built up Density").Set(density[0]);
@@ -94,20 +84,11 @@ namespace AreaCalculations
                         break;
 
                     case "УПИ В ДВЕ ЗОНИ":
-                        // achieved area calculations
-                        foreach (Area area in allAreas)
-                        {
-                            if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНА")
-                                buildArea[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                            else if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА")
-                                totalBuildArea[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                        }
                         teststring += "Тип на УПИ: Един имот в две устройствени зони\n";
                         double plotAr = Math.Round((projInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert) + (projInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert), 2);
-                        plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
                         plotAreas.Add(plotAr);
-                        density.Add(Math.Round(buildArea[0] / plotAreas[0], 2));
-                        kint.Add(Math.Round(totalBuildArea[0] / plotAreas[0], 2));
+                        density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
                         T.Start();
                         projInfo.LookupParameter("Plot Area").Set(plotAr);
                         projInfo.LookupParameter("Required Built up Density")
@@ -123,54 +104,28 @@ namespace AreaCalculations
                         projInfo.LookupParameter("Required Green Area")
                             .Set(projInfo.LookupParameter("Required Green Area 1st").AsDouble() + projInfo.LookupParameter("Required Green Area 2nd").AsDouble());
                         teststring += "Отделните параметри 1st и 2nd бяха сумирани\n";
-                        projInfo.LookupParameter("Achieved Built up Area").Set(buildArea[0]);
-                        projInfo.LookupParameter("Achieved Gross External Area").Set(totalBuildArea[0]);
+                        projInfo.LookupParameter("Achieved Built up Area").Set(areaCalcs.build[0]);
+                        projInfo.LookupParameter("Achieved Gross External Area").Set(areaCalcs.totalBuild[0]);
                         projInfo.LookupParameter("Achieved Area Intensity").Set(kint[0]);
                         projInfo.LookupParameter("Achieved Built up Density").Set(density[0]);
                         T.Commit();
                         break;
 
                     case "ДВЕ УПИ":
-                        teststring += "Тип на УПИ: Две отделни УПИ\n";
-                        plotNames.Add(projInfo.LookupParameter("Plot Number 1st").AsString());
-                        plotNames.Add(projInfo.LookupParameter("Plot Number 2nd").AsString());
-                        foreach (Area area in allAreas)
-                        {
-                            if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНА")
-                            {
-                                if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
-                                    buildArea[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                                else if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[1])
-                                    buildArea[1] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                                else
-                                    errors.MainInstruction += "Открита е партерна или полуподземна Area, която не е сътонесена към нито един от двата въведени имота!\n";
-                            }
-                            else if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА")
-                            {
-                                if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
-                                    totalBuildArea[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                                else if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[1])
-                                    totalBuildArea[1] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                                else
-                                {
-                                    errors.MainInstruction += "Открита е надземна Area, която не е сътонесена към нито един от двата въведени имота!\n";
-                                    errorsExist = true;
-                                }                                    
-                            }
-                        }                        
+                        teststring += "Тип на УПИ: Две отделни УПИ\n";                  
                         plotAreas.Add(Math.Round(projInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));     
-                        density.Add(Math.Round(buildArea[0] / plotAreas[0], 2));
-                        kint.Add(Math.Round(totalBuildArea[0] / plotAreas[0], 2));
+                        density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
                         plotAreas.Add(Math.Round(projInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));                  
-                        density.Add(Math.Round(buildArea[1] / plotAreas[1], 2));
-                        kint.Add(Math.Round(totalBuildArea[1] / plotAreas[1], 2));
+                        density.Add(Math.Round(areaCalcs.build[1] / plotAreas[1], 2));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[1] / plotAreas[1], 2));
                         T.Start();
-                        projInfo.LookupParameter("Achieved Built up Area 1st").Set(buildArea[0]);
-                        projInfo.LookupParameter("Achieved Gross External Area 1st").Set(totalBuildArea[0]);
+                        projInfo.LookupParameter("Achieved Built up Area 1st").Set(areaCalcs.build[0]);
+                        projInfo.LookupParameter("Achieved Gross External Area 1st").Set(areaCalcs.totalBuild[0]);
                         projInfo.LookupParameter("Achieved Area Intensity 1st").Set(kint[0]);
                         projInfo.LookupParameter("Achieved Built up Density 1st").Set(density[0]);
-                        projInfo.LookupParameter("Achieved Built up Area 2nd").Set(buildArea[1]);
-                        projInfo.LookupParameter("Achieved Gross External Area 2nd").Set(totalBuildArea[1]);
+                        projInfo.LookupParameter("Achieved Built up Area 2nd").Set(areaCalcs.build[1]);
+                        projInfo.LookupParameter("Achieved Gross External Area 2nd").Set(areaCalcs.totalBuild[1]);
                         projInfo.LookupParameter("Achieved Area Intensity 2nd").Set(kint[1]);
                         projInfo.LookupParameter("Achieved Built up Density 2nd").Set(density[1]);
                         T.Commit();
@@ -193,20 +148,20 @@ namespace AreaCalculations
                     }
                     if (plotAreas.Count == 1)
                     {
-                        teststring += $"Постигнато ЗП = {buildArea}\n";
+                        teststring += $"Постигнато ЗП = {areaCalcs.build[0]}\n";
                         teststring += $"Постигната плътност = {density[0]}\n";
-                        teststring += $"Постигнато РЗП = {totalBuildArea}\n";
+                        teststring += $"Постигнато РЗП = {areaCalcs.totalBuild[0]}\n";
                         teststring += $"Постигнат КИНТ = {kint[0]}\n";
                     }
                     else
                     {
-                        teststring += $"Постигнато ЗП за имот 1 = {buildArea[0]}\n";
+                        teststring += $"Постигнато ЗП за имот 1 = {areaCalcs.build[0]}\n";
                         teststring += $"Постигната плътност за имот 1 = {density[0]}\n";
-                        teststring += $"Постигнато РЗП за имот 1 = {totalBuildArea[0]}\n";
+                        teststring += $"Постигнато РЗП за имот 1 = {areaCalcs.totalBuild[0]}\n";
                         teststring += $"Постигнат КИНТ за имот 1 = {kint[0]}\n";
-                        teststring += $"Постигнато ЗП за имот 2 = {buildArea}\n";
+                        teststring += $"Постигнато ЗП за имот 2 = {areaCalcs.build[1]}\n";
                         teststring += $"Постигната плътност за имот 2 = {density[1]}\n";
-                        teststring += $"Постигнато РЗП за имот 2 = {totalBuildArea}\n";
+                        teststring += $"Постигнато РЗП за имот 2 = {areaCalcs.totalBuild[1]}\n";
                         teststring += $"Постигнат КИНТ за имот 2 = {kint[1]}\n";
                     }
 
