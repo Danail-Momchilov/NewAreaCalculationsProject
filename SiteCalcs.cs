@@ -12,13 +12,16 @@ namespace AreaCalculations
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            Document doc = uidoc.Document;            
+            Document doc = uidoc.Document;
 
             try
             {
                 // get all areas and project info
                 FilteredElementCollector allAreas = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType();
                 ProjectInfo projInfo = doc.ProjectInformation;
+
+                // define a ProjectInfo Updater object
+                ProjInfoUpdater ProjInfo = new ProjInfoUpdater(projInfo, doc);
 
                 // get plot numbers from project and define a list for all the plot areas
                 List<double> plotAreas = new List<double>();
@@ -58,12 +61,7 @@ namespace AreaCalculations
                         plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
                         density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
                         kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
-                        T.Start();
-                        projInfo.LookupParameter("Achieved Built up Area").Set(areaCalcs.build[0]);
-                        projInfo.LookupParameter("Achieved Gross External Area").Set(areaCalcs.totalBuild[0]);
-                        projInfo.LookupParameter("Achieved Area Intensity").Set(kint[0]);
-                        projInfo.LookupParameter("Achieved Built up Density").Set(density[0]);
-                        T.Commit();
+                        ProjInfo.setAchievedStandart(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0]);
                         break;
 
                     case "ЪГЛОВО УПИ":
