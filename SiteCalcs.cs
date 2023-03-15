@@ -27,6 +27,19 @@ namespace AreaCalculations
                 List<double> plotAreas = new List<double>();
                 List<string> plotNames = new List<string>();
 
+                // area calculation instance and additional plot parameters variables
+                AreaCollection areaCalcs = new AreaCollection(allAreas, plotNames);
+                List<double> kint = new List<double>();
+                List<double> density = new List<double>();
+
+                // area conversion variable
+                double areaConvert = 10.763914692;
+
+                // define output report string
+                OutputReport output = new OutputReport();
+
+                TaskDialog errors = new TaskDialog("Ужас, смрад, безобразие");
+
                 if (projInfo.LookupParameter("Plot Type").AsString() == "ДВЕ УПИ")
                 {
                     plotNames.Add(projInfo.LookupParameter("Plot Number 1st").AsString());
@@ -37,24 +50,11 @@ namespace AreaCalculations
                     plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
                 }
 
-                // area calculation instance and additional plot parameters variables
-                AreaCollection areaCalcs = new AreaCollection(allAreas, plotNames);
-                List<double> kint = new List<double>();
-                List<double> density = new List<double>();
-
-                // area conversion variable
-                double areaConvert = 10.763914692;
-
-                // define output report string
-                string teststring = "Проектните параметри бяха обновени успешно!\n";
-
-                TaskDialog errors = new TaskDialog("Ужас, смрад, безобразие");
-
                 // determine plot type and calculate general parameters
                 switch (projInfo.LookupParameter("Plot Type").AsString())
                 {
                     case "СТАНДАРТНО УПИ":
-                        teststring += "Тип на УПИ: Стандартно\n";
+                        output.addString("Тип на УПИ: Стандартно\n");
                         plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
                         density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
                         kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
@@ -62,7 +62,7 @@ namespace AreaCalculations
                         break;
 
                     case "ЪГЛОВО УПИ":
-                        teststring += "Тип на УПИ: Ъглово\n";
+                        output.addString("Тип на УПИ: Ъглово\n");
                         plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
                         density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
                         kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
@@ -71,17 +71,17 @@ namespace AreaCalculations
                         break;
 
                     case "УПИ В ДВЕ ЗОНИ":
-                        teststring += "Тип на УПИ: Един имот в две устройствени зони\n";
+                        output.addString("Тип на УПИ: Един имот в две устройствени зони\n");
+                        output.addString("Отделните параметри 1st и 2nd бяха сумирани\n");
                         double plotAr = Math.Round((projInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert) + (projInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert), 2);
                         plotAreas.Add(plotAr);
                         density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
                         kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
                         ProjInfo.SetAllTwoZones(plotAr, areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0]);
-                        teststring += "Отделните параметри 1st и 2nd бяха сумирани\n";
                         break;
 
                     case "ДВЕ УПИ":
-                        teststring += "Тип на УПИ: Две отделни УПИ\n";                  
+                        output.addString("Тип на УПИ: Две отделни УПИ\n");               
                         plotAreas.Add(Math.Round(projInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));     
                         density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
                         kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
