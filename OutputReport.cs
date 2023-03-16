@@ -14,5 +14,10 @@ namespace AreaCalculations
 
         public void addString(string message)
         { outputString += message; }
+
+        public void addPlotNamesAreas(List<double> plotAreas, List<string> plotNames)
+        {
+
+        }
     }
 }
