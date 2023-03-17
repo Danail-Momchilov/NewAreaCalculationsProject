@@ -93,30 +93,10 @@ namespace AreaCalculations
                 }
 
                 // output report
-                for (int i = 0; i < plotAreas.Count; i++)
-                {
-                    teststring = teststring + $"Площ на имот {i}: " + plotAreas[i].ToString() + "\n" + $"Име на имот {i}: " + plotNames[i] + "\n";
-                }
-                if (plotAreas.Count == 1)
-                {
-                    teststring += $"Постигнато ЗП = {areaCalcs.build[0]}\n";
-                    teststring += $"Постигната плътност = {density[0]}\n";
-                    teststring += $"Постигнато РЗП = {areaCalcs.totalBuild[0]}\n";
-                    teststring += $"Постигнат КИНТ = {kint[0]}\n";
-                }
-                else
-                {
-                    teststring += $"Постигнато ЗП за имот 1 = {areaCalcs.build[0]}\n";
-                    teststring += $"Постигната плътност за имот 1 = {density[0]}\n";
-                    teststring += $"Постигнато РЗП за имот 1 = {areaCalcs.totalBuild[0]}\n";
-                    teststring += $"Постигнат КИНТ за имот 1 = {kint[0]}\n";
-                    teststring += $"Постигнато ЗП за имот 2 = {areaCalcs.build[1]}\n";
-                    teststring += $"Постигната плътност за имот 2 = {density[1]}\n";
-                    teststring += $"Постигнато РЗП за имот 2 = {areaCalcs.totalBuild[1]}\n";
-                    teststring += $"Постигнат КИНТ за имот 2 = {kint[1]}\n";
-                }
+                output.updateFinalOutput(plotAreas, plotNames, areaCalcs.build, density, areaCalcs.totalBuild, kint);
+
                 TaskDialog testDialog = new TaskDialog("Report");
-                testDialog.MainInstruction = teststring;
+                testDialog.MainInstruction = output.outputString;
                 testDialog.Show();
                 
                 return Result.Succeeded;
