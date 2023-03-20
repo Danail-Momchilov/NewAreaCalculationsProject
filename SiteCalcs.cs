@@ -27,6 +27,16 @@ namespace AreaCalculations
                 List<double> plotAreas = new List<double>();
                 List<string> plotNames = new List<string>();
 
+                if (projInfo.LookupParameter("Plot Type").AsString() == "ДВЕ УПИ")
+                {
+                    plotNames.Add(projInfo.LookupParameter("Plot Number 1st").AsString());
+                    plotNames.Add(projInfo.LookupParameter("Plot Number 2nd").AsString());
+                }
+                else
+                {
+                    plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
+                }
+
                 // area calculation instance and additional plot parameters variables
                 AreaCollection areaCalcs = new AreaCollection(allAreas, plotNames);
                 List<double> kint = new List<double>();
@@ -40,16 +50,7 @@ namespace AreaCalculations
 
                 TaskDialog errors = new TaskDialog("Ужас, смрад, безобразие");
 
-                if (projInfo.LookupParameter("Plot Type").AsString() == "ДВЕ УПИ")
-                {
-                    plotNames.Add(projInfo.LookupParameter("Plot Number 1st").AsString());
-                    plotNames.Add(projInfo.LookupParameter("Plot Number 2nd").AsString());
-                }
-                else
-                {
-                    plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
-                }
-
+                
                 // determine plot type and calculate general parameters
                 switch (projInfo.LookupParameter("Plot Type").AsString())
                 {
@@ -82,10 +83,10 @@ namespace AreaCalculations
 
                     case "ДВЕ УПИ":
                         output.addString("Тип на УПИ: Две отделни УПИ\n");               
-                        plotAreas.Add(Math.Round(projInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));     
+                        plotAreas.Add(Math.Round(projInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));
                         density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
                         kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
-                        plotAreas.Add(Math.Round(projInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));                  
+                        plotAreas.Add(Math.Round(projInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));
                         density.Add(Math.Round(areaCalcs.build[1] / plotAreas[1], 2));
                         kint.Add(Math.Round(areaCalcs.totalBuild[1] / plotAreas[1], 2));
                         ProjInfo.SetAchievedTwoPlots(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], areaCalcs.build[1], areaCalcs.totalBuild[1], kint[1], density[1]);
@@ -96,6 +97,7 @@ namespace AreaCalculations
                 output.updateFinalOutput(plotAreas, plotNames, areaCalcs.build, density, areaCalcs.totalBuild, kint);
 
                 TaskDialog testDialog = new TaskDialog("Report");
+
                 testDialog.MainInstruction = output.outputString;
                 testDialog.Show();
                 

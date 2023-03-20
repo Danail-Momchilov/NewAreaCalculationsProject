@@ -28,26 +28,31 @@ namespace AreaCalculations
                 if (plotNames.Count == 1)
                 {
                     if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНА")
-                        build[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                        this.build[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                     else if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА")
-                        totalBuild[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                        this.totalBuild[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                 }
                 else if (plotNames.Count == 2)
                 {
                     if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНА")
                     {
                         if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
-                            build[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                            this.build[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                         else if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[1])
-                            build[1] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                            this.build[1] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                     }
                     else if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА")
                     {
                         if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
-                            totalBuild[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                            this.totalBuild[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                         else if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[1])
-                            totalBuild[1] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                            this.totalBuild[1] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                     }
+                }
+                else
+                {
+                    this.build[0] = plotNames.Count;
+                    this.totalBuild[0] = 1;
                 }
             }
         }

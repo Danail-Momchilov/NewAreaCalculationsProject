@@ -8,7 +8,7 @@ namespace AreaCalculations
 {
     internal class OutputReport
     {
-        string outputString { get; set; }
+        public string outputString { get; set; }
         public OutputReport() 
         { outputString = "Проектните параметри бяха обновени успешно!\n"; }
 
