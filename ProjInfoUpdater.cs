@@ -14,6 +14,14 @@ namespace AreaCalculations
 
         Transaction T { get; set; }
 
+        string errorMessage { get; set; }
+
+        public int CheckProjectInfo()
+        {
+
+            return 0;
+        }
+
         public ProjInfoUpdater(ProjectInfo projectInfo, Document Doc)
         {
             this.ProjectInfo = projectInfo;
