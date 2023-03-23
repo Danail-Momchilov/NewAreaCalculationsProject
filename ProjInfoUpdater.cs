@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.ExtensibleStorage;
 
 namespace AreaCalculations
 {
@@ -12,14 +13,40 @@ namespace AreaCalculations
         public ProjectInfo ProjectInfo { get; set; }
         Document doc { get; set; }
 
-        Transaction T { get; set; }
+        Transaction T { get; set; }        
 
-        string errorMessage { get; set; }
-
-        public int CheckProjectInfo()
+        public string CheckProjectInfo()
         {
+            string errorMessage = "";
 
-            return 0;
+            if (ProjectInfo.LookupParameter("Plot Type").AsString() != "СТАНДАРТНО УПИ" && ProjectInfo.LookupParameter("Plot Type").AsString() != "ЪГЛОВО УПИ"
+                && ProjectInfo.LookupParameter("Plot Type").AsString() != "УПИ В ДВЕ ЗОНИ" && ProjectInfo.LookupParameter("Plot Type").AsString() != "ДВЕ УПИ")
+            { errorMessage += "Моля попълнете параметър 'Plot Type' с една от четирите посочени опции: СТАНДАРТНО УПИ, ЪГЛОВО УПИ, УПИ В ДВЕ ЗОНИ, ДВЕ УПИ!\n"; }
+            else
+            {
+                // fhfghgh
+                switch (ProjectInfo.LookupParameter("Plot Type").AsString())
+                {
+                    case "СТАНДАРТНО УПИ":
+
+                        break;
+
+                    case "ЪГЛОВО УПИ":
+
+                        break;
+
+                    case "УПИ В ДВЕ ЗОНИ":
+
+                        break;
+
+                    case "ДВЕ УПИ":
+
+                        break;
+                }
+
+                // fhfthfth
+            }
+            return errorMessage;
         }
 
         public ProjInfoUpdater(ProjectInfo projectInfo, Document Doc)
