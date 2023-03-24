@@ -48,7 +48,15 @@ namespace AreaCalculations
                 // define output report string
                 OutputReport output = new OutputReport();
 
-                TaskDialog errors = new TaskDialog("Ужас, смрад, безобразие");
+                // check if all the information in the Areas and Project info is set correctly
+                string error = ProjInfo.CheckProjectInfo();
+                if (error != "")
+                {
+                    TaskDialog errors = new TaskDialog("Ужас, смрад, безобразие");
+                    errors.MainInstruction = error;
+                    errors.Show();
+                    return Result.Failed;
+                }             
 
                 
                 // determine plot type and calculate general parameters
