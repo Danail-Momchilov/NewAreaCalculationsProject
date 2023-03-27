@@ -15,6 +15,23 @@ namespace AreaCalculations
 
         double areaConvert = 10.763914692;
 
+        private static bool hasValue(Parameter param)
+        {
+            if (param.HasValue)
+                return true;
+            else
+                return false;
+        }
+
+        public string CheckAreaParameters()
+        {
+            string errorMessage = "";
+
+
+
+            return errorMessage;
+        }
+
         public AreaCollection(FilteredElementCollector Areas, List<string> plotNames)
         {
             this.build.Add(0);
