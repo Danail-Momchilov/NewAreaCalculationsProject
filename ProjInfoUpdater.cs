@@ -43,7 +43,7 @@ namespace AreaCalculations
                         if (!hasValue(ProjectInfo.LookupParameter("Required Built up Area"))) { errorMessage += "При въведена опция 'СТАНДАРТНО УПИ' е нужно да попълните параметър 'Required Built up Area' !!!\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Required Area Intensity"))) { errorMessage += "При въведена опция 'СТАНДАРТНО УПИ' е нужно да попълните параметър 'Required Area Intensity' !!!\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Required Gross External Area"))) { errorMessage += "При въведена опция 'СТАНДАРТНО УПИ' е нужно да попълните параметър 'Required Gross External Area' !!!\n"; }
-                        if (!hasValue(ProjectInfo.LookupParameter("Required Green Area Percantage"))) { errorMessage += "При въведена опция 'СТАНДАРТНО УПИ' е нужно да попълните параметър 'Required Green Area Percantage'...\n"; }
+                        if (!hasValue(ProjectInfo.LookupParameter("Required Green Area Percentage"))) { errorMessage += "При въведена опция 'СТАНДАРТНО УПИ' е нужно да попълните параметър 'Required Green Area Percantage'...\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Required Green Area"))) { errorMessage += "При въведена опция 'СТАНДАРТНО УПИ' е нужно да попълните параметър 'Required Green Area' !!!\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Plot Area"))) { errorMessage += "Айде въведи я тая 'Plot Area' де..."; }
                         break;
@@ -63,7 +63,7 @@ namespace AreaCalculations
                         if (!hasValue(ProjectInfo.LookupParameter("Required Urban Building Height 1st"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Urban Building Height 1st'...\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Required Urban Building Height 2nd"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Urban Building Height 2nd'...\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Required Permit Building Height 1st"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Permit Building Height 1st'...\n"; }
-                        if (!hasValue(ProjectInfo.LookupParameter("Required Permit Building Height 2st"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Permit Building Height 2nd'...\n"; }
+                        if (!hasValue(ProjectInfo.LookupParameter("Required Permit Building Height 2nd"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Permit Building Height 2nd'...\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Required Built up Density 1st"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Built up Density 1st'...\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Required Built up Density 2nd"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Built up Density 2nd'...\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Required Built up Area 1st"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Built up Area 1st'...\n"; }
@@ -72,7 +72,7 @@ namespace AreaCalculations
                         if (!hasValue(ProjectInfo.LookupParameter("Required Area Intensity 2nd"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Area Intensity 2nd'...\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Required Gross External Area 1st"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Gross External Area 1st'...\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Required Gross External Area 2nd"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Gross External Area 2nd'...\n"; }
-                        if (!hasValue(ProjectInfo.LookupParameter("Required Green Area Percantage 1st"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Green Area Percantage 2nd'...\n"; }
+                        if (!hasValue(ProjectInfo.LookupParameter("Required Green Area Percentage 1st"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Green Area Percantage 2nd'...\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Required Green Area 1st"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Green Area 1st'...\n"; }
                         if (!hasValue(ProjectInfo.LookupParameter("Required Green Area 2nd"))) { errorMessage += "При въведена опция 'УПИ В ДВЕ ЗОНИ' е нужно да попълните параметър 'Required Green Area 2nd'...\n"; }
                         break;
@@ -117,7 +117,7 @@ namespace AreaCalculations
         public void SetRequired(double buildArea, double grossArea, double intensity, double density)
         {
             T.Start();
-            ProjectInfo.LookupParameter("Required Build up Area").Set(buildArea);
+            ProjectInfo.LookupParameter("Required Built up Area").Set(buildArea);
             ProjectInfo.LookupParameter("Required Gross External Area").Set(grossArea);
             ProjectInfo.LookupParameter("Required Area Intensity").Set(intensity);
             ProjectInfo.LookupParameter("Required Built up Density").Set(density);

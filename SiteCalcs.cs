@@ -49,11 +49,11 @@ namespace AreaCalculations
                 OutputReport output = new OutputReport();
 
                 // check if all the information in the Areas and Project info is set correctly
-                string error = ProjInfo.CheckProjectInfo();
-                if (error != "")
+                string errorProjInfo = ProjInfo.CheckProjectInfo();
+                if (errorProjInfo != "")
                 {
                     TaskDialog errors = new TaskDialog("Ужас, смрад, безобразие");
-                    errors.MainInstruction = error;
+                    errors.MainInstruction = errorProjInfo;
                     errors.Show();
                     return Result.Failed;
                 }             
