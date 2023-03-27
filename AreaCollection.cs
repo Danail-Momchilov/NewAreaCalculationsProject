@@ -23,11 +23,29 @@ namespace AreaCalculations
                 return false;
         }
 
-        public string CheckAreaParameters()
+        public string CheckAreaParameters(List<string> plotNames, FilteredElementCollector Areas)
         {
             string errorMessage = "";
 
+            List<string> AreaCategoryValues = new List<string> { "ИЗКЛЮЧЕНА ОТ ОЧ", "НЕПРИЛОЖИМО", "ОБЩА ЧАСТ", "САМОСТОЯТЕЛЕН ОБЕКТ" };
+            List<string> AreaLocationValues = new List<string> { "НАДЗЕМНА", "НАЗЕМНА", "НЕПРИЛОЖИМО", "ПОДЗЕМНА", "ПОЛУПОДЗЕМНА" };
 
+            foreach (Area area in Areas)
+            {
+                if (!hasValue(area.LookupParameter("A Instance Area Group"))) { errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id.ToString()} / Непопълнен параметър: A Instance Area Group \n"; }
+                if (!hasValue(area.LookupParameter("A Instance Area Category"))) { errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id.ToString()} / Непопълнен параметър: A Instance Area Group\n"; }
+                else if (!AreaCategoryValues.Contains(area.LookupParameter("A Instance Area Category").AsString())) 
+                    { errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id.ToString()} / Параметър: A Instance Area Group. Допустими стойности: ИЗКЛЮЧЕНА ОТ ОЧ, НЕПРИЛОЖИМО, ОБЩА ЧАСТ, САМОСТОЯТЕЛЕН ОБЕКТ\n"; }
+                if (!hasValue(area.LookupParameter("A Instance Area Location"))) { errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id.ToString()} / Непопълнен параметър: A Instance Area Location\n"; }
+                else if (!AreaLocationValues.Contains(area.LookupParameter("A Instance Area Location").AsString()))
+                    { errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id.ToString()} / Параметър: A Instance Area Location. Допустими стойности: НАДЗЕМНА, НАЗЕМНА, НЕПРИЛОЖИМО, ПОДЗЕМНА, ПОЛУПОДЗЕМНА\n"; }
+                if (!hasValue(area.LookupParameter("A Instance Area Entrance"))) { errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id.ToString()} / Непопълнен параметър: A Instance Area Entrance\n"; }
+                if (plotNames.Count == 2)
+                {
+                    if (!plotNames.Contains(area.LookupParameter("A Instance Area Plot").AsString()))
+                        { errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id.ToString()} / Параметър: A Instance Area Plot. Допустими стойности: {plotNames[0]} и {plotNames[1]}\n"; }
+                }
+            }
 
             return errorMessage;
         }

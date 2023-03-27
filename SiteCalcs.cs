@@ -35,7 +35,7 @@ namespace AreaCalculations
                 else
                 {
                     plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
-                }
+                }                
 
                 // area calculation instance and additional plot parameters variables
                 AreaCollection areaCalcs = new AreaCollection(allAreas, plotNames);
@@ -49,12 +49,12 @@ namespace AreaCalculations
                 OutputReport output = new OutputReport();
 
                 // check if all the information in the Areas and Project info is set correctly
-                string errorProjInfo = ProjInfo.CheckProjectInfo();
-                if (errorProjInfo != "")
+                string errors = ProjInfo.CheckProjectInfo() + areaCalcs.CheckAreaParameters(plotNames, allAreas);
+                if (errors != "")
                 {
-                    TaskDialog errors = new TaskDialog("Ужас, смрад, безобразие");
-                    errors.MainInstruction = errorProjInfo;
-                    errors.Show();
+                    TaskDialog errorReport = new TaskDialog("Ужас, смрад, безобразие");
+                    errorReport.MainInstruction = errors;
+                    errorReport.Show();
                     return Result.Failed;
                 }             
 
