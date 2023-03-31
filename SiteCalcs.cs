@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -35,12 +36,29 @@ namespace AreaCalculations
                 else
                 {
                     plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
-                }                
+                }
 
                 // area calculation instance and additional plot parameters variables
                 AreaCollection areaCalcs = new AreaCollection(allAreas, plotNames);
                 List<double> kint = new List<double>();
                 List<double> density = new List<double>();
+
+                // Greenery object definition
+                Greenery greenery = new Greenery(doc, plotNames);
+
+
+
+                //test test
+                FilteredElementCollector railings = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Railings).WhereElementIsNotElementType();
+                double greenPerc = greenery.greenArea;
+                TaskDialog greenReport = new TaskDialog("Test");
+                greenReport.MainInstruction = $"{greenery.greenArea.ToString()} + {greenery.railingsCount} + {railings.Count()}";
+                greenReport.Show();
+                //test test
+
+
+
+
 
                 // area conversion variable
                 double areaConvert = 10.763914692;
@@ -56,7 +74,7 @@ namespace AreaCalculations
                     errorReport.MainInstruction = errors;
                     errorReport.Show();
                     return Result.Failed;
-                }             
+                }   
 
                 
                 // determine plot type and calculate general parameters

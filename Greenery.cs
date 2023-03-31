@@ -11,15 +11,18 @@ namespace AreaCalculations
 {
     internal class Greenery
     {
-        double greenArea = 0;
-        double greenArea1 = 0;
-        double greenArea2 = 0;
+        public double greenArea { get; set; }
+        public double greenArea1 { get; set; }
+        public double greenArea2 { get; set; }
+        public int railingsCount { get; set; }
 
         public Greenery(Autodesk.Revit.DB.Document doc, List<string> plotNames)
         {
             FilteredElementCollector allFloors = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Floors).WhereElementIsNotElementType();
             FilteredElementCollector allWalls = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Walls).WhereElementIsNotElementType();
             FilteredElementCollector allRailings = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Railings).WhereElementIsNotElementType();
+
+            railingsCount = allRailings.Count();
 
             if (plotNames.Count == 1)
             {
@@ -39,9 +42,12 @@ namespace AreaCalculations
 
                 foreach (Railing railing in allRailings)
                 {
-                    if (railing.LookupParameter("Green Area").AsInteger() == 1)
+                    ElementId railingTypeId = railing.GetTypeId();
+                    ElementType railingType = doc.GetElement(railingTypeId) as ElementType;
+
+                    if (railingType.LookupParameter("Green Area").AsInteger() == 1)
                     {
-                        if (railing.LookupParameter("Railing Height").AsDouble() <= 6.56167979)
+                        if (railingType.LookupParameter("Railing Height").AsDouble() <= 6.56167979)
                             greenArea += (railing.LookupParameter("Length").AsDouble() * railing.LookupParameter("Railing Height").AsDouble());
                         else
                             greenArea += (railing.LookupParameter("Length").AsDouble() * 6.56167979);
@@ -77,10 +83,13 @@ namespace AreaCalculations
 
                 foreach (Railing railing in allRailings)
                 {
+                    ElementId railingTypeId = railing.GetTypeId();
+                    ElementType railingType = doc.GetElement(railingTypeId) as ElementType;
+
                     double railingArea = 0;
-                    if (railing.LookupParameter("Green Area").AsInteger() == 1)
+                    if (railingType.LookupParameter("Green Area").AsInteger() == 1)
                     {
-                        if (railing.LookupParameter("Railing Height").AsDouble() <= 6.56167979)
+                        if (railingType.LookupParameter("Railing Height").AsDouble() <= 6.56167979)
                             railingArea += (railing.LookupParameter("Length").AsDouble() * railing.LookupParameter("Railing Height").AsDouble());
                         else
                             railingArea += (railing.LookupParameter("Length").AsDouble() * 6.56167979);
