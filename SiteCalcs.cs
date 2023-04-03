@@ -59,6 +59,8 @@ namespace AreaCalculations
                 {
                     TaskDialog errorReport = new TaskDialog("Ужас, смрад, безобразие");
                     errorReport.MainInstruction = errors;
+                    errorReport.EnableMarqueeProgressBar = true;
+                    errorReport.ExpandedContent = "Стига гледал тоя прогрес бар, оправяй си грешките";
                     errorReport.Show();
                     return Result.Failed;
                 }   
