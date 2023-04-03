@@ -47,14 +47,6 @@ namespace AreaCalculations
                 // Greenery object definition
                 Greenery greenery = new Greenery(doc, plotNames);
 
-                //test
-                TaskDialog green = new TaskDialog("Green Calculated");
-                green.MainInstruction = $"Green1: {greenery.greenArea.ToString()}\n Green2:{greenery.greenArea1.ToString()}\n Green3:{greenery.greenArea2.ToString()}";
-                green.Show();
-                //test
-
-
-
                 // area conversion variable
                 double areaConvert = 10.763914692;
 
@@ -62,7 +54,7 @@ namespace AreaCalculations
                 OutputReport output = new OutputReport();
 
                 // check if all the information in the Areas and Project info is set correctly
-                string errors = ProjInfo.CheckProjectInfo() + areaCalcs.CheckAreaParameters(plotNames, allAreas);
+                string errors = ProjInfo.CheckProjectInfo() + areaCalcs.CheckAreaParameters(plotNames, allAreas) + greenery.errorReport;
                 if (errors != "")
                 {
                     TaskDialog errorReport = new TaskDialog("Ужас, смрад, безобразие");

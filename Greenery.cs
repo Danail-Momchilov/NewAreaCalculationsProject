@@ -14,7 +14,7 @@ namespace AreaCalculations
         public double greenArea { get; set; }
         public double greenArea1 { get; set; }
         public double greenArea2 { get; set; }
-        public int railingsCount { get; set; }
+        public string errorReport = "";
 
         double areaConvert = 10.763914692;
 
@@ -23,8 +23,6 @@ namespace AreaCalculations
             FilteredElementCollector allFloors = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Floors).WhereElementIsNotElementType();
             FilteredElementCollector allWalls = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Walls).WhereElementIsNotElementType();
             FilteredElementCollector allRailings = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_StairsRailing).WhereElementIsNotElementType();
-
-            railingsCount = allRailings.Count();
 
             if (plotNames.Count == 1)
             {
@@ -61,26 +59,36 @@ namespace AreaCalculations
             {
                 foreach (Floor floor in allFloors)
                 {
-                    if (floor.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
-                        greenArea1 += Math.Round(floor.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                    else
-                        greenArea2 += Math.Round(floor.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                    if (floor.FloorType.LookupParameter("Green Area").AsInteger() == 1)
+                    {
+                        if (floor.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
+                            greenArea1 += Math.Round(floor.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                        else if (floor.LookupParameter("A Instance Area Plot").AsString() == plotNames[1])
+                            greenArea2 += Math.Round(floor.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                        else
+                            errorReport += $"Плоча с id: {floor.Id} има попълнен параметър A Instance Area Plot, чиято стойност не отговаря на нито едно от двете въведени имена за УПИ\n";
+                    }
                 }
 
                 foreach (Wall wall in allWalls)
                 {
-                    double wallArea = 0;
                     if (wall.WallType.LookupParameter("Green Area").AsInteger() == 1)
                     {
-                        if (wall.LookupParameter("Unconnected Height").AsDouble() / areaConvert <= 200)
-                            wallArea += Math.Round((wall.LookupParameter("Area").AsDouble() / areaConvert), 2);
+                        double wallArea = 0;
+                        if (wall.WallType.LookupParameter("Green Area").AsInteger() == 1)
+                        {
+                            if (wall.LookupParameter("Unconnected Height").AsDouble() / areaConvert <= 200)
+                                wallArea += Math.Round((wall.LookupParameter("Area").AsDouble() / areaConvert), 2);
+                            else
+                                wallArea += Math.Round((wall.LookupParameter("Length").AsDouble() * 200), 2);
+                        }
+                        if (wall.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
+                            greenArea1 += wallArea;
+                        else if (wall.LookupParameter("A Instance Area Plot").AsString() == plotNames[1])
+                            greenArea2 += wallArea;
                         else
-                            wallArea += Math.Round((wall.LookupParameter("Length").AsDouble() * 200), 2);
+                            errorReport += $"Стена с id: {wall.Id} има попълнен параметър A Instance Area Plot, чиято стойност не отговаря на нито едно от двете въведени имена за УПИ\n";
                     }
-                    if (wall.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
-                        greenArea1 += wallArea;
-                    else
-                        greenArea2 += wallArea;
                 }
 
                 foreach (Railing railing in allRailings)
@@ -88,18 +96,23 @@ namespace AreaCalculations
                     ElementId railingTypeId = railing.GetTypeId();
                     ElementType railingType = doc.GetElement(railingTypeId) as ElementType;
 
-                    double railingArea = 0;
                     if (railingType.LookupParameter("Green Area").AsInteger() == 1)
                     {
-                        if ((railingType.LookupParameter("Railing Height").AsDouble() / areaConvert) <= 200)
-                            railingArea += Math.Round(((railing.LookupParameter("Length").AsDouble() / areaConvert) * (railingType.LookupParameter("Railing Height").AsDouble() / areaConvert)), 2);
+                        double railingArea = 0;
+                        if (railingType.LookupParameter("Green Area").AsInteger() == 1)
+                        {
+                            if ((railingType.LookupParameter("Railing Height").AsDouble() / areaConvert) <= 200)
+                                railingArea += Math.Round(((railing.LookupParameter("Length").AsDouble() / areaConvert) * (railingType.LookupParameter("Railing Height").AsDouble() / areaConvert)), 2);
+                            else
+                                railingArea += Math.Round((railing.LookupParameter("Length").AsDouble() * 200), 2);
+                        }
+                        if (railing.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
+                            greenArea1 += railingArea;
+                        else if (railing.LookupParameter("A Instance Area Plot").AsString() == plotNames[1])
+                            greenArea2 += railingArea;
                         else
-                            railingArea += Math.Round((railing.LookupParameter("Length").AsDouble() * 200), 2);
+                            errorReport += $"Парапет с id: {railing.Id} има попълнен параметър A Instance Area Plot, чиято стойност не отговаря на нито едно от двете въведени имена за УПИ\n";
                     }
-                    if (railing.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
-                        greenArea1 += railingArea;
-                    else
-                        greenArea2 += railingArea;
                 }
             }
         }
