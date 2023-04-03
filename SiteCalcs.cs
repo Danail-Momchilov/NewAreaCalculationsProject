@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 
 namespace AreaCalculations
@@ -46,17 +47,11 @@ namespace AreaCalculations
                 // Greenery object definition
                 Greenery greenery = new Greenery(doc, plotNames);
 
-
-
-                //test test
-                FilteredElementCollector railings = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Railings).WhereElementIsNotElementType();
-                double greenPerc = greenery.greenArea;
-                TaskDialog greenReport = new TaskDialog("Test");
-                greenReport.MainInstruction = $"{greenery.greenArea.ToString()} + {greenery.railingsCount} + {railings.Count()}";
-                greenReport.Show();
-                //test test
-
-
+                //test
+                TaskDialog green = new TaskDialog("Green Calculated");
+                green.MainInstruction = $"Green1: {greenery.greenArea.ToString()}\n Green2:{greenery.greenArea1.ToString()}\n Green3:{greenery.greenArea2.ToString()}";
+                green.Show();
+                //test
 
 
 
