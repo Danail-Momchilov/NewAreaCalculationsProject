@@ -55,11 +55,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
-    <Compile Include="AreaCollection.cs" />
-    <Compile Include="Greenery.cs" />
-    <Compile Include="OutputReport.cs" />
-    <Compile Include="ProjInfoUpdater.cs" />
-    <Compile Include="SiteCalcs.cs" />
+    <Compile Include="SiteCalcs\AreaCollection.cs" />
+    <Compile Include="SiteCalcs\Greenery.cs" />
+    <Compile Include="SiteCalcs\OutputReport.cs" />
+    <Compile Include="SiteCalcs\ProjInfoUpdater.cs" />
+    <Compile Include="SiteCalcs\SiteCalcs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

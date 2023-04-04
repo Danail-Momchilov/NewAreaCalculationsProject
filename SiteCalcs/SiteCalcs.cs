@@ -25,36 +25,27 @@ namespace AreaCalculations
                 // define a ProjectInfo Updater object
                 ProjInfoUpdater ProjInfo = new ProjInfoUpdater(projInfo, doc);
 
-                // get plot numbers from project and define a list for all the plot areas
-                List<double> plotAreas = new List<double>();
-                List<string> plotNames = new List<string>();
-
-                if (projInfo.LookupParameter("Plot Type").AsString() == "ДВЕ УПИ")
+                if (!ProjInfo.isPlotTypeCorrect)
                 {
-                    plotNames.Add(projInfo.LookupParameter("Plot Number 1st").AsString());
-                    plotNames.Add(projInfo.LookupParameter("Plot Number 2nd").AsString());
-                }
-                else
-                {
-                    plotNames.Add(projInfo.LookupParameter("Plot Number").AsString());
+                    TaskDialog plotTypeError = new TaskDialog("Неправилно въведен Plot Type");
+                    plotTypeError.MainInstruction = "За да продължите напред, моля попълнете параметър 'Plot Type' с една от четирите посочени опции: СТАНДАРТНО УПИ, ЪГЛОВО УПИ, УПИ В ДВЕ ЗОНИ, ДВЕ УПИ!";
+                    plotTypeError.Show();
+                    return Result.Failed;
                 }
 
                 // area calculation instance and additional plot parameters variables
-                AreaCollection areaCalcs = new AreaCollection(allAreas, plotNames);
+                AreaCollection areaCalcs = new AreaCollection(allAreas, ProjInfo.plotNames);
                 List<double> kint = new List<double>();
                 List<double> density = new List<double>();
 
                 // Greenery object definition
-                Greenery greenery = new Greenery(doc, plotNames, plotAreas);
-
-                // area conversion variable
-                double areaConvert = 10.763914692;
+                Greenery greenery = new Greenery(doc, ProjInfo.plotNames, ProjInfo.plotAreas);
 
                 // define output report string
                 OutputReport output = new OutputReport();
 
                 // check if all the information in the Areas and Project info is set correctly
-                string errors = ProjInfo.CheckProjectInfo() + areaCalcs.CheckAreaParameters(plotNames, allAreas) + greenery.errorReport;
+                string errors = ProjInfo.CheckProjectInfo() + areaCalcs.CheckAreaParameters(ProjInfo.plotNames, allAreas) + greenery.errorReport;
                 if (errors != "")
                 {
                     TaskDialog errorReport = new TaskDialog("Ужас, смрад, безобразие");
@@ -71,17 +62,15 @@ namespace AreaCalculations
                 {
                     case "СТАНДАРТНО УПИ":
                         output.addString("Тип на УПИ: Стандартно\n");
-                        plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
-                        density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
-                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
+                        density.Add(Math.Round(areaCalcs.build[0] / ProjInfo.plotAreas[0], 2));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / ProjInfo.plotAreas[0], 2));
                         ProjInfo.SetAchievedStandard(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], greenery.greenArea, greenery.achievedPercentage);
                         break;
 
                     case "ЪГЛОВО УПИ":
                         output.addString("Тип на УПИ: Ъглово\n");
-                        plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
-                        density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
-                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
+                        density.Add(Math.Round(areaCalcs.build[0] / ProjInfo.plotAreas[0], 2));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / ProjInfo.plotAreas[0], 2));
                         ProjInfo.SetAchievedStandard(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], greenery.greenArea, greenery.achievedPercentage);
                         ProjInfo.SetRequired(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0]);
                         break;
@@ -89,27 +78,23 @@ namespace AreaCalculations
                     case "УПИ В ДВЕ ЗОНИ":
                         output.addString("Тип на УПИ: Един имот в две устройствени зони\n");
                         output.addString("Отделните параметри 1st и 2nd бяха сумирани\n");
-                        double plotAr = Math.Round((projInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert) + (projInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert), 2);
-                        plotAreas.Add(plotAr);
-                        density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
-                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
-                        ProjInfo.SetAllTwoZones(plotAr, areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], greenery.greenArea, greenery.achievedPercentage);
+                        density.Add(Math.Round(areaCalcs.build[0] / ProjInfo.plotAreas[0], 2));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / ProjInfo.plotAreas[0], 2));
+                        ProjInfo.SetAllTwoZones(ProjInfo.plotAreas[0], areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], greenery.greenArea, greenery.achievedPercentage);
                         break;
 
                     case "ДВЕ УПИ":
-                        output.addString("Тип на УПИ: Две отделни УПИ\n");               
-                        plotAreas.Add(Math.Round(projInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));
-                        density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
-                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
-                        plotAreas.Add(Math.Round(projInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));
-                        density.Add(Math.Round(areaCalcs.build[1] / plotAreas[1], 2));
-                        kint.Add(Math.Round(areaCalcs.totalBuild[1] / plotAreas[1], 2));
+                        output.addString("Тип на УПИ: Две отделни УПИ\n");
+                        density.Add(Math.Round(areaCalcs.build[0] / ProjInfo.plotAreas[0], 2));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / ProjInfo.plotAreas[0], 2));
+                        density.Add(Math.Round(areaCalcs.build[1] / ProjInfo.plotAreas[1], 2));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[1] / ProjInfo.plotAreas[1], 2));
                         ProjInfo.SetAchievedTwoPlots(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], areaCalcs.build[1], areaCalcs.totalBuild[1], kint[1], density[1], greenery.greenArea1, greenery.greenArea2, greenery.achievedPercentage1, greenery.achievedPercentage2);
                         break;
                 }
 
                 // output report
-                output.updateFinalOutput(plotAreas, plotNames, areaCalcs.build, density, areaCalcs.totalBuild, kint, greenery.greenAreas, greenery.achievedPercentages);
+                output.updateFinalOutput(ProjInfo.plotAreas, ProjInfo.plotNames, areaCalcs.build, density, areaCalcs.totalBuild, kint, greenery.greenAreas, greenery.achievedPercentages);
 
                 TaskDialog testDialog = new TaskDialog("Report");
 
