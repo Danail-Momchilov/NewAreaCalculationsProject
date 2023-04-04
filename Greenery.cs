@@ -14,11 +14,14 @@ namespace AreaCalculations
         public double greenArea { get; set; }
         public double greenArea1 { get; set; }
         public double greenArea2 { get; set; }
+        public double achievedPercentage { get; set; }
+        public double achievedPercentage1 { get; set; }
+        public double achievedPercentage2 { get; set; }
         public string errorReport = "";
 
         double areaConvert = 10.763914692;
 
-        public Greenery(Autodesk.Revit.DB.Document doc, List<string> plotNames)
+        public Greenery(Autodesk.Revit.DB.Document doc, List<string> plotNames, List<double> plotAreas)
         {
             FilteredElementCollector allFloors = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Floors).WhereElementIsNotElementType();
             FilteredElementCollector allWalls = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Walls).WhereElementIsNotElementType();
@@ -53,6 +56,8 @@ namespace AreaCalculations
                             greenArea += Math.Round(((railing.LookupParameter("Length").AsDouble() / areaConvert) * 200), 2);
                     }
                 }
+
+                achievedPercentage = Math.Round(((greenArea * 100) / plotAreas[0]), 2);
             }
 
             else if (plotNames.Count == 2)
@@ -114,6 +119,9 @@ namespace AreaCalculations
                             errorReport += $"Парапет с id: {railing.Id} има попълнен параметър A Instance Area Plot, чиято стойност не отговаря на нито едно от двете въведени имена за УПИ\n";
                     }
                 }
+
+                achievedPercentage1 = Math.Round(((greenArea1 * 100) / plotAreas[0]), 2);
+                achievedPercentage2 = Math.Round(((greenArea1 * 100) / plotAreas[1]), 2);
             }
         }
     }

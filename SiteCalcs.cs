@@ -45,7 +45,7 @@ namespace AreaCalculations
                 List<double> density = new List<double>();
 
                 // Greenery object definition
-                Greenery greenery = new Greenery(doc, plotNames);
+                Greenery greenery = new Greenery(doc, plotNames, plotAreas);
 
                 // area conversion variable
                 double areaConvert = 10.763914692;
@@ -74,7 +74,7 @@ namespace AreaCalculations
                         plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
                         density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
                         kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
-                        ProjInfo.SetAchievedStandard(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0]);
+                        ProjInfo.SetAchievedStandard(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], greenery.greenArea, greenery.achievedPercentage);
                         break;
 
                     case "ЪГЛОВО УПИ":
@@ -82,7 +82,7 @@ namespace AreaCalculations
                         plotAreas.Add(projInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
                         density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
                         kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
-                        ProjInfo.SetAchievedStandard(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0]);
+                        ProjInfo.SetAchievedStandard(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], greenery.greenArea, greenery.achievedPercentage);
                         ProjInfo.SetRequired(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0]);
                         break;
 
@@ -93,7 +93,7 @@ namespace AreaCalculations
                         plotAreas.Add(plotAr);
                         density.Add(Math.Round(areaCalcs.build[0] / plotAreas[0], 2));
                         kint.Add(Math.Round(areaCalcs.totalBuild[0] / plotAreas[0], 2));
-                        ProjInfo.SetAllTwoZones(plotAr, areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0]);
+                        ProjInfo.SetAllTwoZones(plotAr, areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], greenery.greenArea, greenery.achievedPercentage);
                         break;
 
                     case "ДВЕ УПИ":
@@ -104,7 +104,7 @@ namespace AreaCalculations
                         plotAreas.Add(Math.Round(projInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));
                         density.Add(Math.Round(areaCalcs.build[1] / plotAreas[1], 2));
                         kint.Add(Math.Round(areaCalcs.totalBuild[1] / plotAreas[1], 2));
-                        ProjInfo.SetAchievedTwoPlots(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], areaCalcs.build[1], areaCalcs.totalBuild[1], kint[1], density[1]);
+                        ProjInfo.SetAchievedTwoPlots(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], areaCalcs.build[1], areaCalcs.totalBuild[1], kint[1], density[1], greenery.greenArea1, greenery.greenArea2, greenery.achievedPercentage1, greenery.achievedPercentage2);
                         break;
                 }
 

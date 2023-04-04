@@ -27,6 +27,7 @@ namespace AreaCalculations
                 outputString += $"Постигната плътност = {density[0]}\n";
                 outputString += $"Постигнато РЗП = {totalBuild[0]}\n";
                 outputString += $"Постигнат КИНТ = {kint[0]}\n";
+                outputString += $"Постигнато озеленяване = {kint[0]}\n";
             }
             else
             {
