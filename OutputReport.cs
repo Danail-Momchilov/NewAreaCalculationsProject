@@ -15,7 +15,7 @@ namespace AreaCalculations
         public void addString(string message)
         { outputString += message; }
 
-        public void updateFinalOutput(List<double> plotAreas, List<string> plotNames, List<double> build, List<double> density, List<double> totalBuild, List<double> kint)
+        public void updateFinalOutput(List<double> plotAreas, List<string> plotNames, List<double> build, List<double> density, List<double> totalBuild, List<double> kint, List<double> greenAreas, List<double> achievedPercentages)
         {
             for (int i = 0; i < plotAreas.Count; i++)
             {
@@ -27,7 +27,8 @@ namespace AreaCalculations
                 outputString += $"Постигната плътност = {density[0]}\n";
                 outputString += $"Постигнато РЗП = {totalBuild[0]}\n";
                 outputString += $"Постигнат КИНТ = {kint[0]}\n";
-                outputString += $"Постигнато озеленяване = {kint[0]}\n";
+                outputString += $"Постигнато озеленяване = {greenAreas[0]}\n";
+                outputString += $"Постигнат процент озеленяване = {achievedPercentages[0]}\n";
             }
             else
             {
@@ -35,10 +36,14 @@ namespace AreaCalculations
                 outputString += $"Постигната плътност за имот 1 = {density[0]}\n";
                 outputString += $"Постигнато РЗП за имот 1 = {totalBuild[0]}\n";
                 outputString += $"Постигнат КИНТ за имот 1 = {kint[0]}\n";
+                outputString += $"Постигнато озеленяване за имот 1 = {greenAreas[0]}\n";
+                outputString += $"Постигнат процент озеленяване за имот 1 = {achievedPercentages[0]}\n";
                 outputString += $"Постигнато ЗП за имот 2 = {build[1]}\n";
                 outputString += $"Постигната плътност за имот 2 = {density[1]}\n";
                 outputString += $"Постигнато РЗП за имот 2 = {totalBuild[1]}\n";
                 outputString += $"Постигнат КИНТ за имот 2 = {kint[1]}\n";
+                outputString += $"Постигнато озеленяване за имот 2 = {greenAreas[1]}\n";
+                outputString += $"Постигнат процент озеленяване за имот 2 = {achievedPercentages[1]}\n";
             }
         }
     }

@@ -17,6 +17,8 @@ namespace AreaCalculations
         public double achievedPercentage { get; set; }
         public double achievedPercentage1 { get; set; }
         public double achievedPercentage2 { get; set; }
+        public List<double> greenAreas { get; set; }
+        public List<double> achievedPercentages { get; set; }
         public string errorReport = "";
 
         double areaConvert = 10.763914692;
@@ -58,6 +60,8 @@ namespace AreaCalculations
                 }
 
                 achievedPercentage = Math.Round(((greenArea * 100) / plotAreas[0]), 2);
+                greenAreas.Add(greenArea);
+                achievedPercentages.Add(achievedPercentage);
             }
 
             else if (plotNames.Count == 2)
@@ -122,6 +126,10 @@ namespace AreaCalculations
 
                 achievedPercentage1 = Math.Round(((greenArea1 * 100) / plotAreas[0]), 2);
                 achievedPercentage2 = Math.Round(((greenArea1 * 100) / plotAreas[1]), 2);
+                achievedPercentages.Add(achievedPercentage1);
+                achievedPercentages.Add(achievedPercentage2);
+                greenAreas.Add(greenArea1);
+                greenAreas.Add(greenArea2);
             }
         }
     }

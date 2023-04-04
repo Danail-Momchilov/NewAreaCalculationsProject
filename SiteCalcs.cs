@@ -109,7 +109,7 @@ namespace AreaCalculations
                 }
 
                 // output report
-                output.updateFinalOutput(plotAreas, plotNames, areaCalcs.build, density, areaCalcs.totalBuild, kint);
+                output.updateFinalOutput(plotAreas, plotNames, areaCalcs.build, density, areaCalcs.totalBuild, kint, greenery.greenAreas, greenery.achievedPercentages);
 
                 TaskDialog testDialog = new TaskDialog("Report");
 
