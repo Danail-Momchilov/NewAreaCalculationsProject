@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.Attributes;
@@ -33,13 +34,6 @@ namespace AreaCalculations
                     return Result.Failed;
                 }
 
-                //
-                TaskDialog test = new TaskDialog("test");
-                test.MainInstruction = ProjInfo.plotAreas[0].ToString() + ProjInfo.plotNames[0];
-                test.Show();
-                //
-
-
                 // area calculation instance and additional plot parameters variables
                 AreaCollection areaCalcs = new AreaCollection(allAreas, ProjInfo.plotNames);
                 List<double> kint = new List<double>();
@@ -57,12 +51,16 @@ namespace AreaCalculations
                 {
                     TaskDialog errorReport = new TaskDialog("Ужас, смрад, безобразие");
                     errorReport.MainInstruction = errors;
-                    errorReport.EnableMarqueeProgressBar = true;
-                    errorReport.ExpandedContent = "Стига гледал тоя прогрес бар, оправяй си грешките";
+                    //errorReport.ExtraCheckBoxText = "Експортване ма грешките в текстови файsл на десктопа";
                     errorReport.Show();
+                    /*
+                    if (errorReport.WasExtraCheckBoxChecked())
+                    {
+                        string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "warnings.txt");
+                        File.WriteAllText(path, errors);
+                    }*/
                     return Result.Failed;
-                }   
-
+                }
                 
                 // determine plot type and calculate general parameters
                 switch (projInfo.LookupParameter("Plot Type").AsString())

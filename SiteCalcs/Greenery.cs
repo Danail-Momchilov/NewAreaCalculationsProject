@@ -32,7 +32,7 @@ namespace AreaCalculations
             if (plotNames.Count == 1)
             {
                 foreach (Floor floor in allFloors)
-                    if (floor.FloorType.LookupParameter("Green Area").AsInteger() == 1) { Math.Round(greenArea += floor.LookupParameter("Area").AsDouble() / areaConvert, 2); }
+                    if (floor.FloorType.LookupParameter("Green Area").AsInteger() == 1) { greenArea += Math.Round(floor.LookupParameter("Area").AsDouble() / areaConvert, 2); }
 
                 foreach (Wall wall in allWalls)
                 {
