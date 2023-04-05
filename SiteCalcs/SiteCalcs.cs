@@ -33,6 +33,13 @@ namespace AreaCalculations
                     return Result.Failed;
                 }
 
+                //
+                TaskDialog test = new TaskDialog("test");
+                test.MainInstruction = ProjInfo.plotAreas[0].ToString() + ProjInfo.plotNames[0];
+                test.Show();
+                //
+
+
                 // area calculation instance and additional plot parameters variables
                 AreaCollection areaCalcs = new AreaCollection(allAreas, ProjInfo.plotNames);
                 List<double> kint = new List<double>();

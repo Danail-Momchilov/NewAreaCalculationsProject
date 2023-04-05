@@ -17,8 +17,8 @@ namespace AreaCalculations
         public double achievedPercentage { get; set; }
         public double achievedPercentage1 { get; set; }
         public double achievedPercentage2 { get; set; }
-        public List<double> greenAreas { get; set; }
-        public List<double> achievedPercentages { get; set; }
+        public List<double> greenAreas { get; set; } = new List<double>();
+        public List<double> achievedPercentages { get; set; } = new List<double>();
         public string errorReport = "";
 
         double areaConvert = 10.763914692;

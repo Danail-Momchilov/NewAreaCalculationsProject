@@ -13,8 +13,8 @@ namespace AreaCalculations
         public ProjectInfo ProjectInfo { get; set; }
         Document doc { get; set; }
         Transaction T { get; set; }
-        public List<double> plotAreas;
-        public List<string> plotNames;
+        public List<double> plotAreas { get; set; } = new List<double>();
+        public List<string> plotNames { get; set; } = new List<string>();
 
         public bool isPlotTypeCorrect = true;
         double areaConvert = 10.763914692;
@@ -106,23 +106,23 @@ namespace AreaCalculations
             switch (ProjectInfo.LookupParameter("Plot Type").AsString())
             {
                 case "СТАНДАРТНО УПИ":
-                    //this.plotNames.Add(ProjectInfo.LookupParameter("Plot Number").AsString());
-                    this.plotAreas.Add(ProjectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
+                    plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
+                    plotAreas.Add(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
                     break;
                 case "ЪГЛОВО УПИ":
-                    //this.plotNames.Add(ProjectInfo.LookupParameter("Plot Number").AsString());
-                    this.plotAreas.Add(ProjectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
+                    plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
+                    plotAreas.Add(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
                     break;
                 case "УПИ В ДВЕ ЗОНИ":
-                    double plotAr = Math.Round((ProjectInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert) + (ProjectInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert), 2);
-                    this.plotAreas.Add(plotAr);
-                    //this.plotNames.Add(ProjectInfo.LookupParameter("Plot Number").AsString());
+                    double plotAr = Math.Round((projectInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert) + (projectInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert), 2);
+                    plotAreas.Add(plotAr);
+                    plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
                     break;
                 case "ДВЕ УПИ":
-                    this.plotNames.Add(ProjectInfo.LookupParameter("Plot Number 1st").AsString());
-                    this.plotNames.Add(ProjectInfo.LookupParameter("Plot Number 2nd").AsString());
-                    this.plotAreas.Add(Math.Round(ProjectInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));
-                    this.plotAreas.Add(Math.Round(ProjectInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));
+                    plotNames.Add(projectInfo.LookupParameter("Plot Number 1st").AsString());
+                    plotNames.Add(projectInfo.LookupParameter("Plot Number 2nd").AsString());
+                    plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));
+                    plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));
                     break;
                 default:
                     isPlotTypeCorrect = false;
