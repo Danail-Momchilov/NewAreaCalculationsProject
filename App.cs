@@ -23,7 +23,7 @@ namespace AreaCalculations
             // creatte a panel
             RibbonPanel areaCalcPanel = application.CreateRibbonPanel(tabName, "Area Calculations");
 
-            // create PushButon
+            // create PushButon1
             PushButtonData butonData1 = new PushButtonData("Plot\nparameters", "Plot\nparameters", assembName, "AreaCalculations.SiteCalcs");
             butonData1.LargeImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
 
@@ -33,6 +33,17 @@ namespace AreaCalculations
             // add tooltip
             butonData1.ToolTip = "This is a tooltip";
             butonData1.ToolTipImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+
+            // create PushButon 2
+            PushButtonData butonData2 = new PushButtonData("Area\ncoefficients", "Area\ncoefficients", assembName, "AreaCalculations.AreaCalcs.AreaCoefficients");
+            butonData2.LargeImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+
+            areaCalcPanel.AddItem(butonData2);
+            areaCalcPanel.AddSeparator();
+
+            // add tooltip
+            butonData2.ToolTip = "This is a tooltip";
+            butonData2.ToolTipImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
 
             return Result.Succeeded;
         }

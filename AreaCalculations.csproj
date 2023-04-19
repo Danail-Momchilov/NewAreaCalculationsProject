@@ -55,6 +55,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="AreaCalcs\AreaCoefficients.cs" />
+    <Compile Include="AreaCalcs\AreaUpdater.cs" />
     <Compile Include="SiteCalcs\AreaCollection.cs" />
     <Compile Include="SiteCalcs\Greenery.cs" />
     <Compile Include="SiteCalcs\OutputReport.cs" />

@@ -49,10 +49,13 @@ namespace AreaCalculations
                 string errors = ProjInfo.CheckProjectInfo() + areaCalcs.CheckAreaParameters(ProjInfo.plotNames, allAreas) + greenery.errorReport;
                 if (errors != "")
                 {
-                    TaskDialog errorReport = new TaskDialog("Ужас, смрад, безобразие");
+                    TaskDialog errorReport = new TaskDialog("Открити грешки");
                     errorReport.MainInstruction = errors;
                     //errorReport.ExtraCheckBoxText = "Експортване ма грешките в текстови файsл на десктопа";
+                    //errorReport.FooterText = "Този репорт ще бъде експортнат в текстови файл на десктопа";
                     errorReport.Show();
+                    string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "warnings.txt");
+                    File.WriteAllText(path, errors);
                     /*
                     if (errorReport.WasExtraCheckBoxChecked())
                     {
