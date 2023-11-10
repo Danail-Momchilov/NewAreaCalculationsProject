@@ -21,15 +21,21 @@ namespace AreaCalculations
             {
                 // get all areas and project info
                 FilteredElementCollector allAreas = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType();
-                ProjectInfo projInfo = doc.ProjectInformation;
 
                 // define a ProjectInfo Updater object
-                ProjInfoUpdater ProjInfo = new ProjInfoUpdater(projInfo, doc);
+                ProjInfoUpdater ProjInfo = new ProjInfoUpdater(doc.ProjectInformation, doc);
 
                 if (!ProjInfo.isPlotTypeCorrect)
                 {
                     TaskDialog plotTypeError = new TaskDialog("Неправилно въведен Plot Type");
                     plotTypeError.MainInstruction = "За да продължите напред, моля попълнете параметър 'Plot Type' с една от четирите посочени опции: СТАНДАРТНО УПИ, ЪГЛОВО УПИ, УПИ В ДВЕ ЗОНИ, ДВЕ УПИ!";
+                    plotTypeError.Show();
+                    return Result.Failed;
+                }
+                if (!ProjInfo.urbanIndexHasValue || !ProjInfo.urbanIndex1stHasValue || !ProjInfo.urbanIndex2ndHasValue)
+                {
+                    TaskDialog plotTypeError = new TaskDialog("Непопълнен параметър 'Urban Index'");
+                    plotTypeError.MainInstruction = "Попълнете параметър 'Urban Index' (при наличие на една устройствена зона), или параметрите 'Urban Index 1st' и 'Urban Index 2nd' (при наличие на две устройствени зони)";
                     plotTypeError.Show();
                     return Result.Failed;
                 }
@@ -66,7 +72,7 @@ namespace AreaCalculations
                 }
                 
                 // determine plot type and calculate general parameters
-                switch (projInfo.LookupParameter("Plot Type").AsString())
+                switch (doc.ProjectInformation.LookupParameter("Plot Type").AsString())
                 {
                     case "СТАНДАРТНО УПИ":
                         output.addString("Тип на УПИ: Стандартно\n");

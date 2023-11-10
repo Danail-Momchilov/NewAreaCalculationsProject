@@ -17,6 +17,11 @@ namespace AreaCalculations
         public List<string> plotNames { get; set; } = new List<string>();
 
         public bool isPlotTypeCorrect = true;
+
+        public bool urbanIndexHasValue = true;
+        public bool urbanIndex1stHasValue = true;
+        public bool urbanIndex2ndHasValue = true;
+
         double areaConvert = 10.763914692;
 
         private static bool hasValue(Parameter param)
@@ -107,22 +112,27 @@ namespace AreaCalculations
             {
                 case "СТАНДАРТНО УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
-                    plotAreas.Add(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
+                    plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert, 2));
+                    if (projectInfo.LookupParameter("Urban Index").AsString() == "") { urbanIndexHasValue = false; }
                     break;
                 case "ЪГЛОВО УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
                     plotAreas.Add(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
+                    if (projectInfo.LookupParameter("Urban Index").AsString() == "") { urbanIndexHasValue = false; }
                     break;
                 case "УПИ В ДВЕ ЗОНИ":
                     double plotAr = Math.Round((projectInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert) + (projectInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert), 2);
                     plotAreas.Add(plotAr);
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
+                    if (projectInfo.LookupParameter("Urban Index 1st").AsString() == "") { urbanIndex1stHasValue = false; }
+                    if (projectInfo.LookupParameter("Urban Index 2nd").AsString() == "") { urbanIndex2ndHasValue = false; }
                     break;
                 case "ДВЕ УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number 1st").AsString());
                     plotNames.Add(projectInfo.LookupParameter("Plot Number 2nd").AsString());
                     plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));
                     plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));
+                    if (projectInfo.LookupParameter("Urban Index").AsString() == "") { urbanIndexHasValue = false; }
                     break;
                 default:
                     isPlotTypeCorrect = false;
