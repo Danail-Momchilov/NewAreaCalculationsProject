@@ -19,9 +19,12 @@ namespace AreaCalculations
         public double achievedPercentage2 { get; set; }
         public List<double> greenAreas { get; set; } = new List<double>();
         public List<double> achievedPercentages { get; set; } = new List<double>();
+
         public string errorReport = "";
 
         double areaConvert = 10.763914692;
+
+        double lengthConvert = 30.48;
 
         public Greenery(Autodesk.Revit.DB.Document doc, List<string> plotNames, List<double> plotAreas)
         {
@@ -32,16 +35,17 @@ namespace AreaCalculations
             if (plotNames.Count == 1)
             {
                 foreach (Floor floor in allFloors)
-                    if (floor.FloorType.LookupParameter("Green Area").AsInteger() == 1) { greenArea += Math.Round(floor.LookupParameter("Area").AsDouble() / areaConvert, 2); }
+                    if (floor.FloorType.LookupParameter("Green Area").AsInteger() == 1)
+                        greenArea += Math.Round(floor.LookupParameter("Area").AsDouble() / areaConvert, 2);
 
                 foreach (Wall wall in allWalls)
                 {
                     if (wall.WallType.LookupParameter("Green Area").AsInteger() == 1)
                     {
-                        if ((wall.LookupParameter("Unconnected Height").AsDouble() / areaConvert) <= 200)
+                        if ((wall.LookupParameter("Unconnected Height").AsDouble() * lengthConvert) <= 200)
                             greenArea += Math.Round(wall.LookupParameter("Area").AsDouble() / areaConvert, 2);
                         else
-                            greenArea += Math.Round(((wall.LookupParameter("Length").AsDouble() / areaConvert) * 200), 2);
+                            greenArea += Math.Round((((wall.LookupParameter("Length").AsDouble() * lengthConvert)/100) * 2), 2);
                     }
                 }
                 
@@ -52,10 +56,10 @@ namespace AreaCalculations
 
                     if (railingType.LookupParameter("Green Area").AsInteger() == 1)
                     {
-                        if (railingType.LookupParameter("Railing Height").AsDouble() / areaConvert  <= 200)
-                            greenArea += Math.Round(((railing.LookupParameter("Length").AsDouble() / areaConvert) * (railingType.LookupParameter("Railing Height").AsDouble() / areaConvert)), 2);
+                        if (railingType.LookupParameter("Railing Height").AsDouble() * lengthConvert <= 200)
+                            greenArea += Math.Round((((railing.LookupParameter("Length").AsDouble() * lengthConvert)/100) * ((railingType.LookupParameter("Railing Height").AsDouble() * lengthConvert)/100)), 2);
                         else
-                            greenArea += Math.Round(((railing.LookupParameter("Length").AsDouble() / areaConvert) * 200), 2);
+                            greenArea += Math.Round((((railing.LookupParameter("Length").AsDouble() * lengthConvert)/100) * 2), 2);
                     }
                 }
 

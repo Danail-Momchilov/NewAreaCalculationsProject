@@ -24,6 +24,45 @@ namespace AreaCalculations
 
         double areaConvert = 10.763914692;
 
+        public ProjInfoUpdater(ProjectInfo projectInfo, Document Doc)
+        {
+            this.ProjectInfo = projectInfo;
+            this.doc = Doc;
+            Transaction transaction = new Transaction(doc, "Update Project Info");
+            T = transaction;
+
+            switch (ProjectInfo.LookupParameter("Plot Type").AsString())
+            {
+                case "СТАНДАРТНО УПИ":
+                    plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
+                    plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert, 2));
+                    if (projectInfo.LookupParameter("Urban Index").AsString() == "") { urbanIndexHasValue = false; }
+                    break;
+                case "ЪГЛОВО УПИ":
+                    plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
+                    plotAreas.Add(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
+                    if (projectInfo.LookupParameter("Urban Index").AsString() == "") { urbanIndexHasValue = false; }
+                    break;
+                case "УПИ В ДВЕ ЗОНИ":
+                    double plotAr = Math.Round((projectInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert) + (projectInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert), 2);
+                    plotAreas.Add(plotAr);
+                    plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
+                    if (projectInfo.LookupParameter("Urban Index 1st").AsString() == "") { urbanIndex1stHasValue = false; }
+                    if (projectInfo.LookupParameter("Urban Index 2nd").AsString() == "") { urbanIndex2ndHasValue = false; }
+                    break;
+                case "ДВЕ УПИ":
+                    plotNames.Add(projectInfo.LookupParameter("Plot Number 1st").AsString());
+                    plotNames.Add(projectInfo.LookupParameter("Plot Number 2nd").AsString());
+                    plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));
+                    plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));
+                    if (projectInfo.LookupParameter("Urban Index").AsString() == "") { urbanIndexHasValue = false; }
+                    break;
+                default:
+                    isPlotTypeCorrect = false;
+                    break;
+            }
+        }
+
         private static bool hasValue(Parameter param)
         {
             if (param.HasValue)
@@ -98,45 +137,134 @@ namespace AreaCalculations
              }
 
             return errorMessage;
-        }
-            
+        }            
 
-        public ProjInfoUpdater(ProjectInfo projectInfo, Document Doc)
+        public string CheckProjectInfoParameters()
         {
-            this.ProjectInfo = projectInfo;
-            this.doc = Doc;
-            Transaction transaction = new Transaction(doc, "Update Project Info");
-            T = transaction;
-
-            switch (ProjectInfo.LookupParameter("Plot Type").AsString())
+            try
             {
-                case "СТАНДАРТНО УПИ":
-                    plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
-                    plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert, 2));
-                    if (projectInfo.LookupParameter("Urban Index").AsString() == "") { urbanIndexHasValue = false; }
-                    break;
-                case "ЪГЛОВО УПИ":
-                    plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
-                    plotAreas.Add(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
-                    if (projectInfo.LookupParameter("Urban Index").AsString() == "") { urbanIndexHasValue = false; }
-                    break;
-                case "УПИ В ДВЕ ЗОНИ":
-                    double plotAr = Math.Round((projectInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert) + (projectInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert), 2);
-                    plotAreas.Add(plotAr);
-                    plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
-                    if (projectInfo.LookupParameter("Urban Index 1st").AsString() == "") { urbanIndex1stHasValue = false; }
-                    if (projectInfo.LookupParameter("Urban Index 2nd").AsString() == "") { urbanIndex2ndHasValue = false; }
-                    break;
-                case "ДВЕ УПИ":
-                    plotNames.Add(projectInfo.LookupParameter("Plot Number 1st").AsString());
-                    plotNames.Add(projectInfo.LookupParameter("Plot Number 2nd").AsString());
-                    plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));
-                    plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));
-                    if (projectInfo.LookupParameter("Urban Index").AsString() == "") { urbanIndexHasValue = false; }
-                    break;
-                default:
-                    isPlotTypeCorrect = false;
-                    break;
+                string missingParameters = "";
+
+                if (ProjectInfo.LookupParameter("Plot Type") == null) { missingParameters += "Липсва параметър 'Plot Type', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Plot Area") == null) { missingParameters += "Липсва параметър 'Plot Area', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Plot Area 1st") == null) { missingParameters += "Липсва параметър 'Plot Area 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Plot Area 2nd") == null) { missingParameters += "Липсва параметър 'Plot Area 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Zone Area 1st") == null) { missingParameters += "Липсва параметър 'Zone Area 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Zone Area 2nd") == null) { missingParameters += "Липсва параметър 'Zone Area 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Plot Number") == null) { missingParameters += "Липсва параметър 'Plot Number', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Plot Number 1st") == null) { missingParameters += "Липсва параметър 'Plot Number 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Plot Number 2nd") == null) { missingParameters += "Липсва параметър 'Plot Number 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Urban Index") == null) { missingParameters += "Липсва параметър 'Urban Index', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Urban Index 1st") == null) { missingParameters += "Липсва параметър 'Urban Index 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Urban Index 2nd") == null) { missingParameters += "Липсва параметър 'Urban Index 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Urban Building Height") == null) { missingParameters += "Липсва параметър 'Required Urban Building Height', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Urban Building Height 1st") == null) { missingParameters += "Липсва параметър 'Required Urban Building Height 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Urban Building Height 2nd") == null) { missingParameters += "Липсва параметър 'Required Urban Building Height 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Permit Building Height") == null) { missingParameters += "Липсва параметър 'Required Permit Building Height', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Permit Building Height 1st") == null) { missingParameters += "Липсва параметър 'Required Permit Building Height 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Permit Building Height 2nd") == null) { missingParameters += "Липсва параметър 'Required Permit Building Height 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Built up Density") == null) { missingParameters += "Липсва параметър 'Required Built up Density', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Built up Density 1st") == null) { missingParameters += "Липсва параметър 'Required Built up Density 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Built up Density 2nd") == null) { missingParameters += "Липсва параметър 'Required Built up Density 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Built up Area") == null) { missingParameters += "Липсва параметър 'Required Built up Area', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Built up Area 1st") == null) { missingParameters += "Липсва параметър 'Required Built up Area 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Built up Area 2nd") == null) { missingParameters += "Липсва параметър 'Required Built up Area 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Area Intensity") == null) { missingParameters += "Липсва параметър 'Required Area Intensity', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Area Intensity 1st") == null) { missingParameters += "Липсва параметър 'Required Area Intensity 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Area Intensity 2nd") == null) { missingParameters += "Липсва параметър 'Required Area Intensity 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Gross External Area") == null) { missingParameters += "Липсва параметър 'Required Gross External Area', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Gross External Area 1st") == null) { missingParameters += "Липсва параметър 'Required Gross External Area 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Gross External Area 2nd") == null) { missingParameters += "Липсва параметър 'Required Gross External Area 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Green Area Percentage") == null) { missingParameters += "Липсва параметър 'Required Green Area Percentage', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Green Area Percentage 1st") == null) { missingParameters += "Липсва параметър 'Required Green Area Percentage 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Green Area Percentage 2nd") == null) { missingParameters += "Липсва параметър 'Required Green Area Percentage 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Green Area") == null) { missingParameters += "Липсва параметър 'Required Green Area', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Green Area 1st") == null) { missingParameters += "Липсва параметър 'Required Green Area 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Green Area 2nd") == null) { missingParameters += "Липсва параметър 'Required Green Area 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Way of Construction") == null) { missingParameters += "Липсва параметър 'Required Way of Construction', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Way of Construction 1st") == null) { missingParameters += "Липсва параметър 'Required Way of Construction 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Way of Construction 2nd") == null) { missingParameters += "Липсва параметър 'Required Way of Construction 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Specifics") == null) { missingParameters += "Липсва параметър 'Required Specifics', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Specifics 1st") == null) { missingParameters += "Липсва параметър 'Required Specifics 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Specifics 2nd") == null) { missingParameters += "Липсва параметър 'Required Specifics 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Building Height") == null) { missingParameters += "Липсва параметър 'Achieved Building Height', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Building Height 1st") == null) { missingParameters += "Липсва параметър 'Achieved Building Height 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Building Height 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Building Height 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Built up Density") == null) { missingParameters += "Липсва параметър 'Achieved Built up Density', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Built up Density 1st") == null) { missingParameters += "Липсва параметър 'Achieved Built up Density 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Built up Density 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Built up Density 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Built up Area") == null) { missingParameters += "Липсва параметър 'Achieved Built up Area', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Built up Area 1st") == null) { missingParameters += "Липсва параметър 'Achieved Built up Area 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Built up Area 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Built up Area 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Area Intensity 1st") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Area Intensity 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Gross External Area") == null) { missingParameters += "Липсва параметър 'Achieved Gross External Area', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Gross External Area 1st") == null) { missingParameters += "Липсва параметър 'Achieved Gross External Area 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Gross External Area 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Gross External Area 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Green Area Percentage") == null) { missingParameters += "Липсва параметър 'Achieved Green Area Percentage', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Green Area Percentage 1st") == null) { missingParameters += "Липсва параметър 'Achieved Green Area Percentage 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Green Area Percentage 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Green Area Percentage 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Green Area") == null) { missingParameters += "Липсва параметър 'Achieved Green Area', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Green Area 1st") == null) { missingParameters += "Липсва параметър 'Achieved Green Area 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Green Area 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Green Area 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Motor Vehicle Places") == null) { missingParameters += "Липсва параметър 'Required Motor Vehicle Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Motor Vehicle Places 1st") == null) { missingParameters += "Липсва параметър 'Required Motor Vehicle Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Motor Vehicle Places 2nd") == null) { missingParameters += "Липсва параметър 'Required Motor Vehicle Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Electrical Vehicle Places") == null) { missingParameters += "Required Electrical Vehicle Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Electrical Vehicle Places 1st") == null) { missingParameters += "Липсва параметър 'Required Electrical Vehicle Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Electrical Vehicle Places 2nd") == null) { missingParameters += "Липсва параметър 'Required Electrical Vehicle Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Disabled Vehicle Places") == null) { missingParameters += "Липсва параметър 'Required Disabled Vehicle Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Disabled Vehicle Places 1st") == null) { missingParameters += "Липсва параметър 'Required Disabled Vehicle Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Disabled Vehicle Places 2nd") == null) { missingParameters += "Липсва параметър 'Required Disabled Vehicle Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Total Vehicle Places") == null) { missingParameters += "Липсва параметър 'Required Total Vehicle Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Total Vehicle Places 1st") == null) { missingParameters += "Липсва параметър 'Required Total Vehicle Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Total Vehicle Places 2nd") == null) { missingParameters += "Липсва параметър 'Required Total Vehicle Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Bicycle Class 1 Places") == null) { missingParameters += "Липсва параметър 'Required Bicycle Class 1 Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Bicycle Class 1 Places 1st") == null) { missingParameters += "Липсва параметър 'Required Bicycle Class 1 Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Bicycle Class 1 Places 2nd") == null) { missingParameters += "Липсва параметър 'Required Bicycle Class 1 Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Bicycle Class 2 Places") == null) { missingParameters += "Липсва параметър 'Required Bicycle Class 2 Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Bicycle Class 2 Places 1st") == null) { missingParameters += "Липсва параметър 'Required Bicycle Class 2 Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Bicycle Class 2 Places 2nd") == null) { missingParameters += "Липсва параметър 'Required Bicycle Class 2 Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Total Bicycle Places") == null) { missingParameters += "Липсва параметър 'Required Total Bicycle Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Total Bicycle Places 1st") == null) { missingParameters += "Липсва параметър 'Required Total Bicycle Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Required Total Bicycle Places 2nd") == null) { missingParameters += "Липсва параметър 'Required Total Bicycle Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Motor Vehicle Places") == null) { missingParameters += "Липсва параметър 'Achieved Motor Vehicle Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Motor Vehicle Places 1st") == null) { missingParameters += "Липсва параметър 'Achieved Motor Vehicle Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Motor Vehicle Places 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Motor Vehicle Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Electrical Vehicle Places") == null) { missingParameters += "Липсва параметър 'Achieved Electrical Vehicle Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Electrical Vehicle Places 1st") == null) { missingParameters += "Липсва параметър 'Achieved Electrical Vehicle Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Electrical Vehicle Places 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Electrical Vehicle Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Disabled Vehicle Places") == null) { missingParameters += "Липсва параметър 'Achieved Disabled Vehicle Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Disabled Vehicle Places 1st") == null) { missingParameters += "Липсва параметър 'Achieved Disabled Vehicle Places 1st, моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Disabled Vehicle Places 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Disabled Vehicle Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Total Vehicle Places") == null) { missingParameters += "Липсва параметър 'Achieved Total Vehicle Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Total Vehicle Places 1st") == null) { missingParameters += "Липсва параметър 'Achieved Total Vehicle Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Total Vehicle Places 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Total Vehicle Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Bicycle Class 1 Places") == null) { missingParameters += "Липсва параметър 'Achieved Bicycle Class 1 Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Bicycle Class 1 Places 1st") == null) { missingParameters += "Липсва параметър 'Achieved Bicycle Class 1 Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Bicycle Class 1 Places 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Bicycle Class 1 Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Bicycle Class 2 Places") == null) { missingParameters += "Липсва параметър 'Achieved Bicycle Class 2 Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Bicycle Class 2 Places 1st") == null) { missingParameters += "Липсва параметър 'Achieved Bicycle Class 2 Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Bicycle Class 2 Places 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Bicycle Class 2 Places 2nd', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Total Bicycle Places") == null) { missingParameters += "Липсва параметър 'Achieved Total Bicycle Places', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Total Bicycle Places 1st") == null) { missingParameters += "Липсва параметър 'Achieved Total Bicycle Places 1st', моля заредете го и опитайте отново...\n"; }
+                if (ProjectInfo.LookupParameter("Achieved Total Bicycle Places 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Total Bicycle Places 2nd', моля заредете го и опитайте отново...\n"; }
+
+                return missingParameters;
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
 

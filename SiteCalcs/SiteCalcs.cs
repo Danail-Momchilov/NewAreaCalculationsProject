@@ -24,7 +24,16 @@ namespace AreaCalculations
 
                 // define a ProjectInfo Updater object
                 ProjInfoUpdater ProjInfo = new ProjInfoUpdater(doc.ProjectInformation, doc);
-
+                
+                // check if all parameters are loaded in Project Info
+                if (ProjInfo.CheckProjectInfoParameters() != "")
+                {
+                    TaskDialog projInfoParametrersError = new TaskDialog("Липсващи параметри");
+                    projInfoParametrersError.MainInstruction = ProjInfo.CheckProjectInfoParameters();
+                    projInfoParametrersError.Show();
+                    return Result.Failed;
+                }
+                // check whether Plot Type parameter is assigned correctly
                 if (!ProjInfo.isPlotTypeCorrect)
                 {
                     TaskDialog plotTypeError = new TaskDialog("Неправилно въведен Plot Type");
@@ -32,11 +41,12 @@ namespace AreaCalculations
                     plotTypeError.Show();
                     return Result.Failed;
                 }
+                // check whether Urban Index parameter has value
                 if (!ProjInfo.urbanIndexHasValue || !ProjInfo.urbanIndex1stHasValue || !ProjInfo.urbanIndex2ndHasValue)
                 {
-                    TaskDialog plotTypeError = new TaskDialog("Непопълнен параметър 'Urban Index'");
-                    plotTypeError.MainInstruction = "Попълнете параметър 'Urban Index' (при наличие на една устройствена зона), или параметрите 'Urban Index 1st' и 'Urban Index 2nd' (при наличие на две устройствени зони)";
-                    plotTypeError.Show();
+                    TaskDialog urbanIndexError = new TaskDialog("Непопълнен параметър 'Urban Index'");
+                    urbanIndexError.MainInstruction = "Попълнете параметър 'Urban Index' (при наличие на една устройствена зона), или параметрите 'Urban Index 1st' и 'Urban Index 2nd' (при наличие на две устройствени зони)";
+                    urbanIndexError.Show();
                     return Result.Failed;
                 }
 
@@ -50,24 +60,16 @@ namespace AreaCalculations
 
                 // define output report string
                 OutputReport output = new OutputReport();
-
+                
                 // check if all the information in the Areas and Project info is set correctly
-                string errors = ProjInfo.CheckProjectInfo() + areaCalcs.CheckAreaParameters(ProjInfo.plotNames, allAreas) + greenery.errorReport;
+                string errors = ProjInfo.CheckProjectInfo() + areaCalcs.CheckAreasParameters(ProjInfo.plotNames, allAreas) + greenery.errorReport;
                 if (errors != "")
                 {
                     TaskDialog errorReport = new TaskDialog("Открити грешки");
                     errorReport.MainInstruction = errors;
-                    //errorReport.ExtraCheckBoxText = "Експортване ма грешките в текстови файsл на десктопа";
-                    //errorReport.FooterText = "Този репорт ще бъде експортнат в текстови файл на десктопа";
                     errorReport.Show();
                     string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "warnings.txt");
                     File.WriteAllText(path, errors);
-                    /*
-                    if (errorReport.WasExtraCheckBoxChecked())
-                    {
-                        string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "warnings.txt");
-                        File.WriteAllText(path, errors);
-                    }*/
                     return Result.Failed;
                 }
                 
