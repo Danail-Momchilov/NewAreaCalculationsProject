@@ -24,9 +24,9 @@ namespace AreaCalculations.AreaCalcs
 
                 TaskDialog report = new TaskDialog("Report");
                 if (count > 0)
-                    report.MainInstruction = $"Успяшно бяха обновени коефициентите на {count} area обекти!";
+                    report.MainInstruction = $"Успяшно бяха обновени коефициентите на {count} 'Area' обекти!";
                 else
-                    report.MainInstruction = "Не са открити обекти от тип area с непопълнени параметри за коефициентите";
+                    report.MainInstruction = "Не са открити обекти от тип 'Area' с непопълнени параметри за коефициентите";
                 report.Show();
 
                 return Result.Succeeded;

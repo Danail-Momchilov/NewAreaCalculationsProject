@@ -90,10 +90,10 @@ namespace AreaCalculations
                         double wallArea = 0;
                         if (wall.WallType.LookupParameter("Green Area").AsInteger() == 1)
                         {
-                            if (wall.LookupParameter("Unconnected Height").AsDouble() / areaConvert <= 200)
+                            if (wall.LookupParameter("Unconnected Height").AsDouble() * lengthConvert <= 200)
                                 wallArea += Math.Round((wall.LookupParameter("Area").AsDouble() / areaConvert), 2);
                             else
-                                wallArea += Math.Round((wall.LookupParameter("Length").AsDouble() * 200), 2);
+                                wallArea += Math.Round((((wall.LookupParameter("Length").AsDouble() * lengthConvert) /100) * 2), 2);
                         }
                         if (wall.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
                             greenArea1 += wallArea;
@@ -114,10 +114,10 @@ namespace AreaCalculations
                         double railingArea = 0;
                         if (railingType.LookupParameter("Green Area").AsInteger() == 1)
                         {
-                            if ((railingType.LookupParameter("Railing Height").AsDouble() / areaConvert) <= 200)
-                                railingArea += Math.Round(((railing.LookupParameter("Length").AsDouble() / areaConvert) * (railingType.LookupParameter("Railing Height").AsDouble() / areaConvert)), 2);
+                            if ((((railingType.LookupParameter("Railing Height").AsDouble() * lengthConvert) /100)) <= 2)
+                                railingArea += Math.Round(((railing.LookupParameter("Length").AsDouble() * lengthConvert) /100) * ((railingType.LookupParameter("Railing Height").AsDouble() * lengthConvert) / 100), 2);
                             else
-                                railingArea += Math.Round((railing.LookupParameter("Length").AsDouble() * 200), 2);
+                                railingArea += Math.Round((((railing.LookupParameter("Length").AsDouble() * lengthConvert) /100) * 2), 2);
                         }
                         if (railing.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
                             greenArea1 += railingArea;
