@@ -14,13 +14,10 @@ namespace AreaCalculations
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            Document doc = uidoc.Document;
-
             try
             {
-                // get all areas and project info
-                FilteredElementCollector allAreas = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType();
+                UIDocument uidoc = commandData.Application.ActiveUIDocument;
+                Document doc = uidoc.Document;
 
                 // define a ProjectInfo Updater object
                 ProjInfoUpdater ProjInfo = new ProjInfoUpdater(doc.ProjectInformation, doc);
@@ -41,17 +38,9 @@ namespace AreaCalculations
                     plotTypeError.Show();
                     return Result.Failed;
                 }
-                // check whether Urban Index parameter has value
-                if (!ProjInfo.urbanIndexHasValue || !ProjInfo.urbanIndex1stHasValue || !ProjInfo.urbanIndex2ndHasValue)
-                {
-                    TaskDialog urbanIndexError = new TaskDialog("Непопълнен параметър 'Urban Index'");
-                    urbanIndexError.MainInstruction = "Попълнете параметър 'Urban Index' (при наличие на една устройствена зона), или параметрите 'Urban Index 1st' и 'Urban Index 2nd' (при наличие на две устройствени зони)";
-                    urbanIndexError.Show();
-                    return Result.Failed;
-                }
 
                 // area calculation instance and additional plot parameters variables
-                AreaCollection areaCalcs = new AreaCollection(allAreas, ProjInfo.plotNames);
+                AreaCollection areaCalcs = new AreaCollection(doc, ProjInfo.plotNames);
                 List<double> kint = new List<double>();
                 List<double> density = new List<double>();
 
@@ -62,7 +51,7 @@ namespace AreaCalculations
                 OutputReport output = new OutputReport();
                 
                 // check if all the information in the Areas and Project info is set correctly
-                string errors = ProjInfo.CheckProjectInfo() + areaCalcs.CheckAreasParameters(ProjInfo.plotNames, allAreas) + greenery.errorReport;
+                string errors = ProjInfo.CheckProjectInfo() + areaCalcs.CheckAreasParameters(ProjInfo.plotNames) + greenery.errorReport;
                 if (errors != "")
                 {
                     TaskDialog errorReport = new TaskDialog("Открити грешки");

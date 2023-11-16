@@ -12,15 +12,11 @@ namespace AreaCalculations
     {
         public ProjectInfo ProjectInfo { get; set; }
         Document doc { get; set; }
-        Transaction T { get; set; }
+        Transaction transaction { get; set; }
         public List<double> plotAreas { get; set; } = new List<double>();
         public List<string> plotNames { get; set; } = new List<string>();
 
         public bool isPlotTypeCorrect = true;
-
-        public bool urbanIndexHasValue = true;
-        public bool urbanIndex1stHasValue = true;
-        public bool urbanIndex2ndHasValue = true;
 
         double areaConvert = 10.763914692;
 
@@ -28,29 +24,24 @@ namespace AreaCalculations
         {
             this.ProjectInfo = projectInfo;
             this.doc = Doc;
-            Transaction transaction = new Transaction(doc, "Update Project Info");
-            T = transaction;
+            this.transaction = new Transaction(doc, "Update Project Info");
 
             switch (ProjectInfo.LookupParameter("Plot Type").AsString())
             {
                 case "СТАНДАРТНО УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
                     plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert, 2));
-                    if (projectInfo.LookupParameter("Urban Index").AsString() == "") { urbanIndexHasValue = false; }
                     break;
 
                 case "ЪГЛОВО УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
                     plotAreas.Add(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
-                    if (projectInfo.LookupParameter("Urban Index").AsString() == "") { urbanIndexHasValue = false; }
                     break;
 
                 case "УПИ В ДВЕ ЗОНИ":
                     double plotAr = Math.Round((projectInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert) + (projectInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert), 2);
                     plotAreas.Add(plotAr);
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
-                    if (projectInfo.LookupParameter("Urban Index 1st").AsString() == "") { urbanIndex1stHasValue = false; }
-                    if (projectInfo.LookupParameter("Urban Index 2nd").AsString() == "") { urbanIndex2ndHasValue = false; }
                     break;
 
                 case "ДВЕ УПИ":
@@ -58,7 +49,6 @@ namespace AreaCalculations
                     plotNames.Add(projectInfo.LookupParameter("Plot Number 2nd").AsString());
                     plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));
                     plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));
-                    if (projectInfo.LookupParameter("Urban Index").AsString() == "") { urbanIndexHasValue = false; }
                     break;
 
                 default:
@@ -274,29 +264,29 @@ namespace AreaCalculations
 
         public void SetAchievedStandard(double buildArea, double grossArea, double intensity, double density, double greenArea, double achievedPercentage)
         {
-            T.Start();
+            transaction.Start();
             ProjectInfo.LookupParameter("Achieved Built up Area").Set(buildArea);
             ProjectInfo.LookupParameter("Achieved Gross External Area").Set(grossArea);
             ProjectInfo.LookupParameter("Achieved Area Intensity").Set(grossArea);
             ProjectInfo.LookupParameter("Achieved Built up Density").Set(density);
             ProjectInfo.LookupParameter("Achieved Green Area").Set(greenArea);
             ProjectInfo.LookupParameter("Achieved Green Area Percentage").Set(achievedPercentage);
-            T.Commit();
+            transaction.Commit();
         }
         
         public void SetRequired(double buildArea, double grossArea, double intensity, double density)
         {
-            T.Start();
+            transaction.Start();
             ProjectInfo.LookupParameter("Required Built up Area").Set(buildArea);
             ProjectInfo.LookupParameter("Required Gross External Area").Set(grossArea);
             ProjectInfo.LookupParameter("Required Area Intensity").Set(intensity);
             ProjectInfo.LookupParameter("Required Built up Density").Set(density);
-            T.Commit();
+            transaction.Commit();
         }
 
         public void SetAllTwoZones(double plotArea, double buildArea, double totalBuild, double kint, double density, double greenArea, double achievedPercentage)
         {
-            T.Start();
+            transaction.Start();
             ProjectInfo.LookupParameter("Plot Area").Set(plotArea);
             ProjectInfo.LookupParameter("Required Built up Density")
                 .Set((ProjectInfo.LookupParameter("Required Built up Density 1st").AsDouble() + ProjectInfo.LookupParameter("Required Built up Density 2nd").AsDouble()) / 2);
@@ -318,12 +308,12 @@ namespace AreaCalculations
             ProjectInfo.LookupParameter("Achieved Green Area").Set(greenArea);
             ProjectInfo.LookupParameter("Achieved Green Area Percentage").Set(achievedPercentage);
             // check this with the Simo
-            T.Commit();
+            transaction.Commit();
         }
 
         public void SetAchievedTwoPlots(double buildArea1, double totalBuild1, double kint1, double density1, double buildArea2, double totalBuild2, double kint2, double density2, double greenArea1, double greenArea2, double percentage1, double percentage2)
         {
-            T.Start();
+            transaction.Start();
             ProjectInfo.LookupParameter("Achieved Built up Area 1st").Set(buildArea1);
             ProjectInfo.LookupParameter("Achieved Gross External Area 1st").Set(totalBuild1);
             ProjectInfo.LookupParameter("Achieved Area Intensity 1st").Set(kint1);
@@ -336,7 +326,7 @@ namespace AreaCalculations
             ProjectInfo.LookupParameter("Achieved Green Area Percentage 1st").Set(percentage1);
             ProjectInfo.LookupParameter("Achieved Green Area 2nd").Set(greenArea2);
             ProjectInfo.LookupParameter("Achieved Green Area Percentage 2nd").Set(percentage2);
-            T.Commit();
+            transaction.Commit();
         }
     }
 }

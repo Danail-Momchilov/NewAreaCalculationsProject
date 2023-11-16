@@ -7,24 +7,24 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 
-namespace AreaCalculations.AreaCalcs
+namespace AreaCalculations
 {
     [TransactionAttribute(TransactionMode.Manual)]
     internal class AreaCoefficients : IExternalCommand
     {        
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            Document doc = uidoc.Document;
-
             try
             {
-                AreaUpdater areaUpdater = new AreaUpdater(doc);
+                UIDocument uidoc = commandData.Application.ActiveUIDocument;
+                Document doc = uidoc.Document;
+
+                AreaCollection areaUpdater = new AreaCollection(doc);
                 int count = areaUpdater.updateAreaCoefficients();
 
                 TaskDialog report = new TaskDialog("Report");
                 if (count > 0)
-                    report.MainInstruction = $"Успяшно бяха обновени коефициентите на {count} 'Area' обекти!";
+                    report.MainInstruction = $"Успешно бяха обновени коефициентите на {count} 'Area' обекти!";
                 else
                     report.MainInstruction = "Не са открити обекти от тип 'Area' с непопълнени параметри за коефициентите";
                 report.Show();

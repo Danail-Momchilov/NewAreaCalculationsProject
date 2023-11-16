@@ -35,10 +35,17 @@ namespace AreaCalculations
             butonData1.ToolTipImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
 
             // create PushButon 2
-            PushButtonData butonData2 = new PushButtonData("Area\ncoefficients", "Area\ncoefficients", assembName, "AreaCalculations.AreaCalcs.AreaCoefficients");
+            PushButtonData butonData2 = new PushButtonData("Area\ncoefficients", "Area\ncoefficients", assembName, "AreaCalculations.AreaCoefficients");
             butonData2.LargeImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
 
             areaCalcPanel.AddItem(butonData2);
+            areaCalcPanel.AddSeparator();
+
+            // create PushButon 3
+            PushButtonData butonData3 = new PushButtonData("Area\ncalculations", "Area\ncalculations", assembName, "AreaCalculations.CalculateAreaParameters");
+            butonData2.LargeImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+
+            areaCalcPanel.AddItem(butonData3);
             areaCalcPanel.AddSeparator();
 
             // add tooltip
