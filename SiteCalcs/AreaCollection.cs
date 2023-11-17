@@ -22,6 +22,37 @@ namespace AreaCalculations
 
         Transaction transaction { get; set; }
         
+        private bool hasValue(Parameter param)
+        {
+            if (param.HasValue)
+                return true;
+            else
+                return false;
+        }
+
+        private bool updateIfNoValue(Parameter param, double value)
+        {
+            if (param.HasValue)
+                return false;
+            else
+            {
+                param.Set(value);
+                return true;
+            }
+        }
+
+        private object belongsToArea(Area area)
+        {
+            foreach (Area mainArea in areasCollector)
+            {
+                if (area.LookupParameter("A Instance Area Entrance").AsString() == mainArea.LookupParameter("Number").AsString())
+                    return mainArea;
+                break;
+            }
+
+            return null;
+        }        
+
         public AreaCollection(Document document)
         {
             this.doc = document;
@@ -30,7 +61,7 @@ namespace AreaCalculations
 
             this.transaction = new Transaction(doc, "Update Areas");
         }
-        
+
         public AreaCollection(Document document, List<string> plotNames)
         {
             this.doc = document;
@@ -47,7 +78,7 @@ namespace AreaCalculations
 
             this.totalBuild.Add(0);
             this.totalBuild.Add(0);
-            
+
             foreach (Area area in areasCollector)
             {
                 if (area.LookupParameter("Area").AsString() != "Not Placed")
@@ -83,37 +114,6 @@ namespace AreaCalculations
                     }
                 }
             }
-        }
-        
-        private bool hasValue(Parameter param)
-        {
-            if (param.HasValue)
-                return true;
-            else
-                return false;
-        }
-
-        private bool updateIfNoValue(Parameter param, double value)
-        {
-            if (param.HasValue)
-                return false;
-            else
-            {
-                param.Set(value);
-                return true;
-            }
-        }
-
-        private object belongsToArea(Area area)
-        {
-            foreach (Area mainArea in areasCollector)
-            {
-                if (area.LookupParameter("A Instance Area Entrance").AsString() == mainArea.LookupParameter("Number").AsString())
-                    return mainArea;
-                break;
-            }
-
-            return null;
         }
 
         public string CheckAreasParameters(List<string> plotNames)
@@ -213,10 +213,11 @@ namespace AreaCalculations
                 area.LookupParameter("A Instance Property Common Area %").Set(0);
                 area.LookupParameter("A Instance Building Permit %").Set(0);
             }
-            
+
+            // Calculate A Instance Area Primary
             foreach (Area area in areasCollector)
             {
-                if (area.LookupParameter("A Instance Area Entrance").AsString() != "")
+                if (area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != "")
                 {
                     bool wasFound = false;
 
@@ -224,17 +225,36 @@ namespace AreaCalculations
 
                     foreach (Area mainArea in areasCollectorDuplicate)
                     {
-                        if (area.LookupParameter("A Instance Area Entrance").AsString() == mainArea.LookupParameter("Number").AsString())
+                        if (area.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString())
                         {
-                            mainArea.LookupParameter("A Instance Area Gross Area").Set(mainArea.LookupParameter("A Instance Area Gross Area").AsDouble() + area.LookupParameter("Area").AsDouble());
+                            mainArea.LookupParameter("A Instance Gross Area").Set(mainArea.LookupParameter("A Instance Gross Area").AsDouble() + area.LookupParameter("Area").AsDouble());
                             wasFound = true;
                         }
                     }
 
                     if (!wasFound)
+                        //errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id} / {area.LookupParameter("A Instance Area Primary").HasValue} {area.LookupParameter("A Instance Area Primary").AsString() == ""}\n";
                         errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id} / Посочената Area е зададена като подчинена на такава с несъществуващ номер. Моля, проверете го и стартирайте апликацията отново\n";
+
+                    areasCollectorDuplicate.Dispose();
                 }
             }
+            /*
+            // calculate C1(C2) parameters
+            List<double> c1c2Values = new List<double>();
+
+            foreach (Area area in areasCollector)
+            {
+                // calculate C1(C2) parameter
+                double c1c2 = area.LookupParameter("A Instance Gross Area").AsDouble()
+                    * area.LookupParameter("A Coefficient Orientation (Ки)").AsDouble() * area.LookupParameter("A Coefficient Level (Кв)").AsDouble()
+                    * area.LookupParameter("A Coefficient Location (Км)").AsDouble() * area.LookupParameter("A Coefficient Height (Кив)").AsDouble()
+                    * area.LookupParameter("A Coefficient Roof (Кпп)").AsDouble() * area.LookupParameter("A Coefficient Roof (Кпп)").AsDouble()
+                    * area.LookupParameter("A Coefficient Special (Кок)").AsDouble() * area.LookupParameter("A Coefficient Zones (Кк)").AsDouble()
+                    * area.LookupParameter("A Coefficient Correction").AsDouble();
+
+                c1c2Values.Add(c1c2);
+            }*/
 
             transaction.Commit();
 

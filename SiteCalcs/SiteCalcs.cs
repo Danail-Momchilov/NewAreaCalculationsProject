@@ -102,7 +102,6 @@ namespace AreaCalculations
                 output.updateFinalOutput(ProjInfo.plotAreas, ProjInfo.plotNames, areaCalcs.build, density, areaCalcs.totalBuild, kint, greenery.greenAreas, greenery.achievedPercentages);
 
                 TaskDialog testDialog = new TaskDialog("Report");
-
                 testDialog.MainInstruction = output.outputString;
                 testDialog.Show();
                 

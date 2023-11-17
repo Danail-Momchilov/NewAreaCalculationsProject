@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace AreaCalculations
 
                 // reminder to use the previous commands prior to starting this one
                 TaskDialog dialog = new TaskDialog("Напомняне");
-                dialog.MainInstruction = "Моля, преди да пуснете инструмента, се уверете че имате успешно и коректно изчислени Plot Parameters и Area Coefficients ;)";
+                dialog.MainInstruction = "Моля, преди да пуснете инструмента, се уверете че имате успешно и коректно изчислени Plot Parameters и Area Coefficients (wink) ;) ;)";
                 dialog.Show();
 
                 // define a ProjectInfo Updater object
@@ -51,11 +52,18 @@ namespace AreaCalculations
 
                 if (errorMessage != "")
                 {
-                    TaskDialog test = new TaskDialog("pat4ici");
+                    TaskDialog test = new TaskDialog("Пак грешки...sadness");
                     test.MainInstruction = errorMessage;
+                    string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "warnings.txt");
+                    File.WriteAllText(path, errorMessage);
                     test.Show();
                 }
-
+                else
+                {
+                    TaskDialog dialogReport = new TaskDialog("Репорт");
+                    dialogReport.MainInstruction = "Успешно бяха преизчислени параметрите на всички Areas в обекта!";
+                    dialogReport.Show();
+                }
 
                 return Result.Succeeded;
             }
