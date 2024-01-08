@@ -45,32 +45,25 @@ namespace AreaCalculations
                     return Result.Failed;
                 }
 
-                // area calculation instance and additional plot parameters variables
-                AreaCollection areaCalcs = new AreaCollection(doc, projInfo.plotNames);
+                // area dictionary instance and additional plot parameters variables
+                AreaDictionary areaDict = new AreaDictionary(doc);
 
-                string errorMessage = areaCalcs.calculateAreaParameters();
+                
 
-                if (errorMessage != "")
-                {
-                    TaskDialog test = new TaskDialog("Пак грешки...sadness");
-                    test.MainInstruction = errorMessage;
-                    string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "warnings.txt");
-                    File.WriteAllText(path, errorMessage);
-                    test.Show();
-                }
+                /*
                 else
                 {
                     TaskDialog dialogReport = new TaskDialog("Репорт");
                     dialogReport.MainInstruction = "Успешно бяха преизчислени параметрите на всички Areas в обекта!";
                     dialogReport.Show();
-                }
+                }*/
 
                 return Result.Succeeded;
             }
             catch (Exception e)
             {
                 TaskDialog exceptions = new TaskDialog("Съобщение за грешка");
-                exceptions.MainInstruction = $"{e.Message}\n\n {e.ToString()}";
+                exceptions.MainInstruction = $"{e.Message}\n\n {e.ToString()} \n\n {e.StackTrace}";
                 exceptions.Show();
                 return Result.Failed;
             }

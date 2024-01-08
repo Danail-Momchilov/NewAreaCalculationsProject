@@ -26,7 +26,7 @@ namespace AreaCalculations
 
         double lengthConvert = 30.48;
 
-        public Greenery(Autodesk.Revit.DB.Document doc, List<string> plotNames, List<double> plotAreas)
+        public Greenery(Document doc, List<string> plotNames, List<double> plotAreas)
         {
             FilteredElementCollector allFloors = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Floors).WhereElementIsNotElementType();
             FilteredElementCollector allWalls = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Walls).WhereElementIsNotElementType();

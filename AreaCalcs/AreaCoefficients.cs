@@ -24,9 +24,9 @@ namespace AreaCalculations
 
                 TaskDialog report = new TaskDialog("Report");
                 if (count > 0)
-                    report.MainInstruction = $"Успешно бяха обновени коефициентите на {count} 'Area' обекти!";
+                    report.MainInstruction = $"Успешно бяха обновени коефициентите на {count} 'Area' обекти! За всички останали е обновен само коефициент 'A Coefficient Multiplied' :*";
                 else
-                    report.MainInstruction = "Не са открити обекти от тип 'Area' с непопълнени параметри за коефициентите";
+                    report.MainInstruction = "Не са открити обекти от тип 'Area' с непопълнени параметри за коефициентите. Обновен е единствено 'A Coefficient Multiplied'";
                 report.Show();
 
                 return Result.Succeeded;
@@ -34,7 +34,7 @@ namespace AreaCalculations
             catch (Exception e)
             {
                 TaskDialog exceptions = new TaskDialog("Съобщение за грешка");
-                exceptions.MainInstruction = $"{e.Message}\n\n {e.ToString()}";
+                exceptions.MainInstruction = $"{e.Message}\n\n {e.ToString()}\n\n {e.InnerException} \n\n {e.GetBaseException()}";
                 exceptions.Show();
                 return Result.Failed;
             }
