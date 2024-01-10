@@ -49,6 +49,8 @@ namespace AreaCalculations
                 AreaDictionary areaDict = new AreaDictionary(doc);
                 // find all secondary areas for each primary one, add their total area to the sum and check for errors
                 string errrorMessage = areaDict.calculatePrimaryArea();
+                // calculate C1/C2 coefficients
+                areaDict.calculateC1C2();
 
                 if (errrorMessage != "")
                 {
