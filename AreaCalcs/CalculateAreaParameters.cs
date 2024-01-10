@@ -47,18 +47,25 @@ namespace AreaCalculations
 
                 // area dictionary instance and additional plot parameters variables
                 AreaDictionary areaDict = new AreaDictionary(doc);
+                // find all secondary areas for each primary one, add their total area to the sum and check for errors
+                string errrorMessage = areaDict.calculatePrimaryArea();
 
-                
-
-                /*
+                if (errrorMessage != "")
+                {
+                    TaskDialog errorReport = new TaskDialog ("Открити грешки. Вземете им обърнете внимание");
+                    errorReport.MainInstruction = errrorMessage;
+                    errorReport.Show();
+                    string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "warnings.txt");
+                    File.WriteAllText(path, errrorMessage);
+                    return Result.Failed;
+                }
                 else
                 {
                     TaskDialog dialogReport = new TaskDialog("Репорт");
                     dialogReport.MainInstruction = "Успешно бяха преизчислени параметрите на всички Areas в обекта!";
                     dialogReport.Show();
-                }*/
-
-                return Result.Succeeded;
+                    return Result.Succeeded;
+                }                
             }
             catch (Exception e)
             {

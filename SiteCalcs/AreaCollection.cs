@@ -17,11 +17,10 @@ namespace AreaCalculations
         public List<double> totalBuild { get; set; }
         public FilteredElementCollector areasCollector { get; set; }
         public Document doc { get; set; }
+        Transaction transaction { get; set; }
 
         private double areaConvert = 10.763914692;
 
-        Transaction transaction { get; set; }
-        
         private bool hasValue(Parameter param)
         {
             if (param.HasValue)
@@ -215,73 +214,6 @@ namespace AreaCalculations
 
             transaction.Commit();
             return i;
-        }
-
-        public string calculateAreaParameters()
-        {
-            // define a variable to collect potential warnings
-            string errorMessage = "";
-
-            transaction.Start();
-
-            // define initial values for area parameters
-            foreach (Area area in areasCollector)
-            {
-                area.LookupParameter("A Instance Total Area").Set(0);
-                area.LookupParameter("A Instance Gross Area").Set(area.LookupParameter("Area").AsDouble());
-                area.LookupParameter("A Instance Common Area").Set(0);
-                area.LookupParameter("A Instance Common Area %").Set(0);
-                area.LookupParameter("A Instance RLP Area").Set(0);
-                area.LookupParameter("A Instance RLP Area %").Set(0);
-                area.LookupParameter("A Instance Property Common Area %").Set(0);
-                area.LookupParameter("A Instance Building Permit %").Set(0);
-            }
-
-            // Calculate A Instance Area Primary
-            foreach (Area area in areasCollector)
-            {
-                if (area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != "")
-                {
-                    bool wasFound = false;
-
-                    FilteredElementCollector areasCollectorDuplicate = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType();
-
-                    foreach (Area mainArea in areasCollectorDuplicate)
-                    {
-                        if (area.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString())
-                        {
-                            mainArea.LookupParameter("A Instance Gross Area").Set(mainArea.LookupParameter("A Instance Gross Area").AsDouble() + area.LookupParameter("Area").AsDouble());
-                            wasFound = true;
-                        }
-                    }
-
-                    if (!wasFound)
-                        //errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id} / {area.LookupParameter("A Instance Area Primary").HasValue} {area.LookupParameter("A Instance Area Primary").AsString() == ""}\n";
-                        errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id} / Посочената Area е зададена като подчинена на такава с несъществуващ номер. Моля, проверете го и стартирайте апликацията отново\n";
-
-                    areasCollectorDuplicate.Dispose();
-                }
-            }
-            /*
-            // calculate C1(C2) parameters
-            List<double> c1c2Values = new List<double>();
-
-            foreach (Area area in areasCollector)
-            {
-                // calculate C1(C2) parameter
-                double c1c2 = area.LookupParameter("A Instance Gross Area").AsDouble()
-                    * area.LookupParameter("A Coefficient Orientation (Ки)").AsDouble() * area.LookupParameter("A Coefficient Level (Кв)").AsDouble()
-                    * area.LookupParameter("A Coefficient Location (Км)").AsDouble() * area.LookupParameter("A Coefficient Height (Кив)").AsDouble()
-                    * area.LookupParameter("A Coefficient Roof (Кпп)").AsDouble() * area.LookupParameter("A Coefficient Roof (Кпп)").AsDouble()
-                    * area.LookupParameter("A Coefficient Special (Кок)").AsDouble() * area.LookupParameter("A Coefficient Zones (Кк)").AsDouble()
-                    * area.LookupParameter("A Coefficient Correction").AsDouble();
-
-                c1c2Values.Add(c1c2);
-            }*/
-
-            transaction.Commit();
-
-            return errorMessage;
         }
     }
 }

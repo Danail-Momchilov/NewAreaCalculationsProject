@@ -15,12 +15,14 @@ namespace AreaCalculations
         public List<string> plotNames { get; set; }
         public Dictionary<string, List<string>> plotProperties { get; set; }
         public Document doc { get; set; }
+        public Transaction transaction { get; set; }
         public AreaDictionary(Document activeDoc)
         {
             this.doc = activeDoc;
             this.AreasOrganizer = new Dictionary<string, Dictionary<string, List<Area>>>();
             this.plotNames = new List<string>();
             this.plotProperties = new Dictionary<string, List<string>>();
+            this.transaction = new Transaction(activeDoc, "Calculate and Update Area Parameters");
 
             FilteredElementCollector areasCollector = new FilteredElementCollector(activeDoc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType();
 
@@ -57,42 +59,55 @@ namespace AreaCalculations
                 }
             }
         }
-        public void calculatePrimaryArea()
+
+        private double areaConvert = 10.763914692;
+        public string calculatePrimaryArea()
         {
             string errorMessage = "";
+            List<string> missingNumbers = new List<string>();
 
-            foreach (string plot in plotNames)
+            transaction.Start();
+
+            foreach (Area mainArea in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType())
             {
-                foreach (string property in plotProperties[plot])
+                mainArea.LookupParameter("A Instance Gross Area").Set(mainArea.LookupParameter("Area").AsDouble());
+            }
+            
+            foreach (Area secondaryArea in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType())
+            {
+                bool wasfound = false;
+                
+                if (secondaryArea.LookupParameter("A Instance Area Primary").HasValue && secondaryArea.LookupParameter("A Instance Area Primary").AsString() != "")
                 {
-                    // set main Area, based only on Area parameter first
-                    foreach (Area mainArea in AreasOrganizer[plot][property])
+                    foreach (Area mainArea in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType())
                     {
-                        mainArea.LookupParameter("A Instance Gross Area").Set(mainArea.LookupParameter("Area").AsDouble());
+                        if (secondaryArea.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString())
+                        {
+                            double sum = mainArea.LookupParameter("A Instance Gross Area").AsDouble() + secondaryArea.LookupParameter("Area").AsDouble();
+
+                            bool wasSet = mainArea.LookupParameter("A Instance Gross Area").Set(sum);
+
+                            wasfound = true;
+
+                            // test
+
+                            errorMessage += $"Добавяме площта: {secondaryArea.LookupParameter("Area").AsDouble()/areaConvert} към тази на Area: {mainArea.Number}, която към момента е: {mainArea.Area/areaConvert}! Общата сума е {secondaryArea.LookupParameter("Area").AsDouble() / areaConvert + mainArea.Area / areaConvert}\nsum = {sum/areaConvert}\nsum in imperial = {sum}\nwasSet = {wasSet}\n\n";
+
+                            // test
+                        }
                     }
 
-                    foreach (Area secondaryArea in AreasOrganizer[plot][property])
+                    if (!wasfound && !missingNumbers.Contains(secondaryArea.LookupParameter("Number").AsString()))
                     {
-                        if (secondaryArea.LookupParameter("A Instance Area Primary").HasValue && secondaryArea.LookupParameter("A Instance Area Primary").AsString() != "")
-                        {
-                            bool wasfound = false;
-
-                            foreach(Area mainArea in AreasOrganizer[plot][property])
-                            {
-                                if (secondaryArea.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString())
-                                {
-                                    mainArea.LookupParameter("A Instance Gross Area").Set(mainArea.LookupParameter("A Instance Gross Area").AsDouble() + secondaryArea.LookupParameter("Area").AsDouble());
-                                }
-                            }
-
-                            if (!wasfound)
-                            {
-
-                            }
-                        }
+                        missingNumbers.Add(secondaryArea.LookupParameter("Number").AsString());
+                        errorMessage += $"Грешка: Area {secondaryArea.LookupParameter("Number").AsString()} / id: {secondaryArea.Id} / Посочената Area е зададена като подчинена на такава с несъществуващ номер. Моля, проверете го и стартирайте апликацията отново\n";
                     }
                 }
             }
+
+            transaction.Commit();
+
+            return errorMessage;
         }
     }
 }
