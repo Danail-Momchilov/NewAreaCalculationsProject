@@ -74,7 +74,7 @@ namespace AreaCalculations
 
                 foreach (Area secArea in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().ToList())
                 {
-                    if (secArea.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString())
+                    if (secArea.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString() && secArea.LookupParameter("A Instance Area Primary").HasValue && secArea.Area != 0)
                     {
                         double sum = mainArea.LookupParameter("A Instance Gross Area").AsDouble() + secArea.LookupParameter("Area").AsDouble();
                         mainArea.LookupParameter("A Instance Gross Area").Set(sum);
@@ -152,10 +152,140 @@ namespace AreaCalculations
 
             foreach (Area area in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().ToList())
             {
-                area.LookupParameter("A Instance Price C1/C2").Set((area.LookupParameter("A Instance Gross Area").AsDouble() * area.LookupParameter("A Coefficient Multiplied").AsDouble())/areaConvert);
+                if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                {
+                    area.LookupParameter("A Instance Price C1/C2").Set((area.LookupParameter("A Instance Gross Area").AsDouble() * area.LookupParameter("A Coefficient Multiplied").AsDouble()) / areaConvert);
+                }
             }
 
             transaction.Commit();
+        }
+        public void calculateCommonAreaPerc()
+        {
+            transaction.Start();
+
+            foreach (string plotName in plotNames)
+            {
+                foreach (string property in plotProperties[plotName])
+                {
+                    double totaC1C2 = 0;
+
+                    // calculate total summed up C1C2 for the given property
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        {
+                            double C1C2 = area.LookupParameter("A Instance Price C1/C2").AsDouble();
+                            totaC1C2 += C1C2;
+                        }
+                    }
+
+                    // calculate common area percentage parameter for each area
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        {
+                            double commonAreaPercent = (area.LookupParameter("A Instance Price C1/C2").AsDouble() / totaC1C2) * 100;
+                            area.LookupParameter("A Instance Common Area %").Set(commonAreaPercent);
+                        }
+                    }
+                }
+            }
+
+            transaction.Commit();
+        }
+        public void calculateCommonArea()
+        {
+            transaction.Start();
+
+            foreach (string plotName in plotNames)
+            {
+                foreach (string property in plotProperties[plotName])
+                {
+                    double commonAreas = 0;
+
+                    // calculate total summed up area of all common areas                    
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "ОБЩА ЧАСТ")
+                        {
+                            commonAreas += area.LookupParameter("Area").AsDouble();
+                        }
+                    }
+
+                    // calculate common area percentage parameter for each area
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        {
+                            double commonArea = 0;
+
+                            commonArea = (area.LookupParameter("A Instance Common Area %").AsDouble() * commonAreas) / 100;
+                            area.LookupParameter("A Instance Common Area").Set(commonArea);
+                        }
+                    }
+                }
+            }
+
+            transaction.Commit();
+        }
+        public void calculateTotalArea()
+        {
+            transaction.Start();
+
+            foreach (string plotName in plotNames)
+            {
+                foreach (string property in plotProperties[plotName])
+                {                 
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        {
+                            area.LookupParameter("A Instance Total Area").Set(area.LookupParameter("A Instance Gross Area").AsDouble() + area.LookupParameter("A Instance Common Area").AsDouble());
+                        }
+                    }
+                }
+            }
+
+            transaction.Commit();
+        }
+        public void calculateBuildingPercentPermit()
+        {
+            transaction.Start();
+
+            foreach (string plotName in plotNames)
+            {
+                double totalPlotC1C2 = 0;
+
+                foreach (string property in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        {
+                            totalPlotC1C2 += area.LookupParameter("A Instance Price C1/C2").AsDouble();
+                        }
+                    }
+                }
+
+                foreach (string property in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        {
+                            double buildingPercentPermit = (area.LookupParameter("A Instance Price C1/C2").AsDouble() / totalPlotC1C2) * 100;
+                            area.LookupParameter("A Instance Building Permit %").Set(buildingPercentPermit);
+                        }
+                    }
+                }
+            }
+
+            transaction.Commit();
+        }
+        public void calculateRlpAreaPercent()
+        {
+
         }
     }
 }

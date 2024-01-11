@@ -51,6 +51,14 @@ namespace AreaCalculations
                 string errrorMessage = areaDict.calculatePrimaryArea();
                 // calculate C1/C2 coefficients
                 areaDict.calculateC1C2();
+                // calculate common area percentages
+                areaDict.calculateCommonAreaPerc();
+                // calculate A Instance Common Area Parameter
+                areaDict.calculateCommonArea();
+                // calculate A Instance Total Area
+                areaDict.calculateTotalArea();
+                // calculate A Instance Building Permit %
+                areaDict.calculateBuildingPercentPermit();
 
                 if (errrorMessage != "")
                 {
