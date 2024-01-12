@@ -13,6 +13,7 @@ namespace AreaCalculations
     {
         public Dictionary<string, Dictionary<string, List<Area>>> AreasOrganizer { get; set; }
         public List<string> plotNames { get; set; }
+        public Dictionary<string, double> plotAreasImp { get; set; }
         public Dictionary<string, List<string>> plotProperties { get; set; }
         public Document doc { get; set; }
         public Transaction transaction { get; set; }
@@ -23,6 +24,9 @@ namespace AreaCalculations
             this.plotNames = new List<string>();
             this.plotProperties = new Dictionary<string, List<string>>();
             this.transaction = new Transaction(activeDoc, "Calculate and Update Area Parameters");
+            this.plotAreasImp = new Dictionary<string, double>();
+
+            ProjectInfo projectInfo = activeDoc.ProjectInformation;
 
             FilteredElementCollector areasCollector = new FilteredElementCollector(activeDoc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType();
 
@@ -40,6 +44,13 @@ namespace AreaCalculations
                             this.AreasOrganizer.Add(plotName, new Dictionary<string, List<Area>>());
                             this.plotNames.Add(plotName);
                             this.plotProperties.Add(plotName, new List<string>());
+
+                            if (projectInfo.LookupParameter("Plot Number").AsString() == plotName)
+                                this.plotAreasImp.Add(plotName, projectInfo.LookupParameter("Plot Area").AsDouble());
+                            else if (projectInfo.LookupParameter("Plot Number 1st").AsString() == plotName)
+                                this.plotAreasImp.Add(plotName, projectInfo.LookupParameter("Plot Area 1st").AsDouble());
+                            else if (projectInfo.LookupParameter("Plot Number 2nd").AsString() == plotName)
+                                this.plotAreasImp.Add(plotName, projectInfo.LookupParameter("Plot Area 2nd").AsDouble());
                         }
                     
                         if (!AreasOrganizer[plotName].ContainsKey(groupName))
@@ -285,7 +296,61 @@ namespace AreaCalculations
         }
         public void calculateRlpAreaPercent()
         {
+            transaction.Start();
 
+            foreach (string plotName in plotNames)
+            {
+                double totalPlotC1C2 = 0;
+
+                foreach (string property in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        {
+                            totalPlotC1C2 += area.LookupParameter("A Instance Price C1/C2").AsDouble();
+                        }
+                    }
+                }
+
+                foreach (string property in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        {
+                            double rlpAreaPercentage = (area.LookupParameter("A Instance Total Area").AsDouble() / totalPlotC1C2) * 100;
+                            area.LookupParameter("A Instance RLP Area %").Set(rlpAreaPercentage / areaConvert); 
+                            // TODO: check this calculation. Why does it work properly, while the calculateBuildingPercentPermit method works without the need to apply the areaConvert?
+                        }
+                    }
+                }
+            }
+
+            transaction.Commit();
+        }
+        public void calculateRlpArea()
+        {
+            transaction.Start();
+
+            foreach (string plotName in plotNames)
+            {
+                double plotAreaImp = plotAreasImp[plotName];
+
+                foreach (string property in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        {
+                            double rlpAreaImp = (plotAreaImp * area.LookupParameter("A Instance RLP Area %").AsDouble()) / 100;
+                            area.LookupParameter("A Instance RLP Area").Set(rlpAreaImp);
+                        }
+                    }
+                }
+            }
+
+            transaction.Commit();
         }
     }
 }

@@ -59,6 +59,10 @@ namespace AreaCalculations
                 areaDict.calculateTotalArea();
                 // calculate A Instance Building Permit %
                 areaDict.calculateBuildingPercentPermit();
+                // calculate A Instance RLP Area %
+                areaDict.calculateRlpAreaPercent();
+                // calculate A Instance RLP Area
+                areaDict.calculateRlpArea();
 
                 if (errrorMessage != "")
                 {
