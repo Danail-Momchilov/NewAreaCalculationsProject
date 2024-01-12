@@ -49,8 +49,19 @@ namespace AreaCalculations
             areaCalcPanel.AddSeparator();
 
             // add tooltip
-            butonData2.ToolTip = "This is a tooltip";
-            butonData2.ToolTipImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+            butonData3.ToolTip = "This is a tooltip";
+            butonData3.ToolTipImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+
+            // create PushButon 4
+            PushButtonData butonData4 = new PushButtonData("Export to\nExcel", "Export to\nExcel", assembName, "AreaCalculations.ExportToExcel");
+            butonData4.LargeImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+
+            areaCalcPanel.AddItem(butonData4);
+            areaCalcPanel.AddSeparator();
+
+            // add tooltip
+            butonData4.ToolTip = "This is a tooltip";
+            butonData4.ToolTipImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
 
             return Result.Succeeded;
         }
