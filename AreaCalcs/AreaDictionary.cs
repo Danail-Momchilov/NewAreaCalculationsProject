@@ -352,5 +352,41 @@ namespace AreaCalculations
 
             transaction.Commit();
         }
+        public string calculateInstancePropertyCommonAreaPercentage()
+        {
+            transaction.Start();
+
+            string errorReport = "";
+
+            foreach (string plotName in plotNames)
+            {
+                foreach (string property in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != "") && area.Area != 0)
+                        {
+                            try
+                            {
+                                double commonAreaImp = area.LookupParameter("A Instance Common Area").AsDouble();
+                                double totalAreaImp = area.LookupParameter("A Instance Total Area").AsDouble();
+
+                                double commonAreaPercent = (commonAreaImp * 100) / totalAreaImp;
+
+                                area.LookupParameter("A Instance Property Common Area %").Set(commonAreaPercent);
+                            }
+                            catch
+                            {
+                                errorReport += $"{area.Id} {area.Name} A Instance Common Area = {area.LookupParameter("A Instance Common Area").AsDouble()} / A Instance Total Area = {area.LookupParameter("A Instance Total Area").AsDouble()}";
+                            }
+                        }
+                    }
+                }
+            }
+
+            transaction.Commit();
+
+            return errorReport;
+        }
     }
 }

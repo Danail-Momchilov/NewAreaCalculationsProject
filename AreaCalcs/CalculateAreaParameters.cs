@@ -63,6 +63,8 @@ namespace AreaCalculations
                 areaDict.calculateRlpAreaPercent();
                 // calculate A Instance RLP Area
                 areaDict.calculateRlpArea();
+                // calculate A Instance Area Category
+                errrorMessage += areaDict.calculateInstancePropertyCommonAreaPercentage();
 
                 if (errrorMessage != "")
                 {

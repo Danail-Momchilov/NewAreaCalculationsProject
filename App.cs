@@ -23,45 +23,55 @@ namespace AreaCalculations
             // creatte a panel
             RibbonPanel areaCalcPanel = application.CreateRibbonPanel(tabName, "Area Calculations");
 
+
+
             // create PushButon1
             PushButtonData butonData1 = new PushButtonData("Plot\nparameters", "Plot\nparameters", assembName, "AreaCalculations.SiteCalcs");
-            butonData1.LargeImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+            butonData1.LargeImage = new BitmapImage(new Uri(path + @"\plotIcon.png"));
 
             areaCalcPanel.AddItem(butonData1);
             areaCalcPanel.AddSeparator();
 
-            // add tooltip
-            butonData1.ToolTip = "This is a tooltip";
-            butonData1.ToolTipImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+            butonData1.ToolTip = "Натиснете този бутон, за да изчислите всички параметри за имота";
+            butonData1.ToolTipImage = new BitmapImage(new Uri(path + @"\plotIcon.png"));
+
+
 
             // create PushButon 2
             PushButtonData butonData2 = new PushButtonData("Area\ncoefficients", "Area\ncoefficients", assembName, "AreaCalculations.AreaCoefficients");
-            butonData2.LargeImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+            butonData2.LargeImage = new BitmapImage(new Uri(path + @"\areacIcon.png"));
 
             areaCalcPanel.AddItem(butonData2);
             areaCalcPanel.AddSeparator();
 
+            butonData2.ToolTip = "Натиснете този бутон, за да попълните автоматично всички Area коефициенти";
+            butonData2.ToolTipImage = new BitmapImage(new Uri(path + @"\areacIcon.png"));
+
+
+
             // create PushButon 3
             PushButtonData butonData3 = new PushButtonData("Area\ncalculations", "Area\ncalculations", assembName, "AreaCalculations.CalculateAreaParameters");
-            butonData2.LargeImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+            butonData3.LargeImage = new BitmapImage(new Uri(path + @"\areaIcon.png"));
 
             areaCalcPanel.AddItem(butonData3);
             areaCalcPanel.AddSeparator();
 
-            // add tooltip
-            butonData3.ToolTip = "This is a tooltip";
-            butonData3.ToolTipImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+            butonData3.ToolTip = "Натиснете този бутон, за да изчислите параметрите към всяка една Area";
+            butonData3.ToolTipImage = new BitmapImage(new Uri(path + @"\areaIcon.png"));
+
+
 
             // create PushButon 4
             PushButtonData butonData4 = new PushButtonData("Export to\nExcel", "Export to\nExcel", assembName, "AreaCalculations.ExportToExcel");
-            butonData4.LargeImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+            butonData4.LargeImage = new BitmapImage(new Uri(path + @"\excelIcon.png"));
 
             areaCalcPanel.AddItem(butonData4);
             areaCalcPanel.AddSeparator();
 
-            // add tooltip
-            butonData4.ToolTip = "This is a tooltip";
-            butonData4.ToolTipImage = new BitmapImage(new Uri(path + @"\iconPlot.png"));
+            butonData4.ToolTip = "Натиснете този бутон, за да експортнете всички обекти Area директно в Excel";
+            butonData4.ToolTipImage = new BitmapImage(new Uri(path + @"\excelIcon.png"));
+
+
 
             return Result.Succeeded;
         }
