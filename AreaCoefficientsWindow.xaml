@@ -1,0 +1,62 @@
+﻿<Window x:Class="AreaCalculations.AreaCoefficientsWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AreaCalculations"
+             mc:Ignorable="d" 
+             d:DesignHeight="420" d:DesignWidth="300"
+             Title="Area Coefficients"
+             ResizeMode="NoResize" Background="White" Foreground="Black">
+    <StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,0,0,245" Height="30">
+            <Label Content="A Coefficient Orientation (Ки)" Height="30" Width="250"/>
+            <TextBox HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-460,0,0" Height="30">
+            <Label Content="A Coefficient Level (Кв)" Height="30" Width="250"/>
+            <TextBox HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-400,0,0" Height="30">
+            <Label Content="A Coefficient Location (Км)" Height="30" Width="250"/>
+            <TextBox HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-340,0,0" Height="30">
+            <Label Content="A Coefficient Height (Кив)" Height="30" Width="250"/>
+            <TextBox HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-280,0,0" Height="30">
+            <Label Content="A Coefficient Roof (Кпп)" Height="30" Width="250"/>
+            <TextBox HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-220,0,0" Height="30">
+            <Label Content="A Coefficient Special (Кок)" Height="30" Width="250"/>
+            <TextBox HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-160,0,0" Height="30">
+            <Label Content="A Coefficient Zones (Кк)" Height="30" Width="250"/>
+            <TextBox HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-100,0,0" Height="30">
+            <Label Content="A Coefficient Correction" Height="30" Width="250"/>
+            <TextBox HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-40,0,0" Height="30">
+            <Label Content="A Coefficient Storage (Ксп) (Склад / Мазе)" Height="30" Width="250"/>
+            <TextBox HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="0.3" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-5,0,0" Height="30">
+            <Label Content="A Coefficient Storage (Ксп)" Height="30" Width="250"/>
+            <TextBox HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,0,0,0" Height="30">
+            <Label Content="A Coefficient Garage (Кпг) (Гараж / Паркинг)" Height="30" Width="250"/>
+            <TextBox HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="0.8" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,0,0,0" Height="30">
+            <Label Content="A Coefficient Garage (Кпг)" Height="30" Width="250"/>
+            <TextBox HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <Button Content="Enter" Height="20" Margin="0,10,0,0" Width="280" Click="SetAreaCoefficients"/>
+    </StackPanel>
+</Window>

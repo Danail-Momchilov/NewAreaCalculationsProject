@@ -58,6 +58,9 @@
     <Compile Include="AreaCalcs\AreaCoefficients.cs" />
     <Compile Include="AreaCalcs\CalculateAreaParameters.cs" />
     <Compile Include="AreaCalcs\AreaDictionary.cs" />
+    <Compile Include="AreaCoefficientsWindow.xaml.cs">
+      <DependentUpon>AreaCoefficientsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Excel\ExportToExcel.cs" />
     <Compile Include="SiteCalcs\AreaCollection.cs" />
     <Compile Include="SiteCalcs\Greenery.cs" />
@@ -100,6 +103,12 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="AreaCoefficientsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
