@@ -19,6 +19,37 @@ namespace AreaCalculations
                 UIDocument uidoc = commandData.Application.ActiveUIDocument;
                 Document doc = uidoc.Document;
 
+                AreaCoefficientsWindow window = new AreaCoefficientsWindow();
+
+                window.ShowDialog();
+
+
+
+
+                string totalTestString = "";
+                totalTestString += window.areaCoefficients["ACOR"];
+                totalTestString += window.areaCoefficients["ACLE"];
+                totalTestString += window.areaCoefficients["ACLO"];
+                totalTestString += window.areaCoefficients["ACHE"];
+                totalTestString += window.areaCoefficients["ACRO"];
+                totalTestString += window.areaCoefficients["ACSP"];
+                totalTestString += window.areaCoefficients["ACZO"];
+                totalTestString += window.areaCoefficients["ACCO"];
+                totalTestString += window.areaCoefficients["ACCO"];
+                totalTestString += window.areaCoefficients["ACSTS"];
+                totalTestString += window.areaCoefficients["ACST"];
+                totalTestString += window.areaCoefficients["ACGAP"];
+                totalTestString += window.areaCoefficients["ACGA"];
+
+
+                TaskDialog test = new TaskDialog("PENIS");
+                test.MainInstruction = totalTestString;
+                test.Show();
+
+
+
+
+
                 AreaCollection areaUpdater = new AreaCollection(doc);
                 int count = areaUpdater.updateAreaCoefficients();
 
