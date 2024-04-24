@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Office.Interop.Excel;
 using Document = Autodesk.Revit.DB.Document;
 
 namespace AreaCalculations
@@ -387,6 +388,18 @@ namespace AreaCalculations
             transaction.Commit();
 
             return errorReport;
+        }
+        public void exportToExcel(string filePath)
+        {
+            Microsoft.Office.Interop.Excel.Application excelWorksheet = new Microsoft.Office.Interop.Excel.Application();
+            Workbook workBook;
+            Worksheet workSheet;
+
+            workBook = excelWorksheet.Workbooks.Open(filePath);
+            workSheet = workBook.Worksheets[0];
+
+            Range cellRange = workSheet.Range["A1:B1"];
+            cellRange.Value = "Pencho";
         }
     }
 }

@@ -19,46 +19,21 @@ namespace AreaCalculations
                 UIDocument uidoc = commandData.Application.ActiveUIDocument;
                 Document doc = uidoc.Document;
 
+                // create and initiate the xaml window
                 AreaCoefficientsWindow window = new AreaCoefficientsWindow();
-
                 window.ShowDialog();
 
-
-
-
-                string totalTestString = "";
-                totalTestString += window.areaCoefficients["ACOR"];
-                totalTestString += window.areaCoefficients["ACLE"];
-                totalTestString += window.areaCoefficients["ACLO"];
-                totalTestString += window.areaCoefficients["ACHE"];
-                totalTestString += window.areaCoefficients["ACRO"];
-                totalTestString += window.areaCoefficients["ACSP"];
-                totalTestString += window.areaCoefficients["ACZO"];
-                totalTestString += window.areaCoefficients["ACCO"];
-                totalTestString += window.areaCoefficients["ACCO"];
-                totalTestString += window.areaCoefficients["ACSTS"];
-                totalTestString += window.areaCoefficients["ACST"];
-                totalTestString += window.areaCoefficients["ACGAP"];
-                totalTestString += window.areaCoefficients["ACGA"];
-                totalTestString += window.overrideBool.ToString();
-
-                TaskDialog test = new TaskDialog("PENIS");
-                test.MainInstruction = totalTestString;
-                test.Show();
-
-
-
-
-
+                // create area collect
                 AreaCollection areaUpdater = new AreaCollection(doc);
-
                 int count;
 
+                // update area coefficients, based on the xaml windows' data
                 if (window.overrideBool)
                     count = areaUpdater.updateAreaCoefficientsOverride(window.areaCoefficients);
                 else
                     count = areaUpdater.updateAreaCoefficients(window.areaCoefficients);
 
+                // output reports
                 TaskDialog report = new TaskDialog("Report");
                 if (count > 0)
                     report.MainInstruction = $"Успешно бяха обновени коефициентите на {count} 'Area' обекти! За всички останали е обновен само коефициент 'A Coefficient Multiplied' :*";

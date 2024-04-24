@@ -31,7 +31,7 @@ namespace AreaCalculations
 
         private bool updateIfNoValue(Parameter param, double value)
         {
-            if (param.HasValue && param.AsValueString() != "")
+            if (param.HasValue && param.AsValueString() != "" && param.AsDouble() != 0)
                 return false;
             else
             {
