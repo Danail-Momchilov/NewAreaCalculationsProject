@@ -40,7 +40,7 @@ namespace AreaCalculations
                 totalTestString += window.areaCoefficients["ACST"];
                 totalTestString += window.areaCoefficients["ACGAP"];
                 totalTestString += window.areaCoefficients["ACGA"];
-
+                totalTestString += window.overrideBool.ToString();
 
                 TaskDialog test = new TaskDialog("PENIS");
                 test.MainInstruction = totalTestString;
@@ -51,7 +51,13 @@ namespace AreaCalculations
 
 
                 AreaCollection areaUpdater = new AreaCollection(doc);
-                int count = areaUpdater.updateAreaCoefficients();
+
+                int count;
+
+                if (window.overrideBool)
+                    count = areaUpdater.updateAreaCoefficientsOverride(window.areaCoefficients);
+                else
+                    count = areaUpdater.updateAreaCoefficients(window.areaCoefficients);
 
                 TaskDialog report = new TaskDialog("Report");
                 if (count > 0)

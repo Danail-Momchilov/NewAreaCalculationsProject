@@ -28,6 +28,8 @@ namespace AreaCalculations
             {"ACGA", 1 }
         };
 
+        public bool overrideBool = false;
+
         public AreaCoefficientsWindow()
         {
             InitializeComponent();
@@ -50,6 +52,9 @@ namespace AreaCalculations
                 this.areaCoefficients["ACST"] = Convert.ToDouble(ACST.Text);
                 this.areaCoefficients["ACGAP"] = Convert.ToDouble(ACGAP.Text);
                 this.areaCoefficients["ACGA"] = Convert.ToDouble(ACGA.Text);
+
+                if (overrideCoefficients.IsChecked != null)
+                    this.overrideBool = (bool)overrideCoefficients.IsChecked;
             }
             catch { }
 
