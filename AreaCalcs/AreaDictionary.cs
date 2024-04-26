@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Office.Interop.Excel;
 using Document = Autodesk.Revit.DB.Document;
+using System.Runtime.InteropServices;
 
 namespace AreaCalculations
 {
@@ -389,17 +390,81 @@ namespace AreaCalculations
 
             return errorReport;
         }
-        public void exportToExcel(string filePath)
+        public void exportToExcel(string filePath, string sheetName)
         {
-            Microsoft.Office.Interop.Excel.Application excelWorksheet = new Microsoft.Office.Interop.Excel.Application();
-            Workbook workBook;
-            Worksheet workSheet;
+            Microsoft.Office.Interop.Excel.Application excelApplication = new Microsoft.Office.Interop.Excel.Application();
+            Workbook workBook = excelApplication.Workbooks.Open(filePath, ReadOnly : false);
+            Worksheet workSheet = (Worksheet)workBook.Worksheets[sheetName];
 
-            workBook = excelWorksheet.Workbooks.Open(filePath);
-            workSheet = workBook.Worksheets[0];
+            int x = 1;
 
-            Range cellRange = workSheet.Range["A1:B1"];
-            cellRange.Value = "Pencho";
+            foreach (string plotName in plotNames)
+            {
+                x += 2;
+
+                foreach (string property in plotProperties[plotName])
+                {
+                    x += 1;
+
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        try
+                        {
+                            Range cellRangeString = workSheet.Range[$"A{x}", $"B{x}"];
+                            Range cellRangeDouble = workSheet.Range[$"C{x}", $"X{x}"];
+
+                            // todo: check them all once again in compliance with the chart structure
+                            string areaNumber = area.LookupParameter("Number").AsString();
+                            string areaName = area.LookupParameter("Name").AsString();
+                            double areaArea = area.LookupParameter("A Instance Total Area").AsDouble() * areaConvert;
+                            // todo: rework properly for subjectivated area
+                            double areaSubjected = area.LookupParameter("Area").AsDouble() * areaConvert;
+                            // todo: rework properly for subjectivated area
+                            double ACGA = area.LookupParameter("A Coefficient Garage (Кпг)").AsDouble() * areaConvert;
+                            double ACOR = area.LookupParameter("A Coefficient Orientation (Ки)").AsDouble() * areaConvert;
+                            double ACLE = area.LookupParameter("A Coefficient Level (Кв)").AsDouble() * areaConvert;
+                            double ACLO = area.LookupParameter("A Coefficient Location (Км)").AsDouble() * areaConvert;
+                            double ACHE = area.LookupParameter("A Coefficient Height (Кив)").AsDouble() * areaConvert;
+                            double ACRO = area.LookupParameter("A Coefficient Roof (Кпп)").AsDouble() * areaConvert;
+                            double ACSP = area.LookupParameter("A Coefficient Special (Кок)").AsDouble() * areaConvert;
+                            double ACST = area.LookupParameter("A Coefficient Storage (Ксп)").AsDouble() * areaConvert;
+                            double ACZO = area.LookupParameter("A Coefficient Zones (Кк)").AsDouble() * areaConvert;
+                            double ACCO = area.LookupParameter("A Coefficient Multiplied").AsDouble() * areaConvert;
+                            double C1C2 = area.LookupParameter("A Instance Price C1/C2").AsDouble() * areaConvert;
+                            double areaCommonPercent = area.LookupParameter("A Instance Common Area %").AsDouble() * areaConvert;
+                            double areaCommonArea = area.LookupParameter("A Instance Common Area").AsDouble() * areaConvert;
+                            double areaTotalArea = (area.LookupParameter("A Instance Total Area").AsDouble() * areaConvert) + (area.LookupParameter("A Instance Common Area").AsDouble() * areaConvert);
+                            double areaPermitPercent = area.LookupParameter("A Instance Building Permit %").AsDouble() * areaConvert;
+                            double areaRLPPercentage = area.LookupParameter("A Instance RLP Area &").AsDouble() * areaConvert;
+                            double areaRLP = area.LookupParameter("A Instance RLP Area").AsDouble() * areaConvert;
+                            // todo: check them all once again in compliance with the chart structure
+
+                            string[] areaStringData = new[] { areaNumber, areaName };
+                            double[] areasDoubleData = new[] { areaArea, areaSubjected, ACGA, ACOR, ACLE, ACLO, ACHE, ACRO, ACSP, ACST, ACZO, ACCO, C1C2, areaCommonPercent, areaCommonArea, areaTotalArea, areaPermitPercent, areaRLPPercentage, areaRLP };
+
+                            cellRangeString.set_Value(XlRangeValueDataType.xlRangeValueDefault, areaStringData);
+                            cellRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, areasDoubleData);                            
+                        }
+                        catch
+                        {
+                            Range cellRangeString = workSheet.Range[$"A{x}", $"B{x}"];
+                            string[] cellsStrings = new[] { "X", "Y" };
+                            cellRangeString.set_Value(XlRangeValueDataType.xlRangeValueDefault, cellsStrings);
+                        }
+
+                        x += 1;
+                    }
+                }
+            }
+
+            workBook.SaveAs(filePath, XlFileFormat.xlWorkbookDefault, Type.Missing, false, false, XlSaveAsAccessMode.xlExclusive);
+            workBook.Close();
+            /*
+            excelApplication.Quit();
+
+            Marshal.ReleaseComObject(workSheet);
+            Marshal.ReleaseComObject(workBook);
+            Marshal.ReleaseComObject(excelApplication);*/
         }
     }
 }
