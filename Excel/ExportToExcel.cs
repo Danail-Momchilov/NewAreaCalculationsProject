@@ -2,11 +2,13 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System;
+using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Office.Interop.Excel;
+using Microsoft.Win32;
 
 namespace AreaCalculations
 {
@@ -48,16 +50,22 @@ namespace AreaCalculations
                 // area dictionary instance and additional plot parameters variables
                 AreaDictionary areaDict = new AreaDictionary(doc);
 
-                string filePath = "c:\\Users\\Danail.Momchilov\\Desktop\\New Microsoft Excel Worksheet (2).xlsx";
+                TaskDialog.Show("Total Number of Areas", areaDict.areasCount.ToString());
+                
+                System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
+                openFileDialog.Filter = "Excel Files|*.xlsx";
+                openFileDialog.Multiselect = false;                
 
-                areaDict.exportToExcel(filePath, "Sheet1");
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string filePath = openFileDialog.FileName;
+                    areaDict.exportToExcel(filePath, "Sheet1");
+                }                
 
                 // debug: 
                 // 1. Пробвай го на домашния комп, за да провериш дали там прави същите проблеми и дали казуса е от лицензите и правата на тъпия ексел в офиса...
                 // 2. провери цялата първа част, свързана с четене на параметри от ерия дикшънарито, за да видиш дали всичко е изписано правилно
-                // 3. Виж дали ще се оправи ако вкараш проверка за всяко едно проверка от тип - ако е null, въведи нула или нещо от сорта. Питай чатджипити за някакъв кратък и удобен ситаксис, за да не бухаш try except на всичко
-                // 4. Не вярвай на CHATGPT за по - генерални неща !!!
-                // 5. Ако все още не е открит проблема или е открит, но все пак се държи sketchy, пробвай с някоя платена библиотека за опериране с ексел... май самата майкрософтска е една идея смотана
+                // 3. Провери защо в ерия дикшънарито има само 15 елемента
 
                 return Result.Succeeded;
             }

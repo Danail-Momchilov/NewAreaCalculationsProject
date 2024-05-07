@@ -19,6 +19,7 @@ namespace AreaCalculations
         public Dictionary<string, List<string>> plotProperties { get; set; }
         public Document doc { get; set; }
         public Transaction transaction { get; set; }
+        public double areasCount { get; set; }
         public AreaDictionary(Document activeDoc)
         {
             this.doc = activeDoc;
@@ -27,6 +28,7 @@ namespace AreaCalculations
             this.plotProperties = new Dictionary<string, List<string>>();
             this.transaction = new Transaction(activeDoc, "Calculate and Update Area Parameters");
             this.plotAreasImp = new Dictionary<string, double>();
+            this.areasCount = 0;
 
             ProjectInfo projectInfo = activeDoc.ProjectInformation;
 
@@ -34,41 +36,39 @@ namespace AreaCalculations
 
             foreach (Area area in areasCollector)
             {
-                if (area != null)
+                string plotName = area.LookupParameter("A Instance Area Plot").AsString();
+                string groupName = area.LookupParameter("A Instance Area Group").AsString();
+
+                if (!string.IsNullOrEmpty(plotName) && !string.IsNullOrEmpty(groupName))
                 {
-                    string plotName = area.LookupParameter("A Instance Area Plot").AsString();
-                    string groupName = area.LookupParameter("A Instance Area Group").AsString();
-
-                    if (!string.IsNullOrEmpty(plotName) && !string.IsNullOrEmpty(groupName))
+                    if (!AreasOrganizer.ContainsKey(plotName))
                     {
-                        if (!AreasOrganizer.ContainsKey(plotName))
-                        {
-                            this.AreasOrganizer.Add(plotName, new Dictionary<string, List<Area>>());
-                            this.plotNames.Add(plotName);
-                            this.plotProperties.Add(plotName, new List<string>());
+                        this.AreasOrganizer.Add(plotName, new Dictionary<string, List<Area>>());
+                        this.plotNames.Add(plotName);
+                        this.plotProperties.Add(plotName, new List<string>());
 
-                            if (projectInfo.LookupParameter("Plot Number").AsString() == plotName)
-                                this.plotAreasImp.Add(plotName, projectInfo.LookupParameter("Plot Area").AsDouble());
-                            else if (projectInfo.LookupParameter("Plot Number 1st").AsString() == plotName)
-                                this.plotAreasImp.Add(plotName, projectInfo.LookupParameter("Plot Area 1st").AsDouble());
-                            else if (projectInfo.LookupParameter("Plot Number 2nd").AsString() == plotName)
-                                this.plotAreasImp.Add(plotName, projectInfo.LookupParameter("Plot Area 2nd").AsDouble());
-                        }
-                    
-                        if (!AreasOrganizer[plotName].ContainsKey(groupName))
-                        {
-                            this.AreasOrganizer[plotName].Add(groupName, new List<Area>());
-                            this.plotProperties[plotName].Add(groupName);
-                        }
-                    
-                        this.AreasOrganizer[plotName][groupName].Add(area);
+                        if (projectInfo.LookupParameter("Plot Number").AsString() == plotName)
+                            this.plotAreasImp.Add(plotName, projectInfo.LookupParameter("Plot Area").AsDouble());
+                        else if (projectInfo.LookupParameter("Plot Number 1st").AsString() == plotName)
+                            this.plotAreasImp.Add(plotName, projectInfo.LookupParameter("Plot Area 1st").AsDouble());
+                        else if (projectInfo.LookupParameter("Plot Number 2nd").AsString() == plotName)
+                            this.plotAreasImp.Add(plotName, projectInfo.LookupParameter("Plot Area 2nd").AsDouble());
                     }
 
-                    else
+                    if (!AreasOrganizer[plotName].ContainsKey(groupName))
                     {
-                        // TODO: to be continued
-                        // TODO: check whether an Area has a plotName, that is not relative to the ones in the Project Info (is it actually needed?)
+                        this.AreasOrganizer[plotName].Add(groupName, new List<Area>());
+                        this.plotProperties[plotName].Add(groupName);
                     }
+
+                    this.AreasOrganizer[plotName][groupName].Add(area);
+                    areasCount++;
+                }
+
+                else
+                {
+                    // TODO: to be continued
+                    // TODO: check whether an Area has a plotName, that is not relative to the ones in the Project Info (is it actually needed?)
                 }
             }
         }
@@ -414,29 +414,29 @@ namespace AreaCalculations
                             Range cellRangeDouble = workSheet.Range[$"C{x}", $"X{x}"];
 
                             // todo: check them all once again in compliance with the chart structure
-                            string areaNumber = area.LookupParameter("Number").AsString();
-                            string areaName = area.LookupParameter("Name").AsString();
-                            double areaArea = area.LookupParameter("A Instance Total Area").AsDouble() * areaConvert;
+                            string areaNumber = area.LookupParameter("Number")?.AsString() ?? "WRONG";
+                            string areaName = area.LookupParameter("Name")?.AsString() ?? "WRONG";
+                            double areaArea = area.LookupParameter("A Instance Total Area")?.AsDouble() * areaConvert ?? 0.0;
                             // todo: rework properly for subjectivated area
-                            double areaSubjected = area.LookupParameter("Area").AsDouble() * areaConvert;
+                            double areaSubjected = area.LookupParameter("Area")?.AsDouble() * areaConvert ?? 0.0;
                             // todo: rework properly for subjectivated area
-                            double ACGA = area.LookupParameter("A Coefficient Garage (Кпг)").AsDouble() * areaConvert;
-                            double ACOR = area.LookupParameter("A Coefficient Orientation (Ки)").AsDouble() * areaConvert;
-                            double ACLE = area.LookupParameter("A Coefficient Level (Кв)").AsDouble() * areaConvert;
-                            double ACLO = area.LookupParameter("A Coefficient Location (Км)").AsDouble() * areaConvert;
-                            double ACHE = area.LookupParameter("A Coefficient Height (Кив)").AsDouble() * areaConvert;
-                            double ACRO = area.LookupParameter("A Coefficient Roof (Кпп)").AsDouble() * areaConvert;
-                            double ACSP = area.LookupParameter("A Coefficient Special (Кок)").AsDouble() * areaConvert;
-                            double ACST = area.LookupParameter("A Coefficient Storage (Ксп)").AsDouble() * areaConvert;
-                            double ACZO = area.LookupParameter("A Coefficient Zones (Кк)").AsDouble() * areaConvert;
-                            double ACCO = area.LookupParameter("A Coefficient Multiplied").AsDouble() * areaConvert;
-                            double C1C2 = area.LookupParameter("A Instance Price C1/C2").AsDouble() * areaConvert;
-                            double areaCommonPercent = area.LookupParameter("A Instance Common Area %").AsDouble() * areaConvert;
-                            double areaCommonArea = area.LookupParameter("A Instance Common Area").AsDouble() * areaConvert;
-                            double areaTotalArea = (area.LookupParameter("A Instance Total Area").AsDouble() * areaConvert) + (area.LookupParameter("A Instance Common Area").AsDouble() * areaConvert);
-                            double areaPermitPercent = area.LookupParameter("A Instance Building Permit %").AsDouble() * areaConvert;
-                            double areaRLPPercentage = area.LookupParameter("A Instance RLP Area &").AsDouble() * areaConvert;
-                            double areaRLP = area.LookupParameter("A Instance RLP Area").AsDouble() * areaConvert;
+                            double ACGA = area.LookupParameter("A Coefficient Garage (Кпг)")?.AsDouble() * areaConvert ?? 0.0;
+                            double ACOR = area.LookupParameter("A Coefficient Orientation (Ки)")?.AsDouble() * areaConvert ?? 0.0;
+                            double ACLE = area.LookupParameter("A Coefficient Level (Кв)")?.AsDouble() * areaConvert ?? 0.0;
+                            double ACLO = area.LookupParameter("A Coefficient Location (Км)")?.AsDouble() * areaConvert ?? 0.0;
+                            double ACHE = area.LookupParameter("A Coefficient Height (Кив)")?.AsDouble() * areaConvert ?? 0.0;
+                            double ACRO = area.LookupParameter("A Coefficient Roof (Кпп)")?.AsDouble() * areaConvert ?? 0.0;
+                            double ACSP = area.LookupParameter("A Coefficient Special (Кок)")?.AsDouble() * areaConvert ?? 0.0;
+                            double ACST = area.LookupParameter("A Coefficient Storage (Ксп)")?.AsDouble() * areaConvert ?? 0.0;
+                            double ACZO = area.LookupParameter("A Coefficient Zones (Кк)")?.AsDouble() * areaConvert ?? 0.0;
+                            double ACCO = area.LookupParameter("A Coefficient Multiplied")?.AsDouble() * areaConvert ?? 0.0;
+                            double C1C2 = area.LookupParameter("A Instance Price C1/C2")?.AsDouble() * areaConvert ?? 0.0;
+                            double areaCommonPercent = area.LookupParameter("A Instance Common Area %")?.AsDouble() * areaConvert ?? 0.0;
+                            double areaCommonArea = area.LookupParameter("A Instance Common Area")?.AsDouble() * areaConvert ?? 0.0;
+                            double areaTotalArea = (area.LookupParameter("A Instance Total Area")?.AsDouble() * areaConvert ?? 0.0) + (area.LookupParameter("A Instance Common Area")?.AsDouble() * areaConvert ?? 0.0);
+                            double areaPermitPercent = area.LookupParameter("A Instance Building Permit %")?.AsDouble() * areaConvert ?? 0.0;
+                            double areaRLPPercentage = area.LookupParameter("A Instance RLP Area &")?.AsDouble() * areaConvert ?? 0.0;
+                            double areaRLP = area.LookupParameter("A Instance RLP Area")?.AsDouble() * areaConvert ?? 0.0;
                             // todo: check them all once again in compliance with the chart structure
 
                             string[] areaStringData = new[] { areaNumber, areaName };
@@ -457,7 +457,7 @@ namespace AreaCalculations
                 }
             }
 
-            workBook.SaveAs(filePath, XlFileFormat.xlWorkbookDefault, Type.Missing, false, false, XlSaveAsAccessMode.xlExclusive);
+            workBook.SaveAs(filePath, XlFileFormat.xlWorkbookDefault, Type.Missing, false, false, XlSaveAsAccessMode.xlNoChange);
             workBook.Close();
             /*
             excelApplication.Quit();
