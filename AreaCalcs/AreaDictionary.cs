@@ -20,6 +20,8 @@ namespace AreaCalculations
         public Document doc { get; set; }
         public Transaction transaction { get; set; }
         public double areasCount { get; set; }
+        public double missingAreasCount { get; set; }
+        public string missingAreasData { get; set; }
         public AreaDictionary(Document activeDoc)
         {
             this.doc = activeDoc;
@@ -29,6 +31,7 @@ namespace AreaCalculations
             this.transaction = new Transaction(activeDoc, "Calculate and Update Area Parameters");
             this.plotAreasImp = new Dictionary<string, double>();
             this.areasCount = 0;
+            this.missingAreasCount = 0;
 
             ProjectInfo projectInfo = activeDoc.ProjectInformation;
 
@@ -39,7 +42,7 @@ namespace AreaCalculations
                 string plotName = area.LookupParameter("A Instance Area Plot").AsString();
                 string groupName = area.LookupParameter("A Instance Area Group").AsString();
 
-                if (!string.IsNullOrEmpty(plotName) && !string.IsNullOrEmpty(groupName))
+                if (!string.IsNullOrEmpty(plotName) && !string.IsNullOrEmpty(groupName) && area.Area!=0)
                 {
                     if (!AreasOrganizer.ContainsKey(plotName))
                     {
@@ -67,8 +70,14 @@ namespace AreaCalculations
 
                 else
                 {
-                    // TODO: to be continued
                     // TODO: check whether an Area has a plotName, that is not relative to the ones in the Project Info (is it actually needed?)
+                    // TODO
+                    // TODO
+                    missingAreasCount++;
+                    missingAreasData += $"{area.Id} {area.Number} {area.Name} {area.Area}\n";
+                    // TODO
+                    // TODO
+                    // TODO
                 }
             }
         }
@@ -398,28 +407,118 @@ namespace AreaCalculations
 
             int x = 1;
 
+            // general formatting
+            // main title : IPID and project number
+            workSheet.Cells[x, 1] = "IPID";
+            workSheet.Cells[x, 2] = doc.ProjectInformation.LookupParameter("Project Number").AsString();
+
+            Range mergeRange = workSheet.Range[$"B{x}", $"V{x}"];
+            mergeRange.Merge();
+            mergeRange.Borders.LineStyle = XlLineStyle.xlContinuous;
+            mergeRange.HorizontalAlignment = XlHAlign.xlHAlignLeft;
+
+            Range ipIdRange = workSheet.Range[$"A{x}", $"A{x}"];
+            ipIdRange.Borders.LineStyle= XlLineStyle.xlContinuous;
+            ipIdRange.HorizontalAlignment = XlHAlign.xlHAlignLeft;
+
+            // main title : project name
+            x += 2;
+            workSheet.Cells[x, 1] = "ОБЕКТ";
+            workSheet.Cells[x, 2] = doc.ProjectInformation.LookupParameter("Project Address").AsString();
+
+            Range mergeRangeObject = workSheet.Range[$"B{x}", $"V{x}"];
+            mergeRangeObject.Merge();
+            mergeRangeObject.Borders.LineStyle = XlLineStyle.xlContinuous;
+            mergeRangeObject.HorizontalAlignment = XlHAlign.xlHAlignLeft;
+
+            Range mergeRangeProjName = workSheet.Range[$"A{x}", $"A{x}"];
+            mergeRangeProjName.Borders.LineStyle = XlLineStyle.xlContinuous;
+            mergeRangeProjName.HorizontalAlignment = XlHAlign.xlHAlignLeft;
+
             foreach (string plotName in plotNames)
             {
                 x += 2;
+                int rangeStart = x;
+
+                // general plot data
+                // plot row
+                Range plotRange = workSheet.Range[$"A{x}", $"V{x}"];
+                string[] plotStrings = new[] { "УПИ:", "X", "m2", "", "Самостоятелни обекти и паркоместа:", "", "", "", "", "", "", "Обекти на терен:", "", "", "", "", "", "Забележки:", "", "", "", ""};
+                plotRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, plotStrings);
+
+                // build up area row
+                x += 1;
+                Range baRange = workSheet.Range[$"A{x}", $"V{x}"];
+                string[] baStrings = new[] { "ЗП:", "X", "m2", "", "Ателиета:", "", "", "", "0", "бр", "", "Паркоместа:", "", "", "0", "бр", "", "За целите на ценообразуването и площообразуването, от площта на общите части са приспаднати ХХ.ХХкв.м. :", "", "", "", ""};
+                baRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, baStrings);
+
+                // total build area row
+                x += 1;
+                Range tbaRange = workSheet.Range[$"A{x}", $"V{x}"];
+                string[] tbaStrings = new[] { "РЗП:", "X", "m2", "", "Апартаменти:", "", "", "", "0", "бр", "", "Дворове:", "", "", "0", "бр", "", "", "", "", "", "" };
+                tbaRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, tbaStrings);
+
+                // underground row
+                x += 1;
+                Range uRange = workSheet.Range[$"A{x}", $"V{x}"];
+                string[] uStrings = new[] { "Сутерени:", "X", "m2", "", "Магазини:", "", "", "", "0", "бр", "", "Трафопост:", "", "", "0", "бр", "", "", "", "", "", "" };
+                uRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, uStrings);
+
+                // underground + tba row
+                x += 1;
+                Range utbaRange = workSheet.Range[$"A{x}", $"V{x}"];
+                string[] utbaStrings = new[] { "РЗП + Сутерени:", "X", "m2", "", "Офиси", "", "", "", "0", "бг", "", "", "", "", "", "", "", "", "", "", "", "" };
+                utbaRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, utbaStrings);
+
+                // CO row
+                x += 1;
+                Range coRange = workSheet.Range[$"A{x}", $"V{x}"];
+                string[] coStrings = new[] { "Общо СО", "X", "m2", "", "Гаражи", "", "", "", "0", "бр", "", "Данни за обекта:", "", "", "", "", "", "", "", "", "", "" };
+                coRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, coStrings);
+
+                // CA row
+                x += 1;
+                Range caRange = workSheet.Range[$"A{x}", $"V{x}"];
+                string[] caStrings = new[] { "Общо ОЧ", "X", "m2", "", "Складове", "", "", "", "0", "бр", "", "Етажност", "", "", "ет", "", "", "", "", "", "", "" };
+                caRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, caStrings);
+
+                // land row
+                x += 1;
+                Range landRange = workSheet.Range[$"A{x}", $"V{x}"];
+                string[] landStrings = new[] { "Земя към СО:", "X", "m2", "", "Паркоместа", "", "", "", "0", "бр", "", "Система", "", "монолитна", "", "", "", "", "", "", "", "" };
+                landRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, landStrings);
+
+                // set borders
+                int rangeEnd = x;
+
+                Range cellsOne = workSheet.Range[$"A{rangeStart}", $"C{rangeEnd}"];
+                cellsOne.Borders.LineStyle = XlLineStyle.xlContinuous;
+
+                Range cellsTwo = workSheet.Range[$"D{rangeStart}", $"D{rangeEnd}"];
+                cellsTwo.Borders.LineStyle = XlLineStyle.xlContinuous;
+
+                Range cellsThree = workSheet.Range[$"E{rangeStart}", $"J{rangeEnd}"];
+                cellsThree.Borders.LineStyle = XlLineStyle.xlContinuous;
+
 
                 foreach (string property in plotProperties[plotName])
                 {
-                    x += 1;
+                    x += 2;
 
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
                         try
                         {
                             Range cellRangeString = workSheet.Range[$"A{x}", $"B{x}"];
-                            Range cellRangeDouble = workSheet.Range[$"C{x}", $"X{x}"];
+                            Range cellRangeDouble = workSheet.Range[$"C{x}", $"V{x}"];
 
-                            // todo: check them all once again in compliance with the chart structure
-                            string areaNumber = area.LookupParameter("Number")?.AsString() ?? "WRONG";
-                            string areaName = area.LookupParameter("Name")?.AsString() ?? "WRONG";
+                            // TODO: check them all once again in compliance with the chart structure
+                            string areaNumber = area.LookupParameter("Number")?.AsString() ?? "SOMETHING'S WRONG";
+                            string areaName = area.LookupParameter("Name")?.AsString() ?? "SOMETHING'S WRONG";
                             double areaArea = area.LookupParameter("A Instance Total Area")?.AsDouble() * areaConvert ?? 0.0;
-                            // todo: rework properly for subjectivated area
+                            // TODO: rework properly for subjectivated area
                             double areaSubjected = area.LookupParameter("Area")?.AsDouble() * areaConvert ?? 0.0;
-                            // todo: rework properly for subjectivated area
+                            // TODO: rework properly for subjectivated area
                             double ACGA = area.LookupParameter("A Coefficient Garage (Кпг)")?.AsDouble() * areaConvert ?? 0.0;
                             double ACOR = area.LookupParameter("A Coefficient Orientation (Ки)")?.AsDouble() * areaConvert ?? 0.0;
                             double ACLE = area.LookupParameter("A Coefficient Level (Кв)")?.AsDouble() * areaConvert ?? 0.0;
@@ -437,13 +536,15 @@ namespace AreaCalculations
                             double areaPermitPercent = area.LookupParameter("A Instance Building Permit %")?.AsDouble() * areaConvert ?? 0.0;
                             double areaRLPPercentage = area.LookupParameter("A Instance RLP Area &")?.AsDouble() * areaConvert ?? 0.0;
                             double areaRLP = area.LookupParameter("A Instance RLP Area")?.AsDouble() * areaConvert ?? 0.0;
-                            // todo: check them all once again in compliance with the chart structure
+                            int integerValue = area.Id.IntegerValue;
+                            double areaID = integerValue;
+                            // TODO: check them all once again in compliance with the chart structure
 
                             string[] areaStringData = new[] { areaNumber, areaName };
-                            double[] areasDoubleData = new[] { areaArea, areaSubjected, ACGA, ACOR, ACLE, ACLO, ACHE, ACRO, ACSP, ACST, ACZO, ACCO, C1C2, areaCommonPercent, areaCommonArea, areaTotalArea, areaPermitPercent, areaRLPPercentage, areaRLP };
+                            double[] areasDoubleData = new[] { areaArea, areaSubjected, ACGA, ACOR, ACLE, ACLO, ACHE, ACRO, ACSP, ACST, ACZO, ACCO, C1C2, areaCommonPercent, areaCommonArea, areaTotalArea, areaPermitPercent, areaRLPPercentage, areaRLP, areaID };
 
                             cellRangeString.set_Value(XlRangeValueDataType.xlRangeValueDefault, areaStringData);
-                            cellRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, areasDoubleData);                            
+                            cellRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, areasDoubleData);
                         }
                         catch
                         {
@@ -457,14 +558,8 @@ namespace AreaCalculations
                 }
             }
 
-            workBook.SaveAs(filePath, XlFileFormat.xlWorkbookDefault, Type.Missing, false, false, XlSaveAsAccessMode.xlNoChange);
+            workBook.Save();
             workBook.Close();
-            /*
-            excelApplication.Quit();
-
-            Marshal.ReleaseComObject(workSheet);
-            Marshal.ReleaseComObject(workBook);
-            Marshal.ReleaseComObject(excelApplication);*/
         }
     }
 }

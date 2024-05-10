@@ -50,8 +50,15 @@ namespace AreaCalculations
                 // area dictionary instance and additional plot parameters variables
                 AreaDictionary areaDict = new AreaDictionary(doc);
 
-                TaskDialog.Show("Total Number of Areas", areaDict.areasCount.ToString());
-                
+                // TODO: develop this check further and also apply it to any other method that is currently constructing Area Dictionary
+                // TODO
+                // TODO
+                TaskDialog.Show("Total Number of Areas in the Dictionary", areaDict.areasCount.ToString());
+                TaskDialog.Show("Total Number of Areas that were skipped", areaDict.missingAreasCount.ToString() + "\nThey are either not placed or have their plot or group name not filled in\n" + areaDict.missingAreasData);
+                // TODO
+                // TODO
+                // TODO
+
                 System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
                 openFileDialog.Filter = "Excel Files|*.xlsx";
                 openFileDialog.Multiselect = false;                
@@ -60,12 +67,7 @@ namespace AreaCalculations
                 {
                     string filePath = openFileDialog.FileName;
                     areaDict.exportToExcel(filePath, "Sheet1");
-                }                
-
-                // debug: 
-                // 1. Пробвай го на домашния комп, за да провериш дали там прави същите проблеми и дали казуса е от лицензите и правата на тъпия ексел в офиса...
-                // 2. провери цялата първа част, свързана с четене на параметри от ерия дикшънарито, за да видиш дали всичко е изписано правилно
-                // 3. Провери защо в ерия дикшънарито има само 15 елемента
+                }
 
                 return Result.Succeeded;
             }
