@@ -492,14 +492,53 @@ namespace AreaCalculations
                 int rangeEnd = x;
 
                 Range cellsOne = workSheet.Range[$"A{rangeStart}", $"C{rangeEnd}"];
-                cellsOne.Borders.LineStyle = XlLineStyle.xlContinuous;
+                Borders bordersOne = cellsOne.Borders;
+                bordersOne[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
+                bordersOne[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
+                bordersOne[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
+                bordersOne[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
 
                 Range cellsTwo = workSheet.Range[$"D{rangeStart}", $"D{rangeEnd}"];
-                cellsTwo.Borders.LineStyle = XlLineStyle.xlContinuous;
+                Borders bordersTwo = cellsTwo.Borders;
+                bordersTwo[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
+                bordersTwo[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
+                bordersTwo[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
+                bordersTwo[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
 
                 Range cellsThree = workSheet.Range[$"E{rangeStart}", $"J{rangeEnd}"];
-                cellsThree.Borders.LineStyle = XlLineStyle.xlContinuous;
+                Borders bordersThree = cellsThree.Borders;
+                bordersThree[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
+                bordersThree[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
+                bordersThree[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
+                bordersThree[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
 
+                Range cellsFour = workSheet.Range[$"K{rangeStart}", $"K{rangeEnd}"];
+                Borders bordersFour = cellsFour.Borders;
+                bordersFour[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
+                bordersFour[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
+                bordersFour[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
+                bordersFour[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+
+                Range cellsFive = workSheet.Range[$"L{rangeStart}", $"P{rangeEnd}"];
+                Borders bordersFive = cellsFive.Borders;
+                bordersFive[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
+                bordersFive[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
+                bordersFive[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
+                bordersFive[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+
+                Range cellsSix = workSheet.Range[$"Q{rangeStart}", $"Q{rangeEnd}"];
+                Borders bordersSix = cellsSix.Borders;
+                bordersSix[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
+                bordersSix[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
+                bordersSix[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
+                bordersSix[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+
+                Range cellsSeven = workSheet.Range[$"R{rangeStart}", $"V{rangeEnd}"];
+                Borders bordersSeven = cellsSeven.Borders;
+                bordersSeven[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
+                bordersSeven[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
+                bordersSeven[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
+                bordersSeven[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
 
                 foreach (string property in plotProperties[plotName])
                 {
@@ -513,7 +552,7 @@ namespace AreaCalculations
                             Range cellRangeDouble = workSheet.Range[$"C{x}", $"V{x}"];
 
                             // TODO: check them all once again in compliance with the chart structure
-                            string areaNumber = area.LookupParameter("Number")?.AsString() ?? "SOMETHING'S WRONG";
+                            string areaNumber = area.LookupParameter("Number").AsString() ?? "SOMETHING'S WRONG";
                             string areaName = area.LookupParameter("Name")?.AsString() ?? "SOMETHING'S WRONG";
                             double areaArea = area.LookupParameter("A Instance Total Area")?.AsDouble() * areaConvert ?? 0.0;
                             // TODO: rework properly for subjectivated area
