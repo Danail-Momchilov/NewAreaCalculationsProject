@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Office.Interop.Excel;
 using Document = Autodesk.Revit.DB.Document;
 using System.Runtime.InteropServices;
+using System.Drawing;
 
 namespace AreaCalculations
 {
@@ -447,37 +448,37 @@ namespace AreaCalculations
                 plotRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, plotStrings);
 
                 // build up area row
-                x += 1;
+                x++;
                 Range baRange = workSheet.Range[$"A{x}", $"V{x}"];
                 string[] baStrings = new[] { "ЗП:", "X", "m2", "", "Ателиета:", "", "", "", "0", "бр", "", "Паркоместа:", "", "", "0", "бр", "", "За целите на ценообразуването и площообразуването, от площта на общите части са приспаднати ХХ.ХХкв.м. :", "", "", "", ""};
                 baRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, baStrings);
 
                 // total build area row
-                x += 1;
+                x++;
                 Range tbaRange = workSheet.Range[$"A{x}", $"V{x}"];
                 string[] tbaStrings = new[] { "РЗП:", "X", "m2", "", "Апартаменти:", "", "", "", "0", "бр", "", "Дворове:", "", "", "0", "бр", "", "", "", "", "", "" };
                 tbaRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, tbaStrings);
 
                 // underground row
-                x += 1;
+                x++;
                 Range uRange = workSheet.Range[$"A{x}", $"V{x}"];
                 string[] uStrings = new[] { "Сутерени:", "X", "m2", "", "Магазини:", "", "", "", "0", "бр", "", "Трафопост:", "", "", "0", "бр", "", "", "", "", "", "" };
                 uRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, uStrings);
 
                 // underground + tba row
-                x += 1;
+                x++;
                 Range utbaRange = workSheet.Range[$"A{x}", $"V{x}"];
                 string[] utbaStrings = new[] { "РЗП + Сутерени:", "X", "m2", "", "Офиси", "", "", "", "0", "бг", "", "", "", "", "", "", "", "", "", "", "", "" };
                 utbaRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, utbaStrings);
 
                 // CO row
-                x += 1;
+                x++;
                 Range coRange = workSheet.Range[$"A{x}", $"V{x}"];
                 string[] coStrings = new[] { "Общо СО", "X", "m2", "", "Гаражи", "", "", "", "0", "бр", "", "Данни за обекта:", "", "", "", "", "", "", "", "", "", "" };
                 coRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, coStrings);
 
                 // CA row
-                x += 1;
+                x++;
                 Range caRange = workSheet.Range[$"A{x}", $"V{x}"];
                 string[] caStrings = new[] { "Общо ОЧ", "X", "m2", "", "Складове", "", "", "", "0", "бр", "", "Етажност", "", "", "ет", "", "", "", "", "", "", "" };
                 caRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, caStrings);
@@ -497,6 +498,7 @@ namespace AreaCalculations
                 bordersOne[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
                 bordersOne[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
                 bordersOne[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+                cellsOne.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
 
                 Range cellsTwo = workSheet.Range[$"D{rangeStart}", $"D{rangeEnd}"];
                 Borders bordersTwo = cellsTwo.Borders;
@@ -504,6 +506,7 @@ namespace AreaCalculations
                 bordersTwo[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
                 bordersTwo[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
                 bordersTwo[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+                cellsTwo.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
 
                 Range cellsThree = workSheet.Range[$"E{rangeStart}", $"J{rangeEnd}"];
                 Borders bordersThree = cellsThree.Borders;
@@ -511,6 +514,7 @@ namespace AreaCalculations
                 bordersThree[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
                 bordersThree[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
                 bordersThree[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+                cellsThree.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
 
                 Range cellsFour = workSheet.Range[$"K{rangeStart}", $"K{rangeEnd}"];
                 Borders bordersFour = cellsFour.Borders;
@@ -518,6 +522,7 @@ namespace AreaCalculations
                 bordersFour[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
                 bordersFour[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
                 bordersFour[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+                cellsFour.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
 
                 Range cellsFive = workSheet.Range[$"L{rangeStart}", $"P{rangeEnd}"];
                 Borders bordersFive = cellsFive.Borders;
@@ -525,6 +530,7 @@ namespace AreaCalculations
                 bordersFive[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
                 bordersFive[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
                 bordersFive[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+                cellsFive.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
 
                 Range cellsSix = workSheet.Range[$"Q{rangeStart}", $"Q{rangeEnd}"];
                 Borders bordersSix = cellsSix.Borders;
@@ -532,6 +538,7 @@ namespace AreaCalculations
                 bordersSix[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
                 bordersSix[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
                 bordersSix[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+                cellsSix.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
 
                 Range cellsSeven = workSheet.Range[$"R{rangeStart}", $"V{rangeEnd}"];
                 Borders bordersSeven = cellsSeven.Borders;
@@ -539,15 +546,61 @@ namespace AreaCalculations
                 bordersSeven[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
                 bordersSeven[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
                 bordersSeven[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+                cellsSeven.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
 
                 foreach (string property in plotProperties[plotName])
                 {
                     x += 2;
+                    workSheet.Cells[x, 1] = $"ПЛОЩООБРАЗУВАНЕ САМОСТОЯТЕЛНИ ОБЕКТИ - {property}";
+                    Range propertyTitleRange = workSheet.Range[$"A{x}", $"V{x}"];
+                    propertyTitleRange.Merge();
+                    propertyTitleRange.HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                    propertyTitleRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+                    propertyTitleRange.Font.Bold = true;
+                    propertyTitleRange.Borders.LineStyle = XlLineStyle.xlContinuous;
+
+                    x++;
+                    Range propertyDataRange = workSheet.Range[$"A{x}", $"V{x}"];
+                    string[] propertyData = new[] { "ПЛОЩ СО:", "", "ПЛОЩ ОЧ:", "", "ОБЩО:", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
+                    propertyDataRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, propertyData);
+                    propertyDataRange.Font.Bold = true;
+                    propertyDataRange.Borders.LineStyle= XlLineStyle.xlContinuous;
+                    propertyDataRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+
+                    x++;
+                    Range parameterNamesRange = workSheet.Range[$"A{x}", $"V{x}"];
+                    string[] parameterNamesData = new[] { "ПЛОЩ СО", "НАИМЕНОВАНИЕ СО", "ПЛОЩ F1(F2)", "ПРИЛЕЖАЩА ПЛОЩ", "Кпг", "Ки", "Кв", "Км", "Кив", "Кпп", "Кок", "Ксп", "Кк", "К", "C1(C2)", "ОБЩИ ЧАСТИ - F3", "", "ОБЩО-F1(F2)+F3", "ПРАВО НА СТРОЕЖ", "ЗЕМЯ", "", "Id" };
+                    parameterNamesRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, parameterNamesData);
+                    parameterNamesRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+                    parameterNamesRange.Font.Bold = true;
+                    parameterNamesRange.Borders.LineStyle = XlLineStyle.xlContinuous;
+
+                    x++;
+                    Range parametersTypeRange = workSheet.Range[$"A{x}", $"V{x}"];
+                    string[] parametersTypeData = new[] { "", "", "m2", "m2", "", "", "", "", "", "", "", "", "", "", "", "% и.ч.", "m2", "m2", "% и.ч.", "% и.ч.", "m2"};
+                    parametersTypeRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, parametersTypeData);
+                    parametersTypeRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+                    parametersTypeRange.Font.Bold = true;
+                    parametersTypeRange.Borders.LineStyle = XlLineStyle.xlContinuous;
+
+                    x++;
+                    Range blankLineRange = workSheet.Range[$"A{x}", $"V{x}"];
+                    blankLineRange.Merge();
+                    blankLineRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+                    Borders blankBorders = blankLineRange.Borders;
+                    blankBorders[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
+                    blankBorders[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
+                    blankBorders[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
+                    blankBorders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+
+                    x++;
 
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
                         try
                         {
+                            // TODO: sort areas by number and level
+
                             Range cellRangeString = workSheet.Range[$"A{x}", $"B{x}"];
                             Range cellRangeDouble = workSheet.Range[$"C{x}", $"V{x}"];
 
