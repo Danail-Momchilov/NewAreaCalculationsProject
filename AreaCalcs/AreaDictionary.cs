@@ -406,6 +406,15 @@ namespace AreaCalculations
             Workbook workBook = excelApplication.Workbooks.Open(filePath, ReadOnly : false);
             Worksheet workSheet = (Worksheet)workBook.Worksheets[sheetName];
 
+            // set columns' width
+            workSheet.Range["A:A"].ColumnWidth = 10;
+            workSheet.Range["B:B"].ColumnWidth = 25;
+            workSheet.Range["C:C"].ColumnWidth = 10;
+            workSheet.Range["D:D"].ColumnWidth = 10;
+            workSheet.Range["E:E"].ColumnWidth = 10;
+            workSheet.Range["F:O"].ColumnWidth = 5;
+            workSheet.Range["P:V"].ColumnWidth = 10;
+
             int x = 1;
 
             // general formatting
@@ -417,10 +426,12 @@ namespace AreaCalculations
             mergeRange.Merge();
             mergeRange.Borders.LineStyle = XlLineStyle.xlContinuous;
             mergeRange.HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            mergeRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
 
             Range ipIdRange = workSheet.Range[$"A{x}", $"A{x}"];
             ipIdRange.Borders.LineStyle= XlLineStyle.xlContinuous;
             ipIdRange.HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            ipIdRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
 
             // main title : project name
             x += 2;
@@ -431,10 +442,12 @@ namespace AreaCalculations
             mergeRangeObject.Merge();
             mergeRangeObject.Borders.LineStyle = XlLineStyle.xlContinuous;
             mergeRangeObject.HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            mergeRangeObject.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
 
             Range mergeRangeProjName = workSheet.Range[$"A{x}", $"A{x}"];
             mergeRangeProjName.Borders.LineStyle = XlLineStyle.xlContinuous;
             mergeRangeProjName.HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            mergeRangeProjName.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
 
             foreach (string plotName in plotNames)
             {
@@ -593,7 +606,9 @@ namespace AreaCalculations
                     blankBorders[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
                     blankBorders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
 
-                    x++;
+                    x += 2;
+
+                    int startLine = x;
 
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
@@ -607,27 +622,27 @@ namespace AreaCalculations
                             // TODO: check them all once again in compliance with the chart structure
                             string areaNumber = area.LookupParameter("Number").AsString() ?? "SOMETHING'S WRONG";
                             string areaName = area.LookupParameter("Name")?.AsString() ?? "SOMETHING'S WRONG";
-                            double areaArea = area.LookupParameter("A Instance Total Area")?.AsDouble() * areaConvert ?? 0.0;
+                            double areaArea = Math.Round(area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0, 3);
                             // TODO: rework properly for subjectivated area
-                            double areaSubjected = area.LookupParameter("Area")?.AsDouble() * areaConvert ?? 0.0;
+                            double areaSubjected = Math.Round(99.9, 3);
                             // TODO: rework properly for subjectivated area
-                            double ACGA = area.LookupParameter("A Coefficient Garage (Кпг)")?.AsDouble() * areaConvert ?? 0.0;
-                            double ACOR = area.LookupParameter("A Coefficient Orientation (Ки)")?.AsDouble() * areaConvert ?? 0.0;
-                            double ACLE = area.LookupParameter("A Coefficient Level (Кв)")?.AsDouble() * areaConvert ?? 0.0;
-                            double ACLO = area.LookupParameter("A Coefficient Location (Км)")?.AsDouble() * areaConvert ?? 0.0;
-                            double ACHE = area.LookupParameter("A Coefficient Height (Кив)")?.AsDouble() * areaConvert ?? 0.0;
-                            double ACRO = area.LookupParameter("A Coefficient Roof (Кпп)")?.AsDouble() * areaConvert ?? 0.0;
-                            double ACSP = area.LookupParameter("A Coefficient Special (Кок)")?.AsDouble() * areaConvert ?? 0.0;
-                            double ACST = area.LookupParameter("A Coefficient Storage (Ксп)")?.AsDouble() * areaConvert ?? 0.0;
-                            double ACZO = area.LookupParameter("A Coefficient Zones (Кк)")?.AsDouble() * areaConvert ?? 0.0;
-                            double ACCO = area.LookupParameter("A Coefficient Multiplied")?.AsDouble() * areaConvert ?? 0.0;
-                            double C1C2 = area.LookupParameter("A Instance Price C1/C2")?.AsDouble() * areaConvert ?? 0.0;
-                            double areaCommonPercent = area.LookupParameter("A Instance Common Area %")?.AsDouble() * areaConvert ?? 0.0;
-                            double areaCommonArea = area.LookupParameter("A Instance Common Area")?.AsDouble() * areaConvert ?? 0.0;
-                            double areaTotalArea = (area.LookupParameter("A Instance Total Area")?.AsDouble() * areaConvert ?? 0.0) + (area.LookupParameter("A Instance Common Area")?.AsDouble() * areaConvert ?? 0.0);
-                            double areaPermitPercent = area.LookupParameter("A Instance Building Permit %")?.AsDouble() * areaConvert ?? 0.0;
-                            double areaRLPPercentage = area.LookupParameter("A Instance RLP Area &")?.AsDouble() * areaConvert ?? 0.0;
-                            double areaRLP = area.LookupParameter("A Instance RLP Area")?.AsDouble() * areaConvert ?? 0.0;
+                            double ACGA = Math.Round(area.LookupParameter("A Coefficient Garage (Кпг)")?.AsDouble() ?? 0.0, 3);
+                            double ACOR = Math.Round(area.LookupParameter("A Coefficient Orientation (Ки)")?.AsDouble() ?? 0.0, 3);
+                            double ACLE = Math.Round(area.LookupParameter("A Coefficient Level (Кв)")?.AsDouble() ?? 0.0, 3);
+                            double ACLO = Math.Round(area.LookupParameter("A Coefficient Location (Км)")?.AsDouble() ?? 0.0, 3);
+                            double ACHE = Math.Round(area.LookupParameter("A Coefficient Height (Кив)")?.AsDouble() ?? 0.0, 3);
+                            double ACRO = Math.Round(area.LookupParameter("A Coefficient Roof (Кпп)")?.AsDouble() ?? 0.0, 3);
+                            double ACSP = Math.Round(area.LookupParameter("A Coefficient Special (Кок)")?.AsDouble() ?? 0.0, 3);
+                            double ACST = Math.Round(area.LookupParameter("A Coefficient Storage (Ксп)")?.AsDouble() ?? 0.0, 3);
+                            double ACZO = Math.Round(area.LookupParameter("A Coefficient Zones (Кк)")?.AsDouble() ?? 0.0, 3);
+                            double ACCO = Math.Round(area.LookupParameter("A Coefficient Multiplied")?.AsDouble() ?? 0.0, 3);
+                            double C1C2 = Math.Round(area.LookupParameter("A Instance Price C1/C2")?.AsDouble() ?? 0.0, 3);
+                            double areaCommonPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3);
+                            double areaCommonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 3);
+                            double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0) + (area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0), 3);
+                            double areaPermitPercent = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3);
+                            double areaRLPPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3);
+                            double areaRLP = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3);
                             int integerValue = area.Id.IntegerValue;
                             double areaID = integerValue;
                             // TODO: check them all once again in compliance with the chart structure
@@ -636,7 +651,10 @@ namespace AreaCalculations
                             double[] areasDoubleData = new[] { areaArea, areaSubjected, ACGA, ACOR, ACLE, ACLO, ACHE, ACRO, ACSP, ACST, ACZO, ACCO, C1C2, areaCommonPercent, areaCommonArea, areaTotalArea, areaPermitPercent, areaRLPPercentage, areaRLP, areaID };
 
                             cellRangeString.set_Value(XlRangeValueDataType.xlRangeValueDefault, areaStringData);
+                            cellRangeString.Borders.LineStyle = XlLineStyle.xlContinuous;
+
                             cellRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, areasDoubleData);
+                            cellRangeDouble.Borders.LineStyle = XlLineStyle.xlContinuous;
                         }
                         catch
                         {
@@ -647,6 +665,11 @@ namespace AreaCalculations
 
                         x += 1;
                     }
+
+                    int endLine = x-1;
+
+                    Range colorRange = workSheet.Range[$"C{startLine}", $"U{endLine}"];
+                    colorRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.PaleGreen);
                 }
             }
 
