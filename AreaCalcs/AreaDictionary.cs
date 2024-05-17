@@ -610,12 +610,43 @@ namespace AreaCalculations
 
                     int startLine = x;
 
-                    foreach (Area area in AreasOrganizer[plotName][property])
+                    // TODO: Solve Areas level sorting (AR-FP-01 going in the end)
+
+                    List<Area> sortedAreas = AreasOrganizer[plotName][property]
+                        .Where(area => !area.LookupParameter("Number").AsString().Contains("ОЧ"))
+                        .OrderBy(area => area.LookupParameter("A Instance Area Entrance").AsString())
+                        .ThenBy(area => area.LookupParameter("Level").AsString())
+                        .ThenBy(area => area.LookupParameter("Number").AsString()).ToList();
+
+                    // TODO: Solve Areas level sorting (AR-FP-01 going in the end)
+
+                    List<string> levels = new List<string>();
+                    List<string> entrances = new List<string>();
+
+                    foreach (Area area in sortedAreas)
                     {
+                        if (!entrances.Contains(area.LookupParameter("A Instance Area Entrance").AsString()))
+                        {
+                            entrances.Add(area.LookupParameter("A Instance Area Entrance").AsString());
+                            workSheet.Cells[x, 1] = area.LookupParameter("A Instance Area Entrance").AsString();
+                            Range entranceRangeString = workSheet.Range[$"A{x}", $"V{x}"];
+                            entranceRangeString.Merge();
+                            entranceRangeString.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+                            x++;
+                        }
+
+                        if (!levels.Contains(area.LookupParameter("Level").AsValueString()))
+                        {
+                            levels.Add(area.LookupParameter("Level").AsValueString());
+                            workSheet.Cells[x, 1] = area.LookupParameter("Level").AsValueString();
+                            Range levelsRangeString = workSheet.Range[$"A{x}", $"V{x}"];
+                            levelsRangeString.Merge();
+                            levelsRangeString.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+                            x++;
+                        }
+
                         try
                         {
-                            // TODO: sort areas by number and level
-
                             Range cellRangeString = workSheet.Range[$"A{x}", $"B{x}"];
                             Range cellRangeDouble = workSheet.Range[$"C{x}", $"V{x}"];
 
