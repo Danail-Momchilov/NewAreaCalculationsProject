@@ -9,6 +9,7 @@ using Microsoft.Office.Interop.Excel;
 using Document = Autodesk.Revit.DB.Document;
 using System.Runtime.InteropServices;
 using System.Drawing;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AreaCalculations
 {
@@ -610,7 +611,7 @@ namespace AreaCalculations
 
                     int startLine = x;
 
-                    // TODO: Solve Areas level sorting (AR-FP-01 going in the end)
+                    // TODO: Solve Areas level sorting (AR-FP-01 going in the end) (and sort properly, it is currently temporary solution)
 
                     List<Area> sortedAreas = AreasOrganizer[plotName][property]
                         .Where(area => !area.LookupParameter("Number").AsString().Contains("ОЧ"))
@@ -618,7 +619,7 @@ namespace AreaCalculations
                         .ThenBy(area => area.LookupParameter("Level").AsString())
                         .ThenBy(area => area.LookupParameter("Number").AsString()).ToList();
 
-                    // TODO: Solve Areas level sorting (AR-FP-01 going in the end)
+                    // TODO: Solve Areas level sorting (AR-FP-01 going in the end) (and sort properly, it is currently temporary solution)
 
                     List<string> levels = new List<string>();
                     List<string> entrances = new List<string>();
@@ -655,7 +656,7 @@ namespace AreaCalculations
                             string areaName = area.LookupParameter("Name")?.AsString() ?? "SOMETHING'S WRONG";
                             double areaArea = Math.Round(area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0, 3);
                             // TODO: rework properly for subjectivated area
-                            double areaSubjected = Math.Round(99.9, 3);
+                            double areaSubjected = double.NaN;
                             // TODO: rework properly for subjectivated area
                             double ACGA = Math.Round(area.LookupParameter("A Coefficient Garage (Кпг)")?.AsDouble() ?? 0.0, 3);
                             double ACOR = Math.Round(area.LookupParameter("A Coefficient Orientation (Ки)")?.AsDouble() ?? 0.0, 3);
@@ -694,7 +695,51 @@ namespace AreaCalculations
                             cellRangeString.set_Value(XlRangeValueDataType.xlRangeValueDefault, cellsStrings);
                         }
 
-                        x += 1;
+                        x ++;
+
+                        // subjectivated areas loop
+
+                        foreach (Area areaSub in sortedAreas)
+                        {
+                            string primaryArea = areaSub.LookupParameter("A Instance Area Primary").AsString();
+
+                            if (primaryArea != null && primaryArea.Equals(area.LookupParameter("Number").AsString()))
+                            {
+                                Range areaSubRangeStr = workSheet.Range[$"A{x}", $"B{x}"];
+                                areaSubRangeStr.set_Value(XlRangeValueDataType.xlRangeValueDefault, new[] { areaSub.LookupParameter("Number").AsString(), areaSub.LookupParameter("Name").AsString() });
+
+                                Range alignmentRange = workSheet.Range[$"A{x}", $"A{x}"];
+                                alignmentRange.HorizontalAlignment = XlHAlign.xlHAlignRight;
+                                
+                                Range areaSubRangeDouble = workSheet.Range[$"C{x}", $"V{x}"];
+                                areaSubRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new[] {double.NaN, Math.Round(areaSub.LookupParameter("Area").AsDouble() / areaConvert, 3), double.NaN, double.NaN,
+                                        double.NaN, double.NaN, double.NaN, double.NaN, double.NaN, double.NaN, double.NaN, double.NaN,
+                                        double.NaN, double.NaN, double.NaN, double.NaN, double.NaN, double.NaN, double.NaN, double.NaN });
+
+                                x++;
+                            }
+                        }
+                        /*
+                        foreach (Area areaSub in AreasOrganizer[plotName]["ЗЕМЯ"])
+                        {
+                            string primaryArea = areaSub.LookupParameter("A Instance Area Primary").AsString();
+
+                            if (primaryArea != null && primaryArea.Equals(area.LookupParameter("Number").AsString()))
+                            {
+                                Range areaSubRangeStr = workSheet.Range[$"A{x}", $"B{x}"];
+                                areaSubRangeStr.set_Value(XlRangeValueDataType.xlRangeValueDefault, new[] { areaSub.LookupParameter("Number").AsString(), areaSub.LookupParameter("Name").AsString() });
+
+                                Range alignmentRange = workSheet.Range[$"A{x}", $"A{x}"];
+                                alignmentRange.HorizontalAlignment = XlHAlign.xlHAlignRight;
+
+                                Range areaSubRangeDouble = workSheet.Range[$"C{x}", $"V{x}"];
+                                areaSubRangeDouble.set_Value(new[] {double.NaN, areaSub.LookupParameter("Area").AsDouble(), double.NaN, double.NaN,
+                                        double.NaN, double.NaN, double.NaN, double.NaN, double.NaN, double.NaN, double.NaN, double.NaN,
+                                        double.NaN, double.NaN, double.NaN, double.NaN, double.NaN, double.NaN, double.NaN, double.NaN });
+
+                                x++;
+                            }
+                        }*/
                     }
 
                     int endLine = x-1;
