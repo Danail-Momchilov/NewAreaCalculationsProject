@@ -17,8 +17,10 @@ namespace AreaCalculations
     {
         public Dictionary<string, Dictionary<string, List<Area>>> AreasOrganizer { get; set; }
         public List<string> plotNames { get; set; }
-        public Dictionary<string, double> plotAreasImp { get; set; }
+        public Dictionary<string, double> plotAreasImp { get; set; } // why is this thing storing data in imperial ?!?!
         public Dictionary<string, List<string>> plotProperties { get; set; }
+        public Dictionary<string, double> plotBuildAreas { get; set; }
+        public Dictionary<string, double> plotTotalBuild { get; set; }
         public Document doc { get; set; }
         public Transaction transaction { get; set; }
         public double areasCount { get; set; }
@@ -32,12 +34,16 @@ namespace AreaCalculations
             this.plotProperties = new Dictionary<string, List<string>>();
             this.transaction = new Transaction(activeDoc, "Calculate and Update Area Parameters");
             this.plotAreasImp = new Dictionary<string, double>();
+            this.plotBuildAreas = new Dictionary<string, double>();
+            this.plotTotalBuild = new Dictionary<string, double>();
             this.areasCount = 0;
             this.missingAreasCount = 0;
 
             ProjectInfo projectInfo = activeDoc.ProjectInformation;
 
             FilteredElementCollector areasCollector = new FilteredElementCollector(activeDoc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType();
+
+            // construct main AreaOrganizer Dictionary
 
             foreach (Area area in areasCollector)
             {
@@ -80,6 +86,42 @@ namespace AreaCalculations
                     // TODO
                     // TODO
                     // TODO
+                }
+            }
+
+            // based on AreasOrganizer, construct the plotBuildAreas dictionary
+
+            foreach (string plotName in plotNames)
+            {
+                plotBuildAreas.Add(plotName, 0);
+
+                foreach (string plotProperty in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][plotProperty])
+                    {
+                        if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА")
+                        {
+                            plotBuildAreas[plotName] += area.Area / areaConvert;
+                        }
+                    }
+                }
+            }
+
+            // based on AreasOrganizer, construct the plotTotalBuild dictionary
+
+            foreach (string plotName in plotNames)
+            {
+                plotTotalBuild.Add(plotName, 0);
+
+                foreach (string plotProperty in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][plotProperty])
+                    {
+                        if (area.LookupParameter("A Instance Area Location").AsString() != "ПОДЗЕМНА" && area.LookupParameter("A Instance Area Primary").AsString() != "")
+                        {
+                            plotTotalBuild[plotName] += area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert;
+                        }
+                    }
                 }
             }
         }
@@ -413,8 +455,9 @@ namespace AreaCalculations
             workSheet.Range["C:C"].ColumnWidth = 20;
             workSheet.Range["D:D"].ColumnWidth = 20;
             workSheet.Range["E:E"].ColumnWidth = 10;
-            workSheet.Range["F:O"].ColumnWidth = 5;
-            workSheet.Range["P:V"].ColumnWidth = 10;
+            workSheet.Range["F:N"].ColumnWidth = 5;
+            workSheet.Range["O:S"].ColumnWidth = 20;
+            workSheet.Range["T:V"].ColumnWidth = 10;
 
             int x = 1;
 
@@ -458,19 +501,19 @@ namespace AreaCalculations
                 // general plot data
                 // plot row
                 Range plotRange = workSheet.Range[$"A{x}", $"V{x}"];
-                string[] plotStrings = new[] { "УПИ:", "X", "m2", "", "Самостоятелни обекти и паркоместа:", "", "", "", "", "", "", "Обекти на терен:", "", "", "", "", "", "Забележки:", "", "", "", ""};
+                object[] plotStrings = new[] { "УПИ:", $"{Math.Round(plotAreasImp[plotName] / areaConvert, 3)}", "m2", "", "Самостоятелни обекти и паркоместа:", "", "", "", "", "", "", "Обекти на терен:", "", "", "", "", "", "Забележки:", "", "", "", ""};
                 plotRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, plotStrings);
 
                 // build up area row
                 x++;
                 Range baRange = workSheet.Range[$"A{x}", $"V{x}"];
-                string[] baStrings = new[] { "ЗП:", "X", "m2", "", "Ателиета:", "", "", "", "0", "бр", "", "Паркоместа:", "", "", "0", "бр", "", "За целите на ценообразуването и площообразуването, от площта на общите части са приспаднати ХХ.ХХкв.м. :", "", "", "", ""};
+                object[] baStrings = new[] { "ЗП:", $"{Math.Round(plotBuildAreas[plotName], 3)}", "m2", "", "Ателиета:", "", "", "", "0", "бр", "", "Паркоместа:", "", "", "0", "бр", "", "За целите на ценообразуването и площообразуването, от площта на общите части са приспаднати ХХ.ХХкв.м. :", "", "", "", ""};
                 baRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, baStrings);
 
                 // total build area row
                 x++;
                 Range tbaRange = workSheet.Range[$"A{x}", $"V{x}"];
-                string[] tbaStrings = new[] { "РЗП:", "X", "m2", "", "Апартаменти:", "", "", "", "0", "бр", "", "Дворове:", "", "", "0", "бр", "", "", "", "", "", "" };
+                string[] tbaStrings = new[] { "РЗП:", $"{Math.Round(plotTotalBuild[plotName], 3)}", "m2", "", "Апартаменти:", "", "", "", "0", "бр", "", "Дворове:", "", "", "0", "бр", "", "", "", "", "", "" };
                 tbaRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, tbaStrings);
 
                 // underground row
@@ -766,7 +809,7 @@ namespace AreaCalculations
                     int endLine = x-1;
 
                     Range colorRange = workSheet.Range[$"C{startLine}", $"U{endLine}"];
-                    colorRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.PaleGreen);
+                    colorRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.DarkSeaGreen);
 
                     // set a formula for the total area sum of F1/F2
                     Range sumF1F2 = workSheet.Range[$"C{x}", $"C{x}"];
@@ -781,8 +824,38 @@ namespace AreaCalculations
                     sumC1C2.Formula = $"=SUM(O{startLine + 2}:O{endLine})";
 
                     // set a formula for the total sum of Common Areas Percentage
-                    Range sumCommonPercent = workSheet.Range[$"Q{x}", $"Q{x}"];
-                    sumCommonPercent.Formula = $"=SUM(Q{startLine + 2}:Q{endLine})";
+                    Range sumCommonPercent = workSheet.Range[$"P{x}", $"P{x}"];
+                    sumCommonPercent.Formula = $"=SUM(P{startLine + 2}:P{endLine})";
+
+                    // set a formula for the total sum of Common Areas Percentage
+                    Range sumIdealPercent = workSheet.Range[$"P{x}", $"P{x}"];
+                    sumIdealPercent.Formula = $"=SUM(P{startLine + 2}:P{endLine})";
+
+                    // set a formula for the total sum of Common Areas Percentage
+                    Range sumIdealArea = workSheet.Range[$"Q{x}", $"Q{x}"];
+                    sumIdealArea.Formula = $"=SUM(Q{startLine + 2}:Q{endLine})";
+
+                    // set a formula for the total sum of Common Areas Percentage
+                    Range sumF1F2F3 = workSheet.Range[$"R{x}", $"R{x}"];
+                    sumF1F2F3.Formula = $"=SUM(R{startLine + 2}:R{endLine})";
+
+                    // set a formula for the total sum of Common Areas Percentage
+                    Range buildingRights = workSheet.Range[$"S{x}", $"S{x}"];
+                    buildingRights.Formula = $"=SUM(S{startLine + 2}:S{endLine})";
+
+                    // set a formula for the total sum of Common Areas Percentage
+                    Range landPercent = workSheet.Range[$"T{x}", $"T{x}"];
+                    landPercent.Formula = $"=SUM(T{startLine + 2}:T{endLine})";
+
+                    // set a formula for the total sum of Common Areas Percentage
+                    Range landArea = workSheet.Range[$"U{x}", $"U{x}"];
+                    landArea.Formula = $"=SUM(U{startLine + 2}:U{endLine})";
+
+                    // set coloring for the summed up rows
+                    Range colorRangePropertySum = workSheet.Range[$"A{endLine + 1}", $"V{endLine + 1}"];
+                    colorRangePropertySum.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+
+                    x++;
                 }
             }
 
