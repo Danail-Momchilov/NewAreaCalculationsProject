@@ -21,6 +21,8 @@ namespace AreaCalculations
         public Dictionary<string, List<string>> plotProperties { get; set; }
         public Dictionary<string, double> plotBuildAreas { get; set; }
         public Dictionary<string, double> plotTotalBuild { get; set; }
+        public Dictionary<string, double> plotUndergroundAreas { get; set; }
+        public Dictionary<string, double> plotIndividualAreas { get; set; }
         public Document doc { get; set; }
         public Transaction transaction { get; set; }
         public double areasCount { get; set; }
@@ -36,6 +38,8 @@ namespace AreaCalculations
             this.plotAreasImp = new Dictionary<string, double>();
             this.plotBuildAreas = new Dictionary<string, double>();
             this.plotTotalBuild = new Dictionary<string, double>();
+            this.plotUndergroundAreas = new Dictionary<string, double>();
+            this.plotIndividualAreas = new Dictionary<string, double>();
             this.areasCount = 0;
             this.missingAreasCount = 0;
 
@@ -117,15 +121,54 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][plotProperty])
                     {
-                        if (area.LookupParameter("A Instance Area Location").AsString() != "ПОДЗЕМНА" && area.LookupParameter("A Instance Area Primary").AsString() != "")
+                        if (area.LookupParameter("A Instance Area Location").AsString() != "ПОДЗЕМНА" 
+                            && area.LookupParameter("A Instance Area Primary").AsString() != "" 
+                            && area.LookupParameter("A Instance Area Category").AsString() != "НЕПРИЛОЖИМО")
                         {
                             plotTotalBuild[plotName] += area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert;
                         }
                     }
                 }
             }
-        }
 
+            // based on AreasOrganizer, construct the plotUndergroundAreas dictionary
+
+            foreach (string plotName in plotNames)
+            {
+                plotUndergroundAreas.Add(plotName, 0);
+
+                foreach (string plotProperty in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][plotProperty])
+                    {
+                        if (area.LookupParameter("A Instance Area Location").AsString() == "ПОДЗЕМНА")
+                        {
+                            plotUndergroundAreas[plotName] += area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert;
+                        }
+                    }
+                }
+            }
+
+            // based on AreasOrganizer, construct the plotIndividualAreas dictionary
+
+            foreach (string plotName in plotNames)
+            {
+                plotIndividualAreas.Add(plotName, 0);
+
+                foreach (string plotProperty in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][plotProperty])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ")
+                        {
+                            plotIndividualAreas[plotName] += area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert;
+                        }
+                    }
+                }
+            }
+
+
+        }
         private double areaConvert = 10.763914692;
         public string calculatePrimaryArea()
         {
@@ -519,19 +562,19 @@ namespace AreaCalculations
                 // underground row
                 x++;
                 Range uRange = workSheet.Range[$"A{x}", $"V{x}"];
-                string[] uStrings = new[] { "Сутерени:", "X", "m2", "", "Магазини:", "", "", "", "0", "бр", "", "Трафопост:", "", "", "0", "бр", "", "", "", "", "", "" };
+                string[] uStrings = new[] { "Сутерени:", $"{Math.Round(plotUndergroundAreas[plotName], 3)}", "m2", "", "Магазини:", "", "", "", "0", "бр", "", "Трафопост:", "", "", "0", "бр", "", "", "", "", "", "" };
                 uRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, uStrings);
 
                 // underground + tba row
                 x++;
                 Range utbaRange = workSheet.Range[$"A{x}", $"V{x}"];
-                string[] utbaStrings = new[] { "РЗП + Сутерени:", "X", "m2", "", "Офиси", "", "", "", "0", "бг", "", "", "", "", "", "", "", "", "", "", "", "" };
+                string[] utbaStrings = new[] { "РЗП + Сутерени:", $"{Math.Round(plotUndergroundAreas[plotName], 3) + Math.Round(plotTotalBuild[plotName], 3)}", "m2", "", "Офиси", "", "", "", "0", "бг", "", "", "", "", "", "", "", "", "", "", "", "" };
                 utbaRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, utbaStrings);
 
                 // CO row
                 x++;
                 Range coRange = workSheet.Range[$"A{x}", $"V{x}"];
-                string[] coStrings = new[] { "Общо СО", "X", "m2", "", "Гаражи", "", "", "", "0", "бр", "", "Данни за обекта:", "", "", "", "", "", "", "", "", "", "" };
+                string[] coStrings = new[] { "Общо СО", $"{Math.Round(plotIndividualAreas[plotName], 3)}", "m2", "", "Гаражи", "", "", "", "0", "бр", "", "Данни за обекта:", "", "", "", "", "", "", "", "", "", "" };
                 coRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, coStrings);
 
                 // CA row
@@ -650,24 +693,32 @@ namespace AreaCalculations
                     blankBorders[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
                     blankBorders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
 
-                    x += 2;
+                    x ++;
 
                     int startLine = x;
 
                     // TODO: Solve Areas level sorting (AR-FP-01 going in the end) (and sort properly, it is currently temporary solution)
-
                     List<Area> sortedAreas = AreasOrganizer[plotName][property]
                         .Where(area => !area.LookupParameter("Number").AsString().Contains("ОЧ"))
                         .Where(area => !(area.LookupParameter("A Instance Area Group").AsString().Equals("ЗЕМЯ") && area.LookupParameter("A Instance Area Primary").HasValue))
                         .OrderBy(area => area.LookupParameter("A Instance Area Entrance").AsString())
                         .ThenBy(area => area.LookupParameter("Level").AsString())
-                        .ThenBy(area => area.LookupParameter("Number").AsString()).ToList();
+                        .ThenBy(area => area.LookupParameter("Number").AsString())
+                        .ToList();
 
                     // TODO: Solve Areas level sorting (AR-FP-01 going in the end) (and sort properly, it is currently temporary solution)
 
                     List<string> levels = new List<string>();
                     List<string> entrances = new List<string>();
-                                        
+
+                    // debug dialog
+                    //
+                    //
+                    TaskDialog.Show("Test", $"A total number of {sortedAreas.Count} areas in: {property} group for plot: {plotName}");
+                    //
+                    //
+                    // debug dialog
+
 
                     foreach (Area area in sortedAreas)
                     {

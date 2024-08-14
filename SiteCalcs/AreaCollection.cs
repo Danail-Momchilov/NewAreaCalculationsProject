@@ -56,7 +56,12 @@ namespace AreaCalculations
         {
             this.doc = document;
 
-            this.areasCollector = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType();
+            ParameterValueProvider provider = new ParameterValueProvider(new ElementId(BuiltInParameter.ROOM_AREA));
+            FilterNumericRuleEvaluator evaluator = new FilterNumericGreater();
+            double epsilon = 0.0001;
+            ElementParameterFilter filter = new ElementParameterFilter(new FilterDoubleRule(provider, evaluator, epsilon, 1E-6));
+
+            this.areasCollector = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().WherePasses(filter);
 
             this.transaction = new Transaction(doc, "Update Areas");
         }
@@ -65,7 +70,12 @@ namespace AreaCalculations
         {
             this.doc = document;
 
-            this.areasCollector = new FilteredElementCollector(document).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType();
+            ParameterValueProvider provider = new ParameterValueProvider(new ElementId(BuiltInParameter.ROOM_AREA));
+            FilterNumericRuleEvaluator evaluator = new FilterNumericGreater();
+            double epsilon = 0.0001;
+            ElementParameterFilter filter = new ElementParameterFilter(new FilterDoubleRule(provider, evaluator, epsilon, 1E-6));
+
+            this.areasCollector = new FilteredElementCollector(document).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().WherePasses(filter);
 
             this.transaction = new Transaction(document, "Update Areas");
 
