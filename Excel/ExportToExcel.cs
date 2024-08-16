@@ -61,7 +61,7 @@ namespace AreaCalculations
 
                 System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
                 openFileDialog.Filter = "Excel Files|*.xlsx";
-                openFileDialog.Multiselect = false;                
+                openFileDialog.Multiselect = false;
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -73,8 +73,10 @@ namespace AreaCalculations
             }
             catch (Exception e)
             {
+                TaskDialog exceptions = new TaskDialog("Съобщение за грешка");
+                exceptions.MainInstruction = $"{e.Message}\n\n {e.ToString()}\n\n {e.InnerException} \n\n {e.GetBaseException()}";
+                exceptions.Show();
                 return Result.Failed;
-                throw e;
             }
         }
     }
