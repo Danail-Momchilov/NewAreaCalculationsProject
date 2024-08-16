@@ -64,6 +64,9 @@
       <DependentUpon>AreaCoefficientsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Excel\ExportToExcel.cs" />
+    <Compile Include="SheetNameWindow.xaml.cs">
+      <DependentUpon>SheetNameWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SiteCalcs\AreaCollection.cs" />
     <Compile Include="SiteCalcs\Greenery.cs" />
     <Compile Include="SiteCalcs\OutputReport.cs" />
@@ -108,6 +111,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="AreaCoefficientsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SheetNameWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -74,7 +74,7 @@ namespace AreaCalculations
             catch (Exception e)
             {
                 TaskDialog exceptions = new TaskDialog("Съобщение за грешка");
-                exceptions.MainInstruction = $"{e.Message}\n\n {e.ToString()}\n\n {e.InnerException} \n\n {e.GetBaseException()}";
+                exceptions.MainInstruction = $"{e.Message}\n\n {e}\n\n {e.InnerException} \n\n {e.GetBaseException()}";
                 exceptions.Show();
                 return Result.Failed;
             }

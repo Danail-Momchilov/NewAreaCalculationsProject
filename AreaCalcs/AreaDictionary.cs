@@ -16,6 +16,7 @@ namespace AreaCalculations
 {
     internal class AreaDictionary
     {
+        private readonly double areaConvert = 10.763914692;
         public Dictionary<string, Dictionary<string, List<Area>>> AreasOrganizer { get; set; }
         public List<string> plotNames { get; set; }
         public Dictionary<string, double> plotAreasImp { get; set; } // why is this thing storing data in imperial ?!?!
@@ -172,7 +173,6 @@ namespace AreaCalculations
 
 
         }
-        private double areaConvert = 10.763914692;
         private int ExtractLevelNumber(string levelString)
         {
             if (!string.IsNullOrEmpty(levelString))
@@ -184,6 +184,13 @@ namespace AreaCalculations
             {
                 return 0;
             }            
+        }
+        private string ReorderEntrance(string entranceName)
+        {
+            if (entranceName == "НЕПРИЛОЖИМО")
+                return "A";
+            else
+                return entranceName;
         }
         public string calculatePrimaryArea()
         {
@@ -354,7 +361,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            double commonArea = 0;
+                            double commonArea;
 
                             commonArea = (area.LookupParameter("A Instance Common Area %").AsDouble() * commonAreas) / 100;
                             area.LookupParameter("A Instance Common Area").Set(commonArea);
@@ -728,7 +735,7 @@ namespace AreaCalculations
                     List<Area> sortedAreas = AreasOrganizer[plotName][property]
                         .Where(area => !area.LookupParameter("Number").AsString().Contains("ОЧ"))
                         .Where(area => !(area.LookupParameter("A Instance Area Group").AsString().Equals("ЗЕМЯ") && area.LookupParameter("A Instance Area Primary").HasValue))
-                        .OrderBy(area => area.LookupParameter("A Instance Area Entrance").AsString())
+                        .OrderBy(area => ReorderEntrance(area.LookupParameter("A Instance Area Entrance").AsString()))
                         .ThenBy(area => ExtractLevelNumber(area.LookupParameter("Level").AsValueString()))
                         .ThenBy(area => area.LookupParameter("Number").AsString())
                         .ToList();
@@ -741,10 +748,11 @@ namespace AreaCalculations
                     // debug dialog
                     //
                     //
-                    TaskDialog.Show("Test", $"A total number of {sortedAreas.Count} areas in: {property} group for plot: {plotName}");
+                    //TaskDialog.Show("Test", $"A total number of {sortedAreas.Count} areas in: {property} group for plot: {plotName}");
                     //
                     //
                     // debug dialog
+
 
 
                     foreach (Area area in sortedAreas)
@@ -762,6 +770,7 @@ namespace AreaCalculations
                             throw e;
                         }
                         */
+                        // TaskDialog.Show("Test", $"AsString: {area.LookupParameter("A Instance Area Entrance").AsString()} AsValueString: {area.LookupParameter("A Instance Area Entrance").AsValueString()}");
 
                         if (!entrances.Contains(area.LookupParameter("A Instance Area Entrance").AsString()))
                         {
@@ -771,6 +780,7 @@ namespace AreaCalculations
                             entranceRangeString.Merge();
                             entranceRangeString.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
                             x++;
+                            levels.Clear();
                         }
 
                         if (!levels.Contains(area.LookupParameter("Level").AsValueString()))

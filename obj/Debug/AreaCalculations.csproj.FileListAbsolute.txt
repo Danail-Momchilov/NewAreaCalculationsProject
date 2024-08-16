@@ -160,3 +160,4 @@ B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\De
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations_MarkupCompile.lref
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCoefficientsWindow.baml
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.g.resources
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\SheetNameWindow.g.cs
