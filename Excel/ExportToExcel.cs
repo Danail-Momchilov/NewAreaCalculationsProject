@@ -53,8 +53,8 @@ namespace AreaCalculations
                 // TODO: develop this check further and also apply it to any other method that is currently constructing Area Dictionary
                 // TODO
                 // TODO
-                TaskDialog.Show("Total Number of Areas in the Dictionary", areaDict.areasCount.ToString());
-                TaskDialog.Show("Total Number of Areas that were skipped", areaDict.missingAreasCount.ToString() + "\nThey are either not placed or have their plot or group name not filled in\n" + areaDict.missingAreasData);
+                // TaskDialog.Show("Total Number of Areas in the Dictionary", areaDict.areasCount.ToString());
+                // TaskDialog.Show("Total Number of Areas that were skipped", areaDict.missingAreasCount.ToString() + "\nThey are either not placed or have their plot or group name not filled in\n" + areaDict.missingAreasData);
                 // TODO
                 // TODO
                 // TODO
@@ -63,10 +63,13 @@ namespace AreaCalculations
                 openFileDialog.Filter = "Excel Files|*.xlsx";
                 openFileDialog.Multiselect = false;
 
+                SheetNameWindow window = new SheetNameWindow();
+                window.ShowDialog();
+
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     string filePath = openFileDialog.FileName;
-                    areaDict.exportToExcel(filePath, "Sheet1");
+                    areaDict.exportToExcel(filePath, window.sheetName.Text);
                 }
 
                 return Result.Succeeded;

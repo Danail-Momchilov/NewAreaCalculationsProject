@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 
-2-226969399
+2665413183
 1330752128
-13-463179733
+13-980577591
 20786773190
-AreaCoefficientsWindow.xaml;SheetNameWindow.xaml;
+AreaCalcs\AreaCoefficientsWindow.xaml;Excel\SheetNameWindow.xaml;
 
-True
+False
 

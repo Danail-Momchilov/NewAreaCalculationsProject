@@ -1,0 +1,82 @@
+﻿<Window x:Class="AreaCalculations.AreaCoefficientsWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AreaCalculations"
+             mc:Ignorable="d"
+             SizeToContent="WidthAndHeight"
+             Title="Area Coefficients"
+             ResizeMode="NoResize"
+             WindowStyle="SingleBorderWindow"
+             Background="White" 
+             Foreground="#EEE809">
+    <StackPanel>
+        <StackPanel>
+            <Label Content="Моля, въведете всички Area коефициенти:" Height="30" Width="300" HorizontalAlignment="Left" Margin="0,0,0,0" Background="#EEE809" HorizontalContentAlignment="Center"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,0,0,245" Height="30">
+            <Label Content="A Coefficient Orientation (Ки)" Height="30" Width="250"/>
+            <TextBox x:Name="ACOR" HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-460,0,0" Height="30">
+            <Label Content="A Coefficient Level (Кв)" Height="30" Width="250"/>
+            <TextBox x:Name="ACLE" HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-400,0,0" Height="30">
+            <Label Content="A Coefficient Location (Км)" Height="30" Width="250"/>
+            <TextBox x:Name="ACLO" HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-340,0,0" Height="30">
+            <Label Content="A Coefficient Height (Кив)" Height="30" Width="250"/>
+            <TextBox x:Name="ACHE" HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-280,0,0" Height="30">
+            <Label Content="A Coefficient Roof (Кпп)" Height="30" Width="250"/>
+            <TextBox x:Name="ACRO" HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-220,0,0" Height="30">
+            <Label Content="A Coefficient Special (Кок)" Height="30" Width="250"/>
+            <TextBox x:Name="ACSP" HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-160,0,0" Height="30">
+            <Label Content="A Coefficient Zones (Кк)" Height="30" Width="250"/>
+            <TextBox x:Name="ACZO" HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-100,0,0" Height="30">
+            <Label Content="A Coefficient Correction" Height="30" Width="250"/>
+            <TextBox x:Name="ACCO" HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-40,0,0" Height="30">
+            <Label Content="A Coefficient Storage (Ксп) (Склад / Мазе)" Height="30" Width="250"/>
+            <TextBox x:Name="ACSTS" HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="0.3" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,-5,0,0" Height="30">
+            <Label Content="A Coefficient Storage (Ксп)" Height="30" Width="250"/>
+            <TextBox x:Name="ACST" HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,0,0,0" Height="30">
+            <Label Content="A Coefficient Garage (Кпг) (Гараж / Паркинг)" Height="30" Width="250"/>
+            <TextBox x:Name="ACGAP" HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="0.8" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,0,0,0" Height="30">
+            <Label Content="A Coefficient Garage (Кпг)" Height="30" Width="250"/>
+            <TextBox x:Name="ACGA" HorizontalAlignment="Right" Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="1.0" VerticalAlignment="Top" Width="25"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10,0,0,0" Height="30">
+            <Label Content="Override existing values" Height="30" Width="250"/>
+            <CheckBox x:Name="overrideCoefficients" Width="15" Height="15" Margin="5,0,0,0"  IsChecked="False" ClipToBounds="True" RenderTransformOrigin="0.5,0.5">
+                <CheckBox.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform X="5"/>
+                    </TransformGroup>
+                </CheckBox.RenderTransform>
+            </CheckBox>
+        </StackPanel>
+        <Button Content="ВЪВЕДИ" Height="20" Margin="0,10,0,0" Width="280" Click="SetAreaCoefficients" Background="#EEE809"/>
+        <Separator Height="20" Background="Transparent"/>
+    </StackPanel>
+</Window>

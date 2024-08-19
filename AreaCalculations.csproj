@@ -60,11 +60,11 @@
     <Compile Include="AreaCalcs\AreaCoefficients.cs" />
     <Compile Include="AreaCalcs\CalculateAreaParameters.cs" />
     <Compile Include="AreaCalcs\AreaDictionary.cs" />
-    <Compile Include="AreaCoefficientsWindow.xaml.cs">
+    <Compile Include="AreaCalcs\AreaCoefficientsWindow.xaml.cs">
       <DependentUpon>AreaCoefficientsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Excel\ExportToExcel.cs" />
-    <Compile Include="SheetNameWindow.xaml.cs">
+    <Compile Include="Excel\SheetNameWindow.xaml.cs">
       <DependentUpon>SheetNameWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="SiteCalcs\AreaCollection.cs" />
@@ -110,11 +110,11 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="AreaCoefficientsWindow.xaml">
+    <Page Include="AreaCalcs\AreaCoefficientsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SheetNameWindow.xaml">
+    <Page Include="Excel\SheetNameWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
