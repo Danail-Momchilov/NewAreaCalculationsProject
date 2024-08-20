@@ -288,14 +288,14 @@ namespace AreaCalculations
                     area.LookupParameter("A Coefficient Correction").Set(ACCO);
                     totalMultiplied *= area.LookupParameter("A Coefficient Correction").AsDouble();
 
-                    if (new List<string> { "склад", "мазе" }.Contains(area.LookupParameter("Name").AsString().ToLower()))
+                    if (new List<string> { "склад", "мазе" }.Any(keyword => area.LookupParameter("Name").AsString().ToLower().Contains(keyword)))
                         area.LookupParameter("A Coefficient Storage (Ксп)").Set(ACSTS);
                     else
                         area.LookupParameter("A Coefficient Storage (Ксп)").Set(ACST);
 
                     totalMultiplied *= area.LookupParameter("A Coefficient Storage (Ксп)").AsDouble();
 
-                    if (new List<string> { "гараж", "паркинг" }.Contains(area.LookupParameter("Name").AsString().ToLower()))
+                    if (new List<string> { "гараж", "паркинг" }.Any(keyword => area.LookupParameter("Name").AsString().ToLower().Contains(keyword)))
                         area.LookupParameter("A Coefficient Garage (Кпг)").Set(ACGAP);
                     else
                         area.LookupParameter("A Coefficient Garage (Кпг)").Set(ACGA);
