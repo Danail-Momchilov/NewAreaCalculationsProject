@@ -313,7 +313,6 @@ namespace AreaCalculations
                 {
                     double totaC1C2 = 0;
 
-                    // calculate total summed up C1C2 for the given property
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
                         if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
@@ -330,14 +329,6 @@ namespace AreaCalculations
                         {
                             double commonAreaPercent = (area.LookupParameter("A Instance Price C1/C2").AsDouble() / totaC1C2) * 100;
                             area.LookupParameter("A Instance Common Area %").Set(commonAreaPercent);
-
-                            //
-                            //
-                            //
-                            TaskDialog.Show("Test", $"Area: {area.Name} / Id: {area.Id} / Total C1C2:{totaC1C2} / C1C2: {area.LookupParameter("A Instance Price C1/C2").AsDouble()} / {(area.LookupParameter("A Instance Price C1/C2").AsDouble() / totaC1C2) * 100}");
-                            //
-                            //
-                            //
                         }
                     }
                 }
@@ -741,7 +732,8 @@ namespace AreaCalculations
 
                     // TODO: Solve Areas level sorting (AR-FP-01 going in the end) (and sort properly, it is currently temporary solution)
                     List<Area> sortedAreas = AreasOrganizer[plotName][property]
-                        .Where(area => !area.LookupParameter("A Instance Area Category").AsString().ToLower().Equals("обща част"))
+                        .Where(area => area.LookupParameter("A Instance Area Category").AsString().ToLower().Equals("самостоятелен обект"))
+                        .Where(area => !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         .Where(area => !area.LookupParameter("A Instance Area Group").AsString().Equals("ЗЕМЯ"))
                         .OrderBy(area => ReorderEntrance(area.LookupParameter("A Instance Area Entrance").AsString()))
                         .ThenBy(area => ExtractLevelNumber(area.LookupParameter("Level").AsValueString()))
