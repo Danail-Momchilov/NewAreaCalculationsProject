@@ -24,7 +24,7 @@ namespace AreaCalculations
         public Dictionary<string, double> plotBuildAreas { get; set; }
         public Dictionary<string, double> plotTotalBuild { get; set; }
         public Dictionary<string, double> plotUndergroundAreas { get; set; }
-        public Dictionary<string, double> plotIndividualAreas { get; set; }
+        public Dictionary<string, double> plotIndividualAreas { get; set; } // revise this one... not sure you need it at all, but also it might not take all factors into account when calculated
         public Document doc { get; set; }
         public Transaction transaction { get; set; }
         public double areasCount { get; set; }
@@ -297,7 +297,7 @@ namespace AreaCalculations
 
                 if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                 {
-                    area.LookupParameter("A Instance Price C1/C2").Set((area.LookupParameter("A Instance Gross Area").AsDouble() * area.LookupParameter("A Coefficient Multiplied").AsDouble()) / areaConvert);
+                    area.LookupParameter("A Instance Price C1/C2").Set(area.LookupParameter("A Instance Gross Area").AsDouble() * area.LookupParameter("A Coefficient Multiplied").AsDouble() / areaConvert);
                 }
             }
 
@@ -431,28 +431,47 @@ namespace AreaCalculations
 
             foreach (string plotName in plotNames)
             {
-                double totalPlotC1C2 = 0;
+                double plotArea = plotAreasImp[plotName];
 
+                // find all area objects of type 'ЗЕМЯ' and calculate their collective percentage as of the total plot area
+                double reductionPercentage = 0;
+
+                // also find the total C1C2 for all individual areas in the property
+                double totalC1C2 = 0;
+
+                // calculate the total C1C2 and reduction percentage for the whole plot
                 foreach (string property in plotProperties[plotName])
-                {
+                {                    
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        if (area.LookupParameter("A Instance Area Group").AsString().ToLower() == "земя")
                         {
-                            totalPlotC1C2 += area.LookupParameter("A Instance Price C1/C2").AsDouble();
+                            reductionPercentage += 100 * area.LookupParameter("Area").AsDouble() / plotArea;
+                        }
+
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" 
+                            && !(area.LookupParameter("A Instance Area Primary").HasValue 
+                            && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        {
+                            totalC1C2 += area.LookupParameter("A Instance Price C1/C2").AsDouble();
                         }
                     }
                 }
 
+                // calculate rlp area percent for each individual area
                 foreach (string property in plotProperties[plotName])
                 {
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ"
+                            && !(area.LookupParameter("A Instance Area Primary").HasValue
+                            && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            double rlpAreaPercentage = (area.LookupParameter("A Instance Total Area").AsDouble() / totalPlotC1C2) * 100;
-                            area.LookupParameter("A Instance RLP Area %").Set(rlpAreaPercentage / areaConvert); 
-                            // TODO: check this calculation. Why does it work properly, while the calculateBuildingPercentPermit method works without the need to apply the areaConvert?
+                            double rlpAreaPercent = area.LookupParameter("A Instance Price C1/C2").AsDouble() * 100 / totalC1C2;
+
+                            rlpAreaPercent = rlpAreaPercent * (100 - reductionPercentage) / 100;
+
+                            area.LookupParameter("A Instance RLP Area %").Set(rlpAreaPercent);
                         }
                     }
                 }
@@ -466,17 +485,15 @@ namespace AreaCalculations
 
             foreach (string plotName in plotNames)
             {
-                double plotAreaImp = plotAreasImp[plotName];
+                // reduce all the areas of 'ЗЕМЯ' objects from the total plot area
+                double remainingPlotArea = plotAreasImp[plotName];
 
+                // calculate the actual RLP area for each Area object
                 foreach (string property in plotProperties[plotName])
                 {
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
-                        {
-                            double rlpAreaImp = (plotAreaImp * area.LookupParameter("A Instance RLP Area %").AsDouble()) / 100;
-                            area.LookupParameter("A Instance RLP Area").Set(rlpAreaImp);
-                        }
+                        area.LookupParameter("A Instance RLP Area").Set(area.LookupParameter("A Instance RLP Area %").AsDouble() * remainingPlotArea / 100);
                     }
                 }
             }
@@ -825,7 +842,7 @@ namespace AreaCalculations
                                 double C1C2 = Math.Round(area.LookupParameter("A Instance Price C1/C2")?.AsDouble() ?? 0.0, 3);
                                 double areaCommonPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3);
                                 double areaCommonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 3);
-                                double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0) + (area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0), 3);
+                                double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0), 3);
                                 double areaPermitPercent = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3);
                                 double areaRLPPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3);
                                 double areaRLP = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3);

@@ -151,7 +151,6 @@ B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\bin\De
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\bin\Debug\zh-TW\AdWindows.resources.dll
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.csproj.AssemblyReference.cache
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.csproj.CoreCompileInputs.cache
-B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.csproj.CopyComplete
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.dll
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.pdb
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.csproj.ResolveComReference.cache
@@ -162,3 +161,4 @@ B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\De
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\Excel\SheetNameWindow.g.cs
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalcs\AreaCoefficientsWindow.baml
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\Excel\SheetNameWindow.baml
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.csproj.CopyComplete
