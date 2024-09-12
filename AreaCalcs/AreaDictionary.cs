@@ -19,12 +19,15 @@ namespace AreaCalculations
         private readonly double areaConvert = 10.763914692;
         public Dictionary<string, Dictionary<string, List<Area>>> AreasOrganizer { get; set; }
         public List<string> plotNames { get; set; }
-        public Dictionary<string, double> plotAreasImp { get; set; } // why is this thing storing data in imperial ?!?!
+        public Dictionary<string, Dictionary<string, double>> propertyCommonAreas { get; set; }
+        public Dictionary<string, Dictionary<string, double>> propertyIndividualAreas { get; set; }
+        public Dictionary<string, double> plotAreasImp { get; set; } // IMPORTANT!!! STORING DATA IN IMPERIAL
         public Dictionary<string, List<string>> plotProperties { get; set; }
         public Dictionary<string, double> plotBuildAreas { get; set; }
         public Dictionary<string, double> plotTotalBuild { get; set; }
         public Dictionary<string, double> plotUndergroundAreas { get; set; }
-        public Dictionary<string, double> plotIndividualAreas { get; set; } // revise this one... not sure you need it at all, but also it might not take all factors into account when calculated
+        public Dictionary<string, double> plotIndividualAreas { get; set; }
+        public Dictionary<string, double> plotCommonAreas { get; set; }
         public Document doc { get; set; }
         public Transaction transaction { get; set; }
         public double areasCount { get; set; }
@@ -34,6 +37,8 @@ namespace AreaCalculations
         {
             this.doc = activeDoc;
             this.AreasOrganizer = new Dictionary<string, Dictionary<string, List<Area>>>();
+            this.propertyCommonAreas = new Dictionary<string, Dictionary<string, double>>();
+            this.propertyIndividualAreas = new Dictionary<string, Dictionary<string, double>>();
             this.plotNames = new List<string>();
             this.plotProperties = new Dictionary<string, List<string>>();
             this.transaction = new Transaction(activeDoc, "Calculate and Update Area Parameters");
@@ -42,6 +47,7 @@ namespace AreaCalculations
             this.plotTotalBuild = new Dictionary<string, double>();
             this.plotUndergroundAreas = new Dictionary<string, double>();
             this.plotIndividualAreas = new Dictionary<string, double>();
+            this.plotCommonAreas = new Dictionary<string, double>();
             this.areasCount = 0;
             this.missingAreasCount = 0;
 
@@ -171,7 +177,63 @@ namespace AreaCalculations
                 }
             }
 
+            // based on AreasOrganizer, construct the plotCommonAreas dictionary
 
+            foreach (string plotName in plotNames)
+            {
+                plotCommonAreas.Add(plotName, 0);
+
+                foreach (string plotProperty in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][plotProperty])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част")
+                        {
+                            plotCommonAreas[plotName] += area.LookupParameter("Area").AsDouble() / areaConvert;
+                        }
+                    }
+                }
+            }
+
+            // based on AreasOrganizer, construct the propertyCommonAreas dictionary
+
+            foreach (string plotName in plotNames)
+            {
+                propertyCommonAreas.Add(plotName, new Dictionary<string, double>());
+
+                foreach (string plotProperty in plotProperties[plotName])
+                {
+                    propertyCommonAreas[plotName].Add(plotProperty, 0);
+
+                    foreach (Area area in AreasOrganizer[plotName][plotProperty])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част")
+                        {
+                            propertyCommonAreas[plotName][plotProperty] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 3);
+                        }
+                    }
+                }
+            }
+
+            // based on AreasOrganizer, construct the propertyIndividualAreas dictionary
+
+            foreach (string plotName in plotNames)
+            {
+                propertyIndividualAreas.Add(plotName, new Dictionary<string, double>());
+
+                foreach (string plotProperty in plotProperties[plotName])
+                {
+                    propertyIndividualAreas[plotName].Add(plotProperty, 0);
+
+                    foreach (Area area in AreasOrganizer[plotName][plotProperty])
+                    {
+                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект")
+                        {
+                            propertyIndividualAreas[plotName][plotProperty] += Math.Round(area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert, 3);
+                        }
+                    }
+                }
+            }
         }
         private int ExtractLevelNumber(string levelString)
         {
@@ -630,7 +692,7 @@ namespace AreaCalculations
                 // CA row
                 x++;
                 Range caRange = workSheet.Range[$"A{x}", $"V{x}"];
-                string[] caStrings = new[] { "Общо ОЧ", "X", "m2", "", "Складове", "", "", "", "0", "бр", "", "Етажност", "", "", "ет", "", "", "", "", "", "", "" };
+                string[] caStrings = new[] { "Общо ОЧ", $"{Math.Round(plotCommonAreas[plotName], 3)}", "m2", "", "Складове", "", "", "", "0", "бр", "", "Етажност", "", "", "ет", "", "", "", "", "", "", "" };
                 caRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, caStrings);
 
                 // land row
@@ -713,7 +775,7 @@ namespace AreaCalculations
 
                         x++;
                         Range propertyDataRange = workSheet.Range[$"A{x}", $"V{x}"];
-                        string[] propertyData = new[] { "ПЛОЩ СО:", "", "ПЛОЩ ОЧ:", "", "ОБЩО:", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
+                        string[] propertyData = new[] { $"ПЛОЩ СО: {propertyIndividualAreas[plotName][property]} кв.м", "", $"ПЛОЩ ОЧ: {propertyCommonAreas[plotName][property]} кв.м", "", "ОБЩО:", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
                         propertyDataRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, propertyData);
                         propertyDataRange.Font.Bold = true;
                         propertyDataRange.Borders.LineStyle = XlLineStyle.xlContinuous;
@@ -758,7 +820,13 @@ namespace AreaCalculations
                                 .ThenBy(area => area.LookupParameter("Number").AsString())
                                 .ToList();
 
-                        List<Area> sortedAreasGround = AreasOrganizer[plotName][property]
+                        List<Area> areasToSort = new List<Area>();
+                        if (AreasOrganizer[plotName].ContainsKey("ЗЕМЯ"))
+                            areasToSort.AddRange(AreasOrganizer[plotName]["ЗЕМЯ"]);
+                        if (AreasOrganizer[plotName].ContainsKey("ТРАФ"))
+                            areasToSort.AddRange(AreasOrganizer[plotName]["ТРАФ"]);
+
+                        List<Area> sortedAreasGround = areasToSort
                                 .Where(area => new List<string> { "земя", "траф" }.Contains(area.LookupParameter("A Instance Area Group").AsString().ToLower()))
                                 .OrderBy(area => ReorderEntrance(area.LookupParameter("A Instance Area Entrance").AsString()))
                                 .ThenBy(area => ExtractLevelNumber(area.LookupParameter("Level").AsValueString()))
@@ -767,7 +835,7 @@ namespace AreaCalculations
 
                         List<Area> sortedAreas = new List<Area>();
 
-                        if (property.ToLower() != "траф" && property.ToLower() != "земя")
+                        if (property.ToLower() != "земя")
                         {
                             sortedAreas = sortedAreasNormal;
                         }
@@ -775,7 +843,6 @@ namespace AreaCalculations
                         {
                             sortedAreas = sortedAreasGround;
                         }
-                        // TODO: split траф && земя into two different cases and describe them
 
                         List<string> levels = new List<string>();
                         List<string> entrances = new List<string>();
