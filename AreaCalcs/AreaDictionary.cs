@@ -28,6 +28,7 @@ namespace AreaCalculations
         public Dictionary<string, double> plotUndergroundAreas { get; set; }
         public Dictionary<string, double> plotIndividualAreas { get; set; }
         public Dictionary<string, double> plotCommonAreas { get; set; }
+        public Dictionary<string, double> plotLandAreas { get; set; }
         public Document doc { get; set; }
         public Transaction transaction { get; set; }
         public double areasCount { get; set; }
@@ -48,6 +49,7 @@ namespace AreaCalculations
             this.plotUndergroundAreas = new Dictionary<string, double>();
             this.plotIndividualAreas = new Dictionary<string, double>();
             this.plotCommonAreas = new Dictionary<string, double>();
+            this.plotLandAreas = new Dictionary<string, double>();
             this.areasCount = 0;
             this.missingAreasCount = 0;
 
@@ -230,6 +232,24 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект")
                         {
                             propertyIndividualAreas[plotName][plotProperty] += Math.Round(area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert, 3);
+                        }
+                    }
+                }
+            }
+
+            // based on AreasOrganizer, construct the plotIndividualAreas dictionary
+
+            foreach (string plotName in plotNames)
+            {
+                plotLandAreas.Add(plotName, 0);
+
+                foreach (string plotProperty in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][plotProperty])
+                    {
+                        if (area.LookupParameter("A Instance Area Group").AsString().ToLower() == "земя")
+                        {
+                            plotLandAreas[plotName] += area.LookupParameter("Area").AsDouble() / areaConvert;
                         }
                     }
                 }
@@ -698,7 +718,7 @@ namespace AreaCalculations
                 // land row
                 x += 1;
                 Range landRange = workSheet.Range[$"A{x}", $"V{x}"];
-                string[] landStrings = new[] { "Земя към СО:", "X", "m2", "", "Паркоместа", "", "", "", "0", "бр", "", "Система", "", "монолитна", "", "", "", "", "", "", "", "" };
+                string[] landStrings = new[] { "Земя към СО:", $"{Math.Round(plotLandAreas[plotName], 3)}", "m2", "", "Паркоместа", "", "", "", "0", "бр", "", "Система", "", "монолитна", "", "", "", "", "", "", "", "" };
                 landRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, landStrings);
 
                 // set borders
