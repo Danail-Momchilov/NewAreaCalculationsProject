@@ -134,10 +134,10 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][plotProperty])
                     {
-                        if (area.LookupParameter("A Instance Area Location").AsString() != "ПОДЗЕМНА" 
-                            && area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект")
+                        if (area.LookupParameter("A Instance Area Location").AsString().ToLower() == "надземна" 
+                            || area.LookupParameter("A Instance Area Location").AsString().ToLower() == "наземна")
                         {
-                            plotTotalBuild[plotName] += area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert;
+                            plotTotalBuild[plotName] += area.Area / areaConvert;
                         }
                     }
                 }
@@ -171,9 +171,9 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][plotProperty])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ")
+                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект")
                         {
-                            plotIndividualAreas[plotName] += area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert;
+                            plotIndividualAreas[plotName] += area.LookupParameter("A Instance Gross Area").AsDouble() / areaConvert;
                         }
                     }
                 }
@@ -215,6 +215,23 @@ namespace AreaCalculations
                         }
                     }
                 }
+
+                // search for properties of type "A + B"
+                foreach (string plotProperty in plotProperties[plotName])
+                {
+                    if (plotProperty.Contains("+"))
+                    {
+                        // if such is found, redistribute their areas across the rest of the properties
+                        string[] splitProperties = plotProperty.Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
+
+                        foreach (string property in splitProperties)
+                        {
+                            double percentage = Math.Round(propertyCommonAreas[plotName][property] / plotCommonAreas[plotName] * 100, 3);
+                            double areaToAdd = propertyCommonAreas[plotName][plotProperty] * percentage / 100;
+                            propertyCommonAreas[plotName][property] += areaToAdd;
+                        }
+                    }
+                }
             }
 
             // based on AreasOrganizer, construct the propertyIndividualAreas dictionary
@@ -237,7 +254,7 @@ namespace AreaCalculations
                 }
             }
 
-            // based on AreasOrganizer, construct the plotIndividualAreas dictionary
+            // based on AreasOrganizer, construct the plotLandAreas dictionary
 
             foreach (string plotName in plotNames)
             {
@@ -426,25 +443,18 @@ namespace AreaCalculations
             {
                 foreach (string property in plotProperties[plotName])
                 {
-                    double commonAreas = 0;
-
-                    // calculate total summed up area of all common areas                    
-                    foreach (Area area in AreasOrganizer[plotName][property])
-                    {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "ОБЩА ЧАСТ")
-                        {
-                            commonAreas += area.LookupParameter("Area").AsDouble();
-                        }
-                    }
+                    double propertyCommonArea = propertyCommonAreas[plotName][property];
 
                     // calculate common area percentage parameter for each area
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" 
+                            && !(area.LookupParameter("A Instance Area Primary").HasValue 
+                            && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
                             double commonArea;
 
-                            commonArea = (area.LookupParameter("A Instance Common Area %").AsDouble() * commonAreas) / 100;
+                            commonArea = area.LookupParameter("A Instance Common Area %").AsDouble() * propertyCommonArea / 100 * areaConvert; // !!!!!!!!!!!!!!!!!!!!!
                             area.LookupParameter("A Instance Common Area").Set(commonArea);
                         }
                     }
