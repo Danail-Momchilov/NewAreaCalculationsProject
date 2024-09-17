@@ -17,6 +17,7 @@ namespace AreaCalculations
     internal class AreaDictionary
     {
         private readonly double areaConvert = 10.763914692;
+        private readonly double lengthConvert = 30.48;
         public Dictionary<string, Dictionary<string, List<Area>>> AreasOrganizer { get; set; }
         public List<string> plotNames { get; set; }
         public Dictionary<string, Dictionary<string, double>> propertyCommonAreas { get; set; }
@@ -134,8 +135,7 @@ namespace AreaCalculations
                     foreach (Area area in AreasOrganizer[plotName][plotProperty])
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() != "ПОДЗЕМНА" 
-                            && area.LookupParameter("A Instance Area Primary").AsString() != "" 
-                            && area.LookupParameter("A Instance Area Category").AsString() != "НЕПРИЛОЖИМО")
+                            && area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект")
                         {
                             plotTotalBuild[plotName] += area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert;
                         }
@@ -885,7 +885,26 @@ namespace AreaCalculations
                                 if (!levels.Contains(area.LookupParameter("Level").AsValueString()))
                                 {
                                     levels.Add(area.LookupParameter("Level").AsValueString());
-                                    workSheet.Cells[x, 1] = area.LookupParameter("Level").AsValueString();
+                                    double levelHeight = Math.Round(doc.GetElement(area.LookupParameter("Level").AsElementId()).LookupParameter("Elevation").AsDouble() * lengthConvert / 100, 3);
+                                    string levelHeightStr;
+
+                                    if (levelHeight < 0)
+                                    {
+                                        string tempString = levelHeight.ToString("F3");
+                                        levelHeightStr = $"{tempString}";
+                                    }
+                                    else if (levelHeight > 0)
+                                    {
+                                        string tempString = levelHeight.ToString("F3");
+                                        levelHeightStr = $"+ {tempString}";
+                                    }
+                                    else
+                                    {
+                                        string tempString = levelHeight.ToString("F3");
+                                        levelHeightStr = $"± {tempString}";
+                                    }
+
+                                    workSheet.Cells[x, 1] = $"{area.LookupParameter("Level").AsValueString()} {levelHeightStr}";
                                     Range levelsRangeString = workSheet.Range[$"A{x}", $"V{x}"];
                                     levelsRangeString.Merge();
                                     levelsRangeString.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
