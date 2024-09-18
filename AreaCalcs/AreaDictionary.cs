@@ -216,19 +216,40 @@ namespace AreaCalculations
                     }
                 }
 
-                // search for properties of type "A + B"
+                // check if there are "A + B + C" type of properties and if there are any, get the total sum of their common areas
+                double plusPropertiesCommonSum = 0;
+                bool wasFound = false;
+
                 foreach (string plotProperty in plotProperties[plotName])
                 {
                     if (plotProperty.Contains("+"))
                     {
-                        // if such is found, redistribute their areas across the rest of the properties
-                        string[] splitProperties = plotProperty.Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
+                        plusPropertiesCommonSum += propertyCommonAreas[plotName][plotProperty];
+                        wasFound = true;
+                    }
+                }
 
-                        foreach (string property in splitProperties)
+                // in case such property types were found, redistribute their areas across the rest of the properties
+                if (wasFound)
+                {
+
+                    double remainingCommonArea = plotCommonAreas[plotName] - plusPropertiesCommonSum;
+
+                    // search for properties of type "A + B"
+                    foreach (string plotProperty in plotProperties[plotName])
+                    {
+                        if (plotProperty.Contains("+"))
                         {
-                            double percentage = Math.Round(propertyCommonAreas[plotName][property] / plotCommonAreas[plotName] * 100, 3);
-                            double areaToAdd = propertyCommonAreas[plotName][plotProperty] * percentage / 100;
-                            propertyCommonAreas[plotName][property] += areaToAdd;
+                            // if such is found, redistribute their areas across the rest of the properties
+                            string[] splitProperties = plotProperty.Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
+
+                            foreach (string property in splitProperties)
+                            {
+                                double ratio = Math.Round(propertyCommonAreas[plotName][property] / remainingCommonArea, 3);
+
+                                double areaToAdd = propertyCommonAreas[plotName][plotProperty] * ratio;
+                                propertyCommonAreas[plotName][property] += areaToAdd;
+                            }
                         }
                     }
                 }
@@ -448,7 +469,7 @@ namespace AreaCalculations
                     // calculate common area percentage parameter for each area
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" 
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ"
                             && !(area.LookupParameter("A Instance Area Primary").HasValue 
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
