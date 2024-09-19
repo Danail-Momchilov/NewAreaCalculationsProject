@@ -171,9 +171,10 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][plotProperty])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект")
+                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект" 
+                            && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            plotIndividualAreas[plotName] += area.LookupParameter("A Instance Gross Area").AsDouble() / areaConvert;
+                            plotIndividualAreas[plotName] += Math.Round(area.LookupParameter("A Instance Gross Area").AsDouble() / areaConvert, 3);
                         }
                     }
                 }
@@ -559,10 +560,12 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Group").AsString().ToLower() == "земя")
                         {
-                            reductionPercentage += 100 * area.LookupParameter("Area").AsDouble() / plotArea;
+                            double areaPercentage = 100 * area.LookupParameter("Area").AsDouble() / plotArea;
+                            area.LookupParameter("A Instance RLP Area %").Set(areaPercentage);
+                            reductionPercentage += areaPercentage;
                         }
 
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" 
+                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект"
                             && !(area.LookupParameter("A Instance Area Primary").HasValue 
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
@@ -576,7 +579,7 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ"
+                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект"
                             && !(area.LookupParameter("A Instance Area Primary").HasValue
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
@@ -864,7 +867,7 @@ namespace AreaCalculations
 
                         List<Area> sortedAreasNormal = AreasOrganizer[plotName][property]
                                 .Where(area => area.LookupParameter("A Instance Area Category").AsString().ToLower().Equals("самостоятелен обект"))
-                                .Where(area => !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                                //.Where(area => !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                                 .Where(area => !area.LookupParameter("A Instance Area Group").AsString().Equals("ЗЕМЯ"))
                                 .OrderBy(area => ReorderEntrance(area.LookupParameter("A Instance Area Entrance").AsString()))
                                 .ThenBy(area => ExtractLevelNumber(area.LookupParameter("Level").AsValueString()))
@@ -1000,15 +1003,20 @@ namespace AreaCalculations
                                     if (primaryArea != null && primaryArea.Equals(area.LookupParameter("Number").AsString()))
                                     {
                                         Range areaAdjRangeStr = workSheet.Range[$"A{x}", $"B{x}"];
-                                        areaAdjRangeStr.set_Value(XlRangeValueDataType.xlRangeValueDefault, new[] { areaSub.LookupParameter("Number").AsString(), areaSub.LookupParameter("Name").AsString() });
+                                        areaAdjRangeStr.set_Value(XlRangeValueDataType.xlRangeValueDefault, new[] { areaSub.LookupParameter("Number").AsString(), 
+                                                                                                                    areaSub.LookupParameter("Name").AsString() });
 
                                         areaAdjRangeStr.HorizontalAlignment = XlHAlign.xlHAlignRight;
                                         areaAdjRangeStr.Borders.LineStyle = XlLineStyle.xlContinuous;
 
                                         Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"V{x}"];
-                                        areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value, Math.Round(areaSub.LookupParameter("Area").AsDouble() / areaConvert, 3), DBNull.Value, DBNull.Value,
-                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
-                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value });
+                                        areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value, 
+                                                    Math.Round(areaSub.LookupParameter("Area").AsDouble() / areaConvert, 3), DBNull.Value, DBNull.Value,
+                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, 
+                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
+                                                    Math.Round(areaSub.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3), 
+                                                    Math.Round(areaSub.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3),
+                                                    areaSub.Id.IntegerValue});
 
                                         Borders areaAdjRangeBorders = areaAdjRangeDouble.Borders;
                                         areaAdjRangeBorders[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
@@ -1037,9 +1045,13 @@ namespace AreaCalculations
                                             areaAdjRangeStr.Borders.LineStyle = XlLineStyle.xlContinuous;
 
                                             Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"V{x}"];
-                                            areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value, Math.Round(areaGround.LookupParameter("Area").AsDouble() / areaConvert, 3), DBNull.Value, DBNull.Value,
-                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
-                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value });
+                                            areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value,
+                                                    Math.Round(areaGround.LookupParameter("Area").AsDouble() / areaConvert, 3), DBNull.Value, DBNull.Value,
+                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
+                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
+                                                    Math.Round(areaGround.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3),
+                                                    Math.Round(areaGround.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3), 
+                                                    areaGround.Id.IntegerValue});
 
                                             Borders areaAdjRangeBorders = areaAdjRangeDouble.Borders;
                                             areaAdjRangeBorders[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
