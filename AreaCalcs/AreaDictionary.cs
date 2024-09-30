@@ -330,7 +330,8 @@ namespace AreaCalculations
                 {
                     Area secArea = collectorElement as Area;
 
-                    if (secArea.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString() && secArea.LookupParameter("A Instance Area Primary").HasValue && secArea.Area != 0)
+                    if (secArea.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString() 
+                        && secArea.LookupParameter("A Instance Area Primary").HasValue && secArea.Area != 0)
                     {
                         double sum = mainArea.LookupParameter("A Instance Gross Area").AsDouble() + secArea.LookupParameter("Area").AsDouble();
                         mainArea.LookupParameter("A Instance Gross Area").Set(sum);
@@ -345,19 +346,54 @@ namespace AreaCalculations
                 if (secArea.LookupParameter("A Instance Area Primary").HasValue && secArea.LookupParameter("A Instance Area Primary").AsString() != "" && secArea.Area != 0)
                 {
                     bool wasFound = false;
+                    string mainNumber = secArea.LookupParameter("A Instance Area Primary").AsString();
+                    string[] mainNumbers = mainNumber.Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    //
+                    //
+                    //
+                    foreach (string number in mainNumbers)
+                        TaskDialog.Show($"{secArea.Name}", number);
+
+                    string test = "";
+                    //
+                    //
+                    //
 
                     foreach (Element element in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().ToList())
                     {
                         Area mainArea = element as Area;
 
-                        if (secArea.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString())
-                            wasFound = true;
+                        foreach (string number in mainNumbers)
+                        {
+                            if (mainArea.Number == number)
+                            {
+                                wasFound = true;
+                            }
+
+                            //
+                            //
+                            //
+                            test += $"Number: {mainArea.Number} | Is equal to: {number} | Isequal: {mainArea.Number == number} \n";
+                            //
+                            //
+                            //
+                        }
                     }
+
+                    //
+                    //
+                    //
+                    TaskDialog.Show("Final test report", $"{test}");
+                    //
+                    //
+                    //
 
                     if (!wasFound && !missingNumbers.Contains(secArea.LookupParameter("Number").AsString()))
                     {
                         missingNumbers.Add(secArea.LookupParameter("Number").AsString());
-                        errorMessage += $"Грешка: Area {secArea.LookupParameter("Number").AsString()} / id: {secArea.Id} / Посочената Area е зададена като подчинена на такава с несъществуващ номер. Моля, проверете го и стартирайте апликацията отново\n";
+                        errorMessage += $"Грешка: Area {secArea.LookupParameter("Number").AsString()} / id: {secArea.Id} " +
+                            $"/ Посочената Area е зададена като подчинена на такава с несъществуващ номер. Моля, проверете го и стартирайте апликацията отново\n";
                     }
                 }
             }
