@@ -319,25 +319,6 @@ namespace AreaCalculations
             List<string> missingNumbers = new List<string>();
 
             transaction.Start();
-            
-            foreach (Element element in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().ToList())
-            {
-                Area mainArea = element as Area;
-
-                mainArea.LookupParameter("A Instance Gross Area").Set(mainArea.LookupParameter("Area").AsDouble());
-
-                foreach (Element collectorElement in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().ToList())
-                {
-                    Area secArea = collectorElement as Area;
-
-                    if (secArea.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString() 
-                        && secArea.LookupParameter("A Instance Area Primary").HasValue && secArea.Area != 0)
-                    {
-                        double sum = mainArea.LookupParameter("A Instance Gross Area").AsDouble() + secArea.LookupParameter("Area").AsDouble();
-                        mainArea.LookupParameter("A Instance Gross Area").Set(sum);
-                    }
-                }
-            }
 
             foreach (Element collectorElement in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().ToList())
             {
@@ -349,45 +330,18 @@ namespace AreaCalculations
                     string mainNumber = secArea.LookupParameter("A Instance Area Primary").AsString();
                     string[] mainNumbers = mainNumber.Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries);
 
-                    //
-                    //
-                    //
-                    foreach (string number in mainNumbers)
-                        TaskDialog.Show($"{secArea.Name}", number);
-
-                    string test = "";
-                    //
-                    //
-                    //
-
                     foreach (Element element in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().ToList())
                     {
                         Area mainArea = element as Area;
 
                         foreach (string number in mainNumbers)
                         {
-                            if (mainArea.Number == number)
+                            if (mainArea.Number.Trim() == number.Trim())
                             {
                                 wasFound = true;
                             }
-
-                            //
-                            //
-                            //
-                            test += $"Number: {mainArea.Number} | Is equal to: {number} | Isequal: {mainArea.Number == number} \n";
-                            //
-                            //
-                            //
                         }
                     }
-
-                    //
-                    //
-                    //
-                    TaskDialog.Show("Final test report", $"{test}");
-                    //
-                    //
-                    //
 
                     if (!wasFound && !missingNumbers.Contains(secArea.LookupParameter("Number").AsString()))
                     {
@@ -397,49 +351,7 @@ namespace AreaCalculations
                     }
                 }
             }
-            /*
-            
-            foreach (Area mainArea in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().ToList())
-            {
-                mainArea.LookupParameter("A Instance Gross Area").Set(mainArea.LookupParameter("Area").AsDouble());
-            }
 
-            foreach (Area secondaryArea in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().ToList())
-            {
-                bool wasfound = false;
-                
-                if (secondaryArea.LookupParameter("A Instance Area Primary").HasValue && secondaryArea.LookupParameter("A Instance Area Primary").AsString() != "" && secondaryArea.Area != 0)
-                {
-                    foreach (Area mainArea in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().ToList())
-                    {
-                        if (secondaryArea.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString())
-                        {
-                            double sum = mainArea.LookupParameter("A Instance Gross Area").AsDouble() + secondaryArea.LookupParameter("Area").AsDouble();
-
-                            bool wasSet = mainArea.LookupParameter("A Instance Gross Area").Set(sum);
-
-                            wasfound = true;
-
-                            // test
-
-                            errorMessage += $"An area of: {secondaryArea.LookupParameter("Area").AsDouble()/areaConvert} is added to the one of Area Number: {mainArea.Number}, " +
-                                $"whioch is at the moment: {mainArea.Area/areaConvert}! The total sum is {secondaryArea.LookupParameter("Area").AsDouble() / areaConvert + mainArea.Area / areaConvert}\n" +
-                                $"calculated sum = {sum/areaConvert}\ncalculated sum in imperial = {sum}\nwasSet = {wasSet}\n" +
-                                $"value for A Instance Gross Area after being set: = {mainArea.LookupParameter("A Instance Gross Area").AsDouble()}\n" +
-                                $"the secondary Area object, added to the main one, has a number {secondaryArea.Number} and an Id: {secondaryArea.Id}\n\n";
-
-                            // test
-                        }
-                    }
-
-                    if (!wasfound && !missingNumbers.Contains(secondaryArea.LookupParameter("Number").AsString()))
-                    {
-                        missingNumbers.Add(secondaryArea.LookupParameter("Number").AsString());
-                        errorMessage += $"Грешка: Area {secondaryArea.LookupParameter("Number").AsString()} / id: {secondaryArea.Id} / Посочената Area е зададена като подчинена на такава с несъществуващ номер. Моля, проверете го и стартирайте апликацията отново\n";
-                    }
-                }
-            }
-            */
             transaction.Commit();
 
             return errorMessage;
@@ -468,23 +380,25 @@ namespace AreaCalculations
             {
                 foreach (string property in plotProperties[plotName])
                 {
-                    double totaC1C2 = 0;
+                    double totalC1C2 = 0;
 
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue 
+                            && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
                             double C1C2 = area.LookupParameter("A Instance Price C1/C2").AsDouble();
-                            totaC1C2 += C1C2;
+                            totalC1C2 += C1C2;
                         }
                     }
 
                     // calculate common area percentage parameter for each area
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue 
+                            && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            double commonAreaPercent = (area.LookupParameter("A Instance Price C1/C2").AsDouble() / totaC1C2) * 100;
+                            double commonAreaPercent = (area.LookupParameter("A Instance Price C1/C2").AsDouble() / totalC1C2) * 100;
                             area.LookupParameter("A Instance Common Area %").Set(commonAreaPercent);
                         }
                     }
@@ -521,6 +435,10 @@ namespace AreaCalculations
 
             transaction.Commit();
         }
+        public void calculateSpecialCommonAreas()
+        {
+            // work on this one tomorrow
+        }
         public void calculateTotalArea()
         {
             transaction.Start();
@@ -531,9 +449,11 @@ namespace AreaCalculations
                 {                 
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue 
+                            && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            area.LookupParameter("A Instance Total Area").Set(area.LookupParameter("A Instance Gross Area").AsDouble() + area.LookupParameter("A Instance Common Area").AsDouble());
+                            area.LookupParameter("A Instance Total Area").Set(area.LookupParameter("A Instance Gross Area").AsDouble() 
+                                + area.LookupParameter("A Instance Common Area").AsDouble());
                         }
                     }
                 }
@@ -553,7 +473,8 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" 
+                            && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
                             totalPlotC1C2 += area.LookupParameter("A Instance Price C1/C2").AsDouble();
                         }
@@ -564,7 +485,8 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" 
+                            && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
                             double buildingPercentPermit = (area.LookupParameter("A Instance Price C1/C2").AsDouble() / totalPlotC1C2) * 100;
                             area.LookupParameter("A Instance Building Permit %").Set(buildingPercentPermit);
@@ -664,7 +586,8 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != "") && area.Area != 0)
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue 
+                            && area.LookupParameter("A Instance Area Primary").AsString() != "") && area.Area != 0)
                         {
                             try
                             {
@@ -677,7 +600,8 @@ namespace AreaCalculations
                             }
                             catch
                             {
-                                errorReport += $"{area.Id} {area.Name} A Instance Common Area = {area.LookupParameter("A Instance Common Area").AsDouble()} / A Instance Total Area = {area.LookupParameter("A Instance Total Area").AsDouble()}";
+                                errorReport += $"{area.Id} {area.Name} A Instance Common Area = {area.LookupParameter("A Instance Common Area").AsDouble()} " +
+                                    $"/ A Instance Total Area = {area.LookupParameter("A Instance Total Area").AsDouble()}";
                             }
                         }
                     }
@@ -701,8 +625,9 @@ namespace AreaCalculations
             workSheet.Range["D:D"].ColumnWidth = 20;
             workSheet.Range["E:E"].ColumnWidth = 10;
             workSheet.Range["F:N"].ColumnWidth = 5;
-            workSheet.Range["O:S"].ColumnWidth = 20;
-            workSheet.Range["T:V"].ColumnWidth = 10;
+            workSheet.Range["O:O"].ColumnWidth = 10;
+            workSheet.Range["P:T"].ColumnWidth = 20;
+            workSheet.Range["U:V"].ColumnWidth = 10;
 
             int x = 1;
 
@@ -873,7 +798,7 @@ namespace AreaCalculations
 
                         x++;
                         Range parameterNamesRange = workSheet.Range[$"A{x}", $"V{x}"];
-                        string[] parameterNamesData = new[] { "ПЛОЩ СО", "НАИМЕНОВАНИЕ СО", "ПЛОЩ F1(F2)", "ПРИЛЕЖАЩА ПЛОЩ", "Кпг", "Ки", "Кв", "Км", "Кив", "Кпп", "Кок", "Ксп", "Кк", "К", "C1(C2)", "ОБЩИ ЧАСТИ - F3", "", "ОБЩО-F1(F2)+F3", "ПРАВО НА СТРОЕЖ", "ЗЕМЯ", "", "Id" };
+                        string[] parameterNamesData = new[] { "ПЛОЩ СО", "НАИМЕНОВАНИЕ СО", "ПЛОЩ F1(F2)", "ПРИЛЕЖАЩА ПЛОЩ", "Кпг", "Ки", "Кв", "Км", "Кив", "Кпп", "Кок", "Ксп", "Кк", "К", "C1(C2)", "ОБЩИ ЧАСТИ - F3", "", "СП.ОБЩИ ЧАСТИ - F4", "ОБЩО-F1(F2)+F3+F4", "ПРАВО НА СТРОЕЖ", "ЗЕМЯ", ""};
                         parameterNamesRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, parameterNamesData);
                         parameterNamesRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
                         parameterNamesRange.Font.Bold = true;
@@ -881,7 +806,7 @@ namespace AreaCalculations
 
                         x++;
                         Range parametersTypeRange = workSheet.Range[$"A{x}", $"V{x}"];
-                        string[] parametersTypeData = new[] { "", "", "m2", "m2", "", "", "", "", "", "", "", "", "", "", "", "% и.ч.", "m2", "m2", "% и.ч.", "% и.ч.", "m2" };
+                        string[] parametersTypeData = new[] { "", "", "m2", "m2", "", "", "", "", "", "", "", "", "", "", "", "% и.ч.", "m2", "m2", "m2", "% и.ч.", "% и.ч.", "m2" };
                         parametersTypeRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, parametersTypeData);
                         parametersTypeRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
                         parametersTypeRange.Font.Bold = true;
@@ -1005,15 +930,14 @@ namespace AreaCalculations
                                     double C1C2 = Math.Round(area.LookupParameter("A Instance Price C1/C2")?.AsDouble() ?? 0.0, 3);
                                     double areaCommonPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3);
                                     double areaCommonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 3);
+                                    double areaCommonAreaSpecial = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() ?? 0.0, 3);
                                     double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0), 3);
                                     double areaPermitPercent = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3);
                                     double areaRLPPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3);
                                     double areaRLP = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3);
-                                    int integerValue = area.Id.IntegerValue;
-                                    double areaID = integerValue;
 
                                     string[] areaStringData = new[] { areaNumber, areaName };
-                                    object[] areasDoubleData = new object[] { areaArea, areaSubjected, ACGA, ACOR, ACLE, ACLO, ACHE, ACRO, ACSP, ACST, ACZO, ACCO, C1C2, areaCommonPercent, areaCommonArea, areaTotalArea, areaPermitPercent, areaRLPPercentage, areaRLP, areaID };
+                                    object[] areasDoubleData = new object[] { areaArea, areaSubjected, ACGA, ACOR, ACLE, ACLO, ACHE, ACRO, ACSP, ACST, ACZO, ACCO, C1C2, areaCommonPercent, areaCommonArea, areaCommonAreaSpecial, areaTotalArea, areaPermitPercent, areaRLPPercentage, areaRLP};
 
                                     cellRangeString.set_Value(XlRangeValueDataType.xlRangeValueDefault, areaStringData);
                                     cellRangeString.Borders.LineStyle = XlLineStyle.xlContinuous;
@@ -1104,7 +1028,7 @@ namespace AreaCalculations
 
                         int endLine = x - 1;
 
-                        Range colorRange = workSheet.Range[$"C{startLine}", $"U{endLine}"];
+                        Range colorRange = workSheet.Range[$"C{startLine}", $"V{endLine}"];
                         colorRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.DarkSeaGreen);
 
                         // set a formula for the total area sum of F1/F2
@@ -1131,21 +1055,25 @@ namespace AreaCalculations
                         Range sumIdealArea = workSheet.Range[$"Q{x}", $"Q{x}"];
                         sumIdealArea.Formula = $"=SUM(Q{startLine + 2}:Q{endLine})";
 
-                        // set a formula for the total sum of Common Areas Percentage
-                        Range sumF1F2F3 = workSheet.Range[$"R{x}", $"R{x}"];
-                        sumF1F2F3.Formula = $"=SUM(R{startLine + 2}:R{endLine})";
+                        // set a formula for the total sum of Special Common Areas
+                        Range sumSpecialArea = workSheet.Range[$"R{x}", $"R{x}"];
+                        sumSpecialArea.Formula = $"=SUM(R{startLine + 2}:R{endLine})";
 
                         // set a formula for the total sum of Common Areas Percentage
-                        Range buildingRights = workSheet.Range[$"S{x}", $"S{x}"];
+                        Range sumF1F2F3 = workSheet.Range[$"S{x}", $"S{x}"];
+                        sumF1F2F3.Formula = $"=SUM(S{startLine + 2}:S{endLine})";
+
+                        // set a formula for the total sum of Common Areas Percentage
+                        Range buildingRights = workSheet.Range[$"T{x}", $"T{x}"];
                         buildingRights.Formula = $"=SUM(S{startLine + 2}:S{endLine})";
 
                         // set a formula for the total sum of Common Areas Percentage
-                        Range landPercent = workSheet.Range[$"T{x}", $"T{x}"];
-                        landPercent.Formula = $"=SUM(T{startLine + 2}:T{endLine})";
+                        Range landPercent = workSheet.Range[$"U{x}", $"U{x}"];
+                        landPercent.Formula = $"=SUM(U{startLine + 2}:U{endLine})";
 
                         // set a formula for the total sum of Common Areas Percentage
-                        Range landArea = workSheet.Range[$"U{x}", $"U{x}"];
-                        landArea.Formula = $"=SUM(U{startLine + 2}:U{endLine})";
+                        Range landArea = workSheet.Range[$"V{x}", $"V{x}"];
+                        landArea.Formula = $"=SUM(V{startLine + 2}:V{endLine})";
 
                         // set coloring for the summed up rows
                         Range colorRangePropertySum = workSheet.Range[$"A{endLine + 1}", $"V{endLine + 1}"];
