@@ -21,6 +21,8 @@ namespace AreaCalculations
         public Dictionary<string, Dictionary<string, List<Area>>> AreasOrganizer { get; set; }
         public List<string> plotNames { get; set; }
         public Dictionary<string, Dictionary<string, double>> propertyCommonAreas { get; set; }
+        public Dictionary<string, Dictionary<string, double>> propertyCommonAreasSpecial { get; set; }
+        public Dictionary<string, Dictionary<string, double>> propertyCommonAreasAll { get; set; }
         public Dictionary<string, Dictionary<string, double>> propertyIndividualAreas { get; set; }
         public Dictionary<string, double> plotAreasImp { get; set; } // IMPORTANT!!! STORING DATA IN IMPERIAL
         public Dictionary<string, List<string>> plotProperties { get; set; }
@@ -59,7 +61,6 @@ namespace AreaCalculations
             FilteredElementCollector areasCollector = new FilteredElementCollector(activeDoc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType();
 
             // construct main AreaOrganizer Dictionary
-
             foreach (Element elem in areasCollector)
             {
                Area area = elem as Area;
@@ -107,7 +108,6 @@ namespace AreaCalculations
             }
 
             // based on AreasOrganizer, construct the plotBuildAreas dictionary
-
             foreach (string plotName in plotNames)
             {
                 plotBuildAreas.Add(plotName, 0);
@@ -125,7 +125,6 @@ namespace AreaCalculations
             }
 
             // based on AreasOrganizer, construct the plotTotalBuild dictionary
-
             foreach (string plotName in plotNames)
             {
                 plotTotalBuild.Add(plotName, 0);
@@ -144,7 +143,6 @@ namespace AreaCalculations
             }
 
             // based on AreasOrganizer, construct the plotUndergroundAreas dictionary
-
             foreach (string plotName in plotNames)
             {
                 plotUndergroundAreas.Add(plotName, 0);
@@ -162,7 +160,6 @@ namespace AreaCalculations
             }
 
             // based on AreasOrganizer, construct the plotIndividualAreas dictionary
-
             foreach (string plotName in plotNames)
             {
                 plotIndividualAreas.Add(plotName, 0);
@@ -181,7 +178,6 @@ namespace AreaCalculations
             }
 
             // based on AreasOrganizer, construct the plotCommonAreas dictionary
-
             foreach (string plotName in plotNames)
             {
                 plotCommonAreas.Add(plotName, 0);
@@ -190,7 +186,9 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][plotProperty])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част")
+                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част"
+                            && !(area.LookupParameter("A Instance Area Primary").HasValue
+                            && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
                             plotCommonAreas[plotName] += area.LookupParameter("Area").AsDouble() / areaConvert;
                         }
@@ -198,8 +196,10 @@ namespace AreaCalculations
                 }
             }
 
-            // based on AreasOrganizer, construct the propertyCommonAreas dictionary
+            // based on AreasOrganizer, construct the plotCommonAreasAll dictionary
+            // ON HOLD FOR NOW
 
+            // based on AreasOrganizer, construct the propertyCommonAreas dictionary
             foreach (string plotName in plotNames)
             {
                 propertyCommonAreas.Add(plotName, new Dictionary<string, double>());
@@ -210,7 +210,9 @@ namespace AreaCalculations
 
                     foreach (Area area in AreasOrganizer[plotName][plotProperty])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част")
+                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част"
+                            && !(area.LookupParameter("A Instance Area Primary").HasValue
+                            && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
                             propertyCommonAreas[plotName][plotProperty] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 3);
                         }
@@ -233,7 +235,6 @@ namespace AreaCalculations
                 // in case such property types were found, redistribute their areas across the rest of the properties
                 if (wasFound)
                 {
-
                     double remainingCommonArea = plotCommonAreas[plotName] - plusPropertiesCommonSum;
 
                     // search for properties of type "A + B"
@@ -256,8 +257,13 @@ namespace AreaCalculations
                 }
             }
 
-            // based on AreasOrganizer, construct the propertyIndividualAreas dictionary
+            // based on AreasOrganizer, construct the propertyCommonAreasSpecial dictionary
+            // TODO
 
+            // based on Areas Organizer, construct the propertyCommonAreasAll
+            // TODO
+
+            // based on AreasOrganizer, construct the propertyIndividualAreas dictionary
             foreach (string plotName in plotNames)
             {
                 propertyIndividualAreas.Add(plotName, new Dictionary<string, double>());
@@ -277,7 +283,6 @@ namespace AreaCalculations
             }
 
             // based on AreasOrganizer, construct the plotLandAreas dictionary
-
             foreach (string plotName in plotNames)
             {
                 plotLandAreas.Add(plotName, 0);
@@ -426,7 +431,7 @@ namespace AreaCalculations
                         {
                             double commonArea;
 
-                            commonArea = area.LookupParameter("A Instance Common Area %").AsDouble() * propertyCommonArea / 100 * areaConvert; // !!!!!!!!!!!!!!!!!!!!!
+                            commonArea = area.LookupParameter("A Instance Common Area %").AsDouble() * propertyCommonArea / 100 * areaConvert;
                             area.LookupParameter("A Instance Common Area").Set(commonArea);
                         }
                     }
@@ -435,9 +440,13 @@ namespace AreaCalculations
 
             transaction.Commit();
         }
+        public void calculateSpecialCommonAreaPercent()
+        {
+            // TODO
+        }
         public void calculateSpecialCommonAreas()
         {
-            // work on this one tomorrow
+            // TODO
         }
         public void calculateTotalArea()
         {
@@ -1029,7 +1038,7 @@ namespace AreaCalculations
                         int endLine = x - 1;
 
                         Range colorRange = workSheet.Range[$"C{startLine}", $"V{endLine}"];
-                        colorRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.DarkSeaGreen);
+                        colorRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.AliceBlue);
 
                         // set a formula for the total area sum of F1/F2
                         Range sumF1F2 = workSheet.Range[$"C{x}", $"C{x}"];
@@ -1065,7 +1074,7 @@ namespace AreaCalculations
 
                         // set a formula for the total sum of Common Areas Percentage
                         Range buildingRights = workSheet.Range[$"T{x}", $"T{x}"];
-                        buildingRights.Formula = $"=SUM(S{startLine + 2}:S{endLine})";
+                        buildingRights.Formula = $"=SUM(T{startLine + 2}:T{endLine})";
 
                         // set a formula for the total sum of Common Areas Percentage
                         Range landPercent = workSheet.Range[$"U{x}", $"U{x}"];
