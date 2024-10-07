@@ -11,6 +11,8 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using static System.Net.Mime.MediaTypeNames;
 using Regex = System.Text.RegularExpressions.Regex;
+using System.Windows.Input;
+using System.Globalization;
 
 namespace AreaCalculations
 {
@@ -513,7 +515,60 @@ namespace AreaCalculations
         }
         public void calculateSpecialCommonAreas()
         {
-            // TODO
+            transaction.Start();
+
+            foreach (string plotName in plotNames)
+            {
+                foreach (string property in plotProperties[plotName])
+                {
+                    // first set all special common area values to 0
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        area.LookupParameter("A Instance Common Area Special").Set(0);
+                    }
+
+                    // check all areas from a given dictionary
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        // check if there is a common area that is set to adjascent to another one
+                        if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част" &&
+                            area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != "")
+                        {
+                            // if such is found, find all of the areas, it is set to be adjascent to
+                            string[] mainAreaNames = area.LookupParameter("A Instance Area Primary").AsString().Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries)
+                                .Select(s => s.Trim())
+                                .ToArray();
+
+                            double sumC1C2 = 0;
+                            List<Area> mainAreaElements = new List<Area>();
+
+                            // find all the areas it is adjascent to and calculate their total C1C2 and add them to a list
+                            foreach (string mainAreaName in mainAreaNames)
+                            {
+                                foreach (Area mainArea in AreasOrganizer[plotName][property])
+                                {
+                                    if (mainArea.LookupParameter("Number").AsString() == mainAreaName)
+                                    {
+                                        sumC1C2 += mainArea.LookupParameter("A Instance Price C1/C2").AsDouble();
+                                        mainAreaElements.Add(mainArea);
+                                    }
+                                }
+                            }
+
+                            // for each area of the list, calculate its Special Common Area
+                            foreach (Area mainArea in mainAreaElements)
+                            {
+                                double percentage = mainArea.LookupParameter("A Instance Price C1/C2").AsDouble() * 100 / sumC1C2;
+
+                                mainArea.LookupParameter("A Instance Common Area Special")
+                                    .Set(mainArea.LookupParameter("A Instance Common Area Special").AsDouble() + (percentage * area.Area / 100));
+                            }
+                        }
+                    }
+                }
+            }
+
+            transaction.Commit();
         }
         public void calculateTotalArea()
         {
@@ -1023,7 +1078,7 @@ namespace AreaCalculations
                                     double areaCommonPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3);
                                     double areaCommonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 3);
                                     double areaCommonAreaSpecialPercent = Math.Round(area.LookupParameter("A Instance Common Area Special %")?.AsDouble() / areaConvert ?? 0.0, 3);
-                                    double areaCommonAreaSpecial = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() ?? 0.0, 3);
+                                    double areaCommonAreaSpecial = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() / areaConvert ?? 0.0, 3);
                                     double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0), 3);
                                     double areaPermitPercent = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3);
                                     double areaRLPPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3);
@@ -1048,7 +1103,6 @@ namespace AreaCalculations
                                 x++;
 
                                 // adjascent areas loop
-
                                 foreach (Area areaSub in sortedAreas)
                                 {
                                     string primaryArea = areaSub.LookupParameter("A Instance Area Primary").AsString();
@@ -1063,12 +1117,12 @@ namespace AreaCalculations
                                         areaAdjRangeStr.Borders.LineStyle = XlLineStyle.xlContinuous;
 
                                         Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"W{x}"];
-                                        areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value, 
+                                        areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value,
                                                     Math.Round(areaSub.LookupParameter("Area").AsDouble() / areaConvert, 3), DBNull.Value, DBNull.Value,
-                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, 
+                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
                                                     DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
-                                                    Math.Round(areaSub.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3), 
-                                                    Math.Round(areaSub.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3)});
+                                                    Math.Round(areaSub.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3),
+                                                    Math.Round(areaSub.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3) });
 
                                         Borders areaAdjRangeBorders = areaAdjRangeDouble.Borders;
                                         areaAdjRangeBorders[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
@@ -1081,7 +1135,6 @@ namespace AreaCalculations
                                 }
 
                                 // also search for adjascent areas from within ground property group
-
                                 if (AreasOrganizer[plotName].ContainsKey("ЗЕМЯ"))
                                 {
                                     foreach (Area areaGround in AreasOrganizer[plotName]["ЗЕМЯ"])
@@ -1099,11 +1152,8 @@ namespace AreaCalculations
                                             Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"W{x}"];
                                             areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value,
                                                     Math.Round(areaGround.LookupParameter("Area").AsDouble() / areaConvert, 3), DBNull.Value, DBNull.Value,
-                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
-                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
-                                                    Math.Round(areaGround.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3),
-                                                    Math.Round(areaGround.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3), 
-                                                    areaGround.Id.IntegerValue});
+                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
+                                                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value});
 
                                             Borders areaAdjRangeBorders = areaAdjRangeDouble.Borders;
                                             areaAdjRangeBorders[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
@@ -1112,6 +1162,46 @@ namespace AreaCalculations
                                             areaAdjRangeBorders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
 
                                             x++;
+                                        }
+                                    }
+                                }
+
+                                // adjascent areas loop for special common areas
+                                foreach (Area areaSub in AreasOrganizer[plotName][property])
+                                {
+                                    if (areaSub.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част")
+                                    {
+                                        string primaryArea = areaSub.LookupParameter("A Instance Area Primary").AsString();
+
+                                        if (primaryArea != null)
+                                        {
+                                            string[] result = primaryArea.Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries)
+                                                .Select(s => s.Trim())
+                                                .ToArray();
+
+                                            if (result.Contains(area.LookupParameter("Number").AsString()))
+                                            {
+                                                Range areaAdjRangeStr = workSheet.Range[$"A{x}", $"B{x}"];
+                                                areaAdjRangeStr.set_Value(XlRangeValueDataType.xlRangeValueDefault, new[] { areaSub.LookupParameter("Number").AsString(),
+                                                                                                                            areaSub.LookupParameter("Name").AsString() });
+
+                                                areaAdjRangeStr.HorizontalAlignment = XlHAlign.xlHAlignRight;
+                                                areaAdjRangeStr.Borders.LineStyle = XlLineStyle.xlContinuous;
+
+                                                Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"W{x}"];
+                                                areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value,
+                                                            Math.Round(areaSub.LookupParameter("Area").AsDouble() / areaConvert, 3), DBNull.Value, DBNull.Value,
+                                                            DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
+                                                            DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value });
+
+                                                Borders areaAdjRangeBorders = areaAdjRangeDouble.Borders;
+                                                areaAdjRangeBorders[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
+                                                areaAdjRangeBorders[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
+                                                areaAdjRangeBorders[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
+                                                areaAdjRangeBorders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+
+                                                x++;
+                                            }
                                         }
                                     }
                                 }
