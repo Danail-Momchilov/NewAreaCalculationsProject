@@ -96,8 +96,10 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНА")
                             this.build[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                        else if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА")
+                        if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА")
+                        {
                             this.totalBuild[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                        }
                     }
                     else if (plotNames.Count == 2)
                     {
