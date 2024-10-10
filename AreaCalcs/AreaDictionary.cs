@@ -388,6 +388,23 @@ namespace AreaCalculations
             else
                 return entranceName;
         }
+        public void setGrossArea()
+        {
+            transaction.Start();
+
+            foreach (string plotName in plotNames)
+            {
+                foreach (string property in plotProperties[plotName])
+                {
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+                        area.LookupParameter("A Instance Gross Area").Set(area.LookupParameter("Area").AsDouble());
+                    }
+                }
+            }
+
+            transaction.Commit();
+        }
         public string calculatePrimaryArea()
         {
             string errorMessage = "";
@@ -395,34 +412,70 @@ namespace AreaCalculations
 
             transaction.Start();
 
-            foreach (Element collectorElement in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().ToList())
+            foreach (string plotName in plotNames)
             {
-                Area secArea = collectorElement as Area;
-
-                if (secArea.LookupParameter("A Instance Area Primary").HasValue && secArea.LookupParameter("A Instance Area Primary").AsString() != "" && secArea.Area != 0)
+                foreach (string property in plotProperties[plotName])
                 {
-                    bool wasFound = false;
-                    string mainNumber = secArea.LookupParameter("A Instance Area Primary").AsString();
-                    string[] mainNumbers = mainNumber.Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    foreach (Element element in new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().ToList())
+                    foreach (Area secArea in AreasOrganizer[plotName][property])
                     {
-                        Area mainArea = element as Area;
-
-                        foreach (string number in mainNumbers)
+                        if (secArea.LookupParameter("A Instance Area Primary").HasValue && secArea.LookupParameter("A Instance Area Primary").AsString() != "" && secArea.Area != 0)
                         {
-                            if (mainArea.Number.Trim() == number.Trim())
+                            bool wasFound = false;
+
+                            string[] mainAreaNumbers = secArea.LookupParameter("A Instance Area Primary").AsString().Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries)
+                                .Select(s => s.Trim())
+                                .ToArray();
+
+                            foreach (string mainAreaNumber in mainAreaNumbers)
                             {
-                                wasFound = true;
+                                if (secArea.LookupParameter("A Instance Area Group").AsString().ToLower() != "земя")
+                                {
+                                    foreach (Area mainArea in AreasOrganizer[plotName][property])
+                                    {
+                                        if (mainArea.Number == mainAreaNumber)
+                                        {
+                                            wasFound = true;
+
+                                            if (secArea.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект")
+                                            {
+                                                mainArea.LookupParameter("A Instance Gross Area").Set(
+                                                    mainArea.LookupParameter("A Instance Gross Area").AsDouble() + secArea.Area);
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                else
+                                {
+                                    foreach (string plotNameMain in plotNames)
+                                    {
+                                        foreach (string propertyMain in plotProperties[plotNameMain])
+                                        {
+                                            foreach (Area mainArea in AreasOrganizer[plotNameMain][propertyMain])
+                                            {
+                                                if (mainArea.Number == mainAreaNumber)
+                                                {
+                                                    wasFound = true;
+
+                                                    if (secArea.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект")
+                                                    {
+                                                        mainArea.LookupParameter("A Instance Gross Area").Set(
+                                                            mainArea.LookupParameter("A Instance Gross Area").AsDouble() + secArea.Area);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (!wasFound && !missingNumbers.Contains(secArea.LookupParameter("Number").AsString()))
+                            {
+                                missingNumbers.Add(secArea.LookupParameter("Number").AsString());
+                                errorMessage += $"Грешка: Area {secArea.LookupParameter("Number").AsString()} / id: {secArea.Id} " +
+                                    $"/ Посочената Area е зададена като подчинена на такава с несъществуващ номер. Моля, проверете я и стартирайте апликацията отново\n";
                             }
                         }
-                    }
-
-                    if (!wasFound && !missingNumbers.Contains(secArea.LookupParameter("Number").AsString()))
-                    {
-                        missingNumbers.Add(secArea.LookupParameter("Number").AsString());
-                        errorMessage += $"Грешка: Area {secArea.LookupParameter("Number").AsString()} / id: {secArea.Id} " +
-                            $"/ Посочената Area е зададена като подчинена на такава с несъществуващ номер. Моля, проверете го и стартирайте апликацията отново\n";
                     }
                 }
             }
@@ -439,9 +492,11 @@ namespace AreaCalculations
             {
                 Area area = collectorElement as Area;
 
-                if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ"
+                    && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                 {
-                    area.LookupParameter("A Instance Price C1/C2").Set(area.LookupParameter("A Instance Gross Area").AsDouble() * area.LookupParameter("A Coefficient Multiplied").AsDouble() / areaConvert);
+                    area.LookupParameter("A Instance Price C1/C2").Set(area.LookupParameter("A Instance Gross Area").AsDouble()
+                        * area.LookupParameter("A Coefficient Multiplied").AsDouble() / areaConvert);
                 }
             }
 
@@ -744,6 +799,54 @@ namespace AreaCalculations
 
             return errorReport;
         }
+        public void redistributeSurplus()
+        {
+            transaction.Start();
+
+            foreach (string plotName in plotNames)
+            {
+                foreach (string property in plotProperties[plotName])
+                {
+                    List<Area> sortedAreas = AreasOrganizer[plotName][property]
+                        .OrderBy(area => area.LookupParameter("A Instance Gross Area").AsDouble())
+                        .ToList();
+
+                    // Group areas by their "A Instance Gross Area" value
+                    var groupedAreas = sortedAreas.GroupBy(area => area.LookupParameter("A Instance Gross Area").AsDouble());
+
+                    Dictionary<string, List<Area>> areaGroups = new Dictionary<string, List<Area>>();
+                    int sequence = 1;
+
+                    foreach (var group in groupedAreas)
+                    {
+                        int areaCount = group.Count();
+                        string key = $"{areaCount}N{sequence}";
+                        areaGroups[key] = group.ToList();
+                        sequence++;
+                    }
+
+                    //
+                    //
+                    //
+                    string testoutput = "";
+                    foreach (string number in areaGroups.Keys)
+                    {
+                        testoutput += $"{number}\n";
+                        foreach (Area area in areaGroups[number])
+                        {
+                            testoutput += $"Name: {area.Name} | Area: {area.Area / areaConvert}\n";
+                        }
+                    }
+                    TaskDialog.Show("Test", testoutput);
+                    //
+                    //
+                    //
+                }
+            }
+
+            transaction.Commit();
+        }
+
         public void exportToExcel(string filePath, string sheetName)
         {
             Microsoft.Office.Interop.Excel.Application excelApplication = new Microsoft.Office.Interop.Excel.Application();
