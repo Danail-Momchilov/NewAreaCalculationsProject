@@ -805,43 +805,95 @@ namespace AreaCalculations
 
             foreach (string plotName in plotNames)
             {
+                Dictionary<string, List<Area>> areaGroupsAll = new Dictionary<string, List<Area>>();
+                Dictionary<string, List<Area>> areaGroupsNoLand = new Dictionary<string, List<Area>>();
+
+                List<Area> plotAreasNoLand = new List<Area>();
+                List<Area> plotAreasAll = new List<Area>();
+
+                // get all the areas in proper lists
                 foreach (string property in plotProperties[plotName])
                 {
-                    List<Area> sortedAreas = AreasOrganizer[plotName][property]
-                        .OrderBy(area => area.LookupParameter("A Instance Gross Area").AsDouble())
-                        .ToList();
-
-                    // Group areas by their "A Instance Gross Area" value
-                    var groupedAreas = sortedAreas.GroupBy(area => area.LookupParameter("A Instance Gross Area").AsDouble());
-
-                    Dictionary<string, List<Area>> areaGroups = new Dictionary<string, List<Area>>();
-                    int sequence = 1;
-
-                    foreach (var group in groupedAreas)
+                    if (property.ToLower() != "земя" && property.ToLower() != "траф" && !property.ToLower().Contains('+'))
                     {
-                        int areaCount = group.Count();
-                        string key = $"{areaCount}N{sequence}";
-                        areaGroups[key] = group.ToList();
-                        sequence++;
+                        plotAreasNoLand.AddRange(AreasOrganizer[plotName][property]);
+                        plotAreasAll.AddRange(AreasOrganizer[plotName][property]);
                     }
-
-                    //
-                    //
-                    //
-                    string testoutput = "";
-                    foreach (string number in areaGroups.Keys)
+                    else if (property.ToLower() == "земя")
                     {
-                        testoutput += $"{number}\n";
-                        foreach (Area area in areaGroups[number])
-                        {
-                            testoutput += $"Name: {area.Name} | Area: {area.Area / areaConvert}\n";
-                        }
+                        plotAreasAll.AddRange(AreasOrganizer[plotName][property]);
                     }
-                    TaskDialog.Show("Test", testoutput);
-                    //
-                    //
-                    //
                 }
+
+                // sort lists, based on objects' areas
+                List<Area> sortedAreasNoLand = plotAreasNoLand
+                    .OrderBy(area => area.LookupParameter("A Instance Gross Area").AsDouble())
+                    .ToList();
+
+                List<Area> sortedAreasAll = plotAreasAll
+                    .OrderBy(area => area.LookupParameter("A Instance Gross Area").AsDouble())
+                    .ToList();
+
+                // group areas by their "A Instance Gross Area" value
+                var groupedAreasAll = sortedAreasAll.GroupBy(area => area.LookupParameter("A Instance Gross Area").AsDouble());
+                var groupedAreasNoLand = sortedAreasNoLand.GroupBy(area => area.LookupParameter("A Instance Gross Area").AsDouble());
+
+                // construct the dictionary for all area groups
+                int sequenceAll = 1;
+
+                foreach (var group in groupedAreasAll)
+                {
+                    int areaCount = group.Count();
+                    string key = $"{areaCount}N{sequenceAll}G{group.ToList()[0].LookupParameter("A Instance Area Group").AsString()}";
+                    areaGroupsAll[key] = group.ToList();
+                    sequenceAll++;
+                }
+
+                // construct the dictionary for all area groups, except for the land
+                int sequence = 1;
+
+                foreach (var group in groupedAreasNoLand)
+                {
+                    int areaCount = group.Count();
+                    string key = $"{areaCount}N{sequence}";
+                    areaGroupsNoLand[key] = group.ToList();
+                    sequence++;
+                }
+
+                // calculate building permit surplus
+                double buildingPermitTotal = 0;
+                foreach (string group in areaGroupsNoLand.Keys)
+                {
+                    foreach (Area area in areaGroupsNoLand[group])
+                    {
+                        buildingPermitTotal += Math.Round(area.LookupParameter("A Instance Building Permit %").AsDouble(), 3);
+                    }
+                }
+                TaskDialog.Show("Test", buildingPermitTotal.ToString());
+
+
+
+
+
+                // DEBUG PRINT OF THE NEWLY FORMED DICTIONARIES
+                //
+                //
+                /*
+                string testoutput = "";
+                foreach (string number in areaGroupsNoLand.Keys)
+                {
+                    testoutput += $"{number}\n";
+                    foreach (Area area in areaGroupsNoLand[number])
+                    {
+                        testoutput += $"Name: {area.Name} | Area: {area.Area / areaConvert}\n";
+                    }
+                }
+                TaskDialog.Show("Test", testoutput);
+                */
+                //
+                //
+                //
+
             }
 
             transaction.Commit();
