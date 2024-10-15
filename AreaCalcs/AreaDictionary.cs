@@ -388,6 +388,113 @@ namespace AreaCalculations
             else
                 return entranceName;
         }
+        private void calculateSurplusPercent(Dictionary<string, List<Area>> areaGroup, string parameterName)
+        {
+            transaction.Start();
+
+            // calculate building permit surplus
+            double buildingPermitTotal = 0;
+            foreach (string group in areaGroup.Keys)
+            {
+                foreach (Area area in areaGroup[group])
+                {
+                    buildingPermitTotal += Math.Round(area.LookupParameter(parameterName).AsDouble(), 3);
+                }
+            }
+
+            double surplus = Math.Round(100 - buildingPermitTotal, 3);
+            int counter = 0;
+
+            while (surplus != 0)
+            {
+                if (counter >= areaGroup.Keys.ToList().Count())
+                {
+                    counter = 0;
+                }
+                string group = areaGroup.Keys.ToList()[counter];
+
+                if ((Math.Abs(surplus) * 1000) >= areaGroup[group].Count())
+                {
+                    // calculate the deduction total, depending on whether the surplis is positive or negatibe
+                    double coefficient = surplus / Math.Abs(surplus);
+                    // so far, the result is either 1 or -1
+                    double finalDeduction = 0.001 * coefficient;
+                    // this is the final deduction calculated value, which would be either -0.001 or 0.001
+
+                    foreach (Area area in areaGroup[group])
+                    {
+                        // redistribute final deduction towards the Building Permit %
+                        double currentPercent = area.LookupParameter(parameterName).AsDouble();
+                        area.LookupParameter(parameterName).Set(currentPercent + finalDeduction);
+                        surplus -= finalDeduction;
+                    }
+                }
+
+                counter++;
+
+                if (counter == 10)
+                    surplus = 0;
+            }
+
+            transaction.Commit();
+        }
+        private void calculateSurplusPercentandArea(Dictionary<string, List<Area>> areaGroup, string parameterNamePercent, string parameterNameArea)
+        {
+            transaction.Start();
+
+            // calculate building permit surplus
+            double buildingPermitTotal = 0;
+            foreach (string group in areaGroup.Keys)
+            {
+                foreach (Area area in areaGroup[group])
+                {
+                    buildingPermitTotal += Math.Round(area.LookupParameter(parameterNamePercent).AsDouble(), 3);
+                }
+            }
+
+            double surplus = Math.Round(100 - buildingPermitTotal, 3);
+            int counter = 0;
+
+            while (surplus != 0)
+            {
+                if (counter >= areaGroup.Keys.ToList().Count())
+                {
+                    counter = 0;
+                }
+                string group = areaGroup.Keys.ToList()[counter];
+
+                if ((Math.Abs(surplus) * 1000) >= areaGroup[group].Count())
+                {
+                    // calculate the deduction total, depending on whether the surplis is positive or negatibe
+                    double coefficient = surplus / Math.Abs(surplus);
+                    // so far, the result is either 1 or -1
+                    double finalDeduction = 0.001 * coefficient;
+                    // this is the final deduction calculated value, which would be either -0.001 or 0.001
+
+                    foreach (Area area in areaGroup[group])
+                    {
+                        // calculate square meters deduction
+                        double areaToDeduct = Math.Round(area.LookupParameter(parameterNameArea).AsDouble() / (area.LookupParameter(parameterNamePercent).AsDouble() / finalDeduction), 3);
+                        double finalArea = area.LookupParameter(parameterNameArea).AsDouble() + areaToDeduct;
+
+                        // redistribute final deduction towards the Building Permit %
+                        double currentPercent = area.LookupParameter(parameterNamePercent).AsDouble();
+                        area.LookupParameter(parameterNamePercent).Set(currentPercent + finalDeduction);
+                        surplus -= finalDeduction;
+
+                        // redistribute square meters area accordingly
+                        area.LookupParameter(parameterNameArea).Set(finalArea);
+                    }
+                }
+
+                counter++;
+
+                if (counter == 10)
+                    surplus = 0;
+            }
+
+            transaction.Commit();
+        }
         public void setGrossArea()
         {
             transaction.Start();
@@ -801,13 +908,11 @@ namespace AreaCalculations
         }
         public void redistributeSurplus()
         {
-            transaction.Start();
-
             foreach (string plotName in plotNames)
             {
                 Dictionary<string, List<Area>> areaGroupsAll = new Dictionary<string, List<Area>>();
                 Dictionary<string, List<Area>> areaGroupsNoLand = new Dictionary<string, List<Area>>();
-                // TODO: Add another dictionary for the purpose of common areas redistribution for each specific proeprty group
+                Dictionary<string, Dictionary<string, List<Area>>> areaGroupsSeperateProperties = new Dictionary<string, Dictionary<string, List<Area>>>();
 
                 List<Area> plotAreasNoLand = new List<Area>();
                 List<Area> plotAreasAll = new List<Area>();
@@ -824,6 +929,12 @@ namespace AreaCalculations
                     {
                         plotAreasAll.AddRange(AreasOrganizer[plotName][property]);
                     }
+
+                    // recalculate common areas surplus here
+                    foreach (Area area in AreasOrganizer[plotName][property])
+                    {
+
+                    }
                 }
 
                 // sort lists, based on objects' areas
@@ -839,7 +950,8 @@ namespace AreaCalculations
                     .OrderBy(area => area.LookupParameter("A Instance Gross Area").AsDouble())
                     .Where(area => area.LookupParameter("A Instance Area Category").AsString().ToLower() != "обща част")
                     .Where(area => area.LookupParameter("A Instance Area Category").AsString().ToLower() != "изключена от оч")
-                    .Where(area => !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                    .Where(area => !(area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект" && 
+                           area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                     .Reverse()
                     .ToList();
 
@@ -870,104 +982,10 @@ namespace AreaCalculations
                 }
 
                 // calculate building permit surplus
-                double buildingPermitTotal = 0;
-                foreach (string group in areaGroupsNoLand.Keys)
-                {
-                    foreach (Area area in areaGroupsNoLand[group])
-                    {
-                        buildingPermitTotal += Math.Round(area.LookupParameter("A Instance Building Permit %").AsDouble(), 3);
-                    }
-                }
-
-                double surplus = Math.Round(100 - buildingPermitTotal, 3);
-                int counter = 0;
-
-                while (surplus != 0)
-                {
-                    if (counter >= areaGroupsNoLand.Keys.ToList().Count())
-                    {
-                        counter = 0;
-                    }
-                    string group = areaGroupsNoLand.Keys.ToList()[counter];
-
-                    if ((Math.Abs(surplus) * 1000) >= areaGroupsNoLand[group].Count())
-                    {
-                        // calculate the deduction total, depending on whether the surplis is positive or negatibe
-                        double coefficient = surplus / Math.Abs(surplus);
-                        // so far, the result is either 1 or -1
-                        double finalDeduction = 0.001 * coefficient;
-                        // this is the final deduction calculated value, which would be either -0.001 or 0.001
-
-                        foreach (Area area in areaGroupsNoLand[group])
-                        {
-                            // redistribute final deduction towards the Building Permit %
-                            double currentPercent = area.LookupParameter("A Instance Building Permit %").AsDouble();
-                            area.LookupParameter("A Instance Building Permit %").Set(currentPercent + finalDeduction);
-                            surplus -= finalDeduction;
-                        }
-                    }
-
-                    counter++;
-
-                    if (counter == 10)
-                        surplus = 0;
-                }
-                /*
-                // calculate building permit surplus
-                double rlpAreaPercentTotal = 0;
-                foreach (string group in areaGroupsAll.Keys)
-                {
-                    foreach (Area area in areaGroupsAll[group])
-                    {
-                        rlpAreaPercentTotal += Math.Round(area.LookupParameter("A Instance RLP Area %").AsDouble(), 3);
-                    }
-                }
-
-                double surplusRLP = Math.Round(100 - rlpAreaPercentTotal, 3);
-                int counterRLP = 0;
-
-                //
-                //
-                //
-                TaskDialog.Show("Test", $"RLP Percent surplus has been calculated to be: {surplusRLP}");
-                //
-                //
-                //
-
-                while (surplusRLP != 0)
-                {
-                    if (counterRLP >= areaGroupsAll.Keys.ToList().Count())
-                    {
-                        counterRLP = 0;
-                    }
-                    string group = areaGroupsAll.Keys.ToList()[counter];
-
-                    if ((Math.Abs(surplusRLP) * 1000) >= areaGroupsAll[group].Count())
-                    {
-                        // calculate the deduction total, depending on whether the surplis is positive or negatibe
-                        double coefficient = surplusRLP / Math.Abs(surplusRLP);
-                        // so far, the result is either 1 or -1
-                        double finalDeduction = 0.001 * coefficient;
-                        // this is the final deduction calculated value, which would be either -0.001 or 0.001
-
-                        foreach (Area area in areaGroupsAll[group])
-                        {
-                            // redistribute final deduction towards the Building Permit %
-                            double currentPercent = area.LookupParameter("A Instance RLP Area %").AsDouble();
-                            area.LookupParameter("A Instance RLP Area %").Set(currentPercent + finalDeduction);
-                            surplusRLP -= finalDeduction;
-                        }
-                    }
-
-                    counterRLP++;
-
-                    if (counterRLP == 10)
-                        surplusRLP = 0;
-                }
-                */
-            }
-
-            transaction.Commit();
+                calculateSurplusPercent(areaGroupsNoLand, "A Instance Building Permit %");
+                // calculate RLP area percent and RLP Area
+                calculateSurplusPercentandArea(areaGroupsAll, "A Instance RLP Area %", "A Instance RLP Area");
+            }            
         }
 
         public void exportToExcel(string filePath, string sheetName)
