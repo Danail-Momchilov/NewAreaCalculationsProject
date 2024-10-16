@@ -930,10 +930,35 @@ namespace AreaCalculations
                         plotAreasAll.AddRange(AreasOrganizer[plotName][property]);
                     }
 
-                    // recalculate common areas surplus here
-                    foreach (Area area in AreasOrganizer[plotName][property])
-                    {
+                    // construct the dictionary for area surplus redistribution
+                    List<Area> propertyGroupAreas = new List<Area>();
 
+                    if (property.ToLower() != "земя" && property.ToLower() != "траф" && !property.ToLower().Contains('+'))
+                    {
+                        foreach (Area area in AreasOrganizer[plotName][property])
+                        {
+                            if (area.LookupParameter("A Instance Area Category").AsString().ToLower() != "обща част" && 
+                                area.LookupParameter("A Instance Area Category").AsString().ToLower() != "изключена от оч" &&
+                                !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                            {
+                                propertyGroupAreas.Add(area);
+                            }
+                        }
+                    }
+
+                    propertyGroupAreas.OrderBy(area => area.LookupParameter("A Instance Gross Area").AsDouble()).Reverse().ToList();
+                    var groupedAreasProperty = propertyGroupAreas.GroupBy(area => area.LookupParameter("A Instance Gross Area").AsDouble());
+
+                    areaGroupsSeperateProperties.Add(property, new Dictionary<string, List<Area>>());
+
+                    int sequenceproperty = 1;
+
+                    foreach (var group in groupedAreasProperty)
+                    {
+                        int areaCount = group.Count();
+                        string key = $"{areaCount}N{sequenceproperty}";
+                        areaGroupsSeperateProperties[property].Add(key, group.ToList());
+                        sequenceproperty++;
                     }
                 }
 
@@ -965,7 +990,7 @@ namespace AreaCalculations
                 foreach (var group in groupedAreasAll)
                 {
                     int areaCount = group.Count();
-                    string key = $"{areaCount}N{sequenceAll}G{group.ToList()[0].LookupParameter("A Instance Area Group").AsString()}";
+                    string key = $"{areaCount}N{sequenceAll}";
                     areaGroupsAll[key] = group.ToList();
                     sequenceAll++;
                 }
@@ -985,6 +1010,14 @@ namespace AreaCalculations
                 calculateSurplusPercent(areaGroupsNoLand, "A Instance Building Permit %");
                 // calculate RLP area percent and RLP Area
                 calculateSurplusPercentandArea(areaGroupsAll, "A Instance RLP Area %", "A Instance RLP Area");
+                // calculate common area percent and common area
+                foreach (string property in areaGroupsSeperateProperties.Keys)
+                {
+                    foreach (string group in areaGroupsSeperateProperties[property].Keys)
+                    {
+                        calculateSurplusPercentandArea(areaGroupsSeperateProperties[property], "A Instance Common Area %", "A Instance Common Area");
+                    }
+                }
             }            
         }
 
