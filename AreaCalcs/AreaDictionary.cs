@@ -126,7 +126,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА")
                         {
-                            plotBuildAreas[plotName] += area.Area / areaConvert;
+                            plotBuildAreas[plotName] += Math.Round(area.Area / areaConvert, 2);
                         }
                     }
                 }
@@ -146,7 +146,7 @@ namespace AreaCalculations
                             && area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект"
                             && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            plotTotalBuild[plotName] += area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert;
+                            plotTotalBuild[plotName] += Math.Round(area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert, 2);
                         }
                     }
                 }
@@ -163,7 +163,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() == "ПОДЗЕМНА")
                         {
-                            plotUndergroundAreas[plotName] += area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert;
+                            plotUndergroundAreas[plotName] += Math.Round(area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert, 2);
                         }
                     }
                 }
@@ -181,7 +181,7 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект" 
                             && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            plotIndividualAreas[plotName] += Math.Round(area.LookupParameter("A Instance Gross Area").AsDouble() / areaConvert, 3);
+                            plotIndividualAreas[plotName] += Math.Round(area.LookupParameter("A Instance Gross Area").AsDouble() / areaConvert, 2);
                         }
                     }
                 }
@@ -198,7 +198,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част")
                         {
-                            plotCommonAreas[plotName] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 3);
+                            plotCommonAreas[plotName] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                         }
                     }
                 }
@@ -217,7 +217,7 @@ namespace AreaCalculations
                             && (area.LookupParameter("A Instance Area Primary").HasValue
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            plotCommonAreasSpecial[plotName] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 3);
+                            plotCommonAreasSpecial[plotName] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                         }
                     }
                 }
@@ -234,7 +234,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част")
                         {
-                            plotCommonAreasAll[plotName] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 3);
+                            plotCommonAreasAll[plotName] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                         }
                     }
                 }
@@ -255,7 +255,7 @@ namespace AreaCalculations
                             && !(area.LookupParameter("A Instance Area Primary").HasValue
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            propertyCommonAreas[plotName][plotProperty] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 3);
+                            propertyCommonAreas[plotName][plotProperty] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                         }
                     }
                 }
@@ -313,7 +313,7 @@ namespace AreaCalculations
                             && (area.LookupParameter("A Instance Area Primary").HasValue
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            propertyCommonAreasSpecial[plotName][plotProperty] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 3);
+                            propertyCommonAreasSpecial[plotName][plotProperty] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                         }
                     }
                 }
@@ -346,7 +346,7 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект"
                             && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            propertyIndividualAreas[plotName][plotProperty] += Math.Round(area.LookupParameter("A Instance Gross Area").AsDouble() / areaConvert, 3);
+                            propertyIndividualAreas[plotName][plotProperty] += Math.Round(area.LookupParameter("A Instance Gross Area").AsDouble() / areaConvert, 2);
                         }
                     }
                 }
@@ -363,7 +363,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Group").AsString().ToLower() == "земя")
                         {
-                            plotLandAreas[plotName] += area.LookupParameter("Area").AsDouble() / areaConvert;
+                            plotLandAreas[plotName] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
                         }
                     }
                 }
@@ -438,7 +438,7 @@ namespace AreaCalculations
 
             transaction.Commit();
         }
-        private void calculateSurplusPercentandArea(Dictionary<string, List<Area>> areaGroup, string parameterNamePercent, string parameterNameArea)
+        private void calculateSurplusPercentandArea(Dictionary<string, List<Area>> areaGroup, string parameterNamePercent, string parameterNameArea, double totalAreaToCalculateFrom)
         {
             transaction.Start();
 
@@ -473,17 +473,30 @@ namespace AreaCalculations
 
                     foreach (Area area in areaGroup[group])
                     {
-                        // calculate square meters deduction
-                        double areaToDeduct = Math.Round(area.LookupParameter(parameterNameArea).AsDouble() / (area.LookupParameter(parameterNamePercent).AsDouble() / finalDeduction), 3);
-                        double finalArea = area.LookupParameter(parameterNameArea).AsDouble() + areaToDeduct;
-
                         // redistribute final deduction towards the Building Permit %
-                        double currentPercent = area.LookupParameter(parameterNamePercent).AsDouble();
-                        area.LookupParameter(parameterNamePercent).Set(currentPercent + finalDeduction);
+                        double calculatedPercent = area.LookupParameter(parameterNamePercent).AsDouble() + finalDeduction;
+                        area.LookupParameter(parameterNamePercent).Set(calculatedPercent);
                         surplus -= finalDeduction;
 
+                        // calculate the updated area 
+                        double calculatedArea = Math.Round(calculatedPercent * totalAreaToCalculateFrom / 100, 2);
+
                         // redistribute square meters area accordingly
-                        area.LookupParameter(parameterNameArea).Set(finalArea);
+                        area.LookupParameter(parameterNameArea).Set(calculatedArea * areaConvert);
+
+                        //
+                        //
+                        //
+                        /*
+                        if (parameterNameArea == "A Instance Common Area")
+                        {
+                            TaskDialog.Show("Test", $"{area.Name} | Calculated percent: {calculatedPercent}" +
+                                $" | Total common areas: {totalAreaToCalculateFrom} | Final area: {calculatedArea} | Remaining surplus: {surplus}");
+                        }
+                        */
+                        //
+                        //
+                        //
                     }
                 }
 
@@ -663,7 +676,7 @@ namespace AreaCalculations
                         {
                             double commonArea;
 
-                            commonArea = area.LookupParameter("A Instance Common Area %").AsDouble() * propertyCommonArea / 100 * areaConvert;
+                            commonArea = Math.Round(area.LookupParameter("A Instance Common Area %").AsDouble() * propertyCommonArea / 100 * areaConvert, 2);
                             area.LookupParameter("A Instance Common Area").Set(commonArea);
                         }
                     }
@@ -946,8 +959,11 @@ namespace AreaCalculations
                         }
                     }
 
-                    propertyGroupAreas.OrderBy(area => area.LookupParameter("A Instance Gross Area").AsDouble()).Reverse().ToList();
-                    var groupedAreasProperty = propertyGroupAreas.GroupBy(area => area.LookupParameter("A Instance Gross Area").AsDouble());
+                    List<Area> orderedPropertyGroup = propertyGroupAreas
+                        .OrderBy(area => area.LookupParameter("A Instance Gross Area").AsDouble())
+                        .Reverse()
+                        .ToList();
+                    var groupedAreasProperty = orderedPropertyGroup.GroupBy(area => area.LookupParameter("A Instance Gross Area").AsDouble());
 
                     areaGroupsSeperateProperties.Add(property, new Dictionary<string, List<Area>>());
 
@@ -1009,13 +1025,13 @@ namespace AreaCalculations
                 // calculate building permit surplus
                 calculateSurplusPercent(areaGroupsNoLand, "A Instance Building Permit %");
                 // calculate RLP area percent and RLP Area
-                calculateSurplusPercentandArea(areaGroupsAll, "A Instance RLP Area %", "A Instance RLP Area");
+                calculateSurplusPercentandArea(areaGroupsAll, "A Instance RLP Area %", "A Instance RLP Area", Math.Round(plotAreasImp[plotName] / areaConvert, 2));
                 // calculate common area percent and common area
                 foreach (string property in areaGroupsSeperateProperties.Keys)
                 {
                     foreach (string group in areaGroupsSeperateProperties[property].Keys)
                     {
-                        calculateSurplusPercentandArea(areaGroupsSeperateProperties[property], "A Instance Common Area %", "A Instance Common Area");
+                        calculateSurplusPercentandArea(areaGroupsSeperateProperties[property], "A Instance Common Area %", "A Instance Common Area", propertyCommonAreas[plotName][property]);
                     }
                 }
             }            
@@ -1084,49 +1100,57 @@ namespace AreaCalculations
                 // general plot data
                 // plot row
                 Range plotRange = workSheet.Range[$"A{x}", $"W{x}"];
-                object[] plotStrings = new[] { "УПИ:", $"{Math.Round(plotAreasImp[plotName] / areaConvert, 3)}", "m2", "", "Самостоятелни обекти и паркоместа:", "", "", "", "", "", "", "Обекти на терен:", "", "", "", "", "", "Забележки:", "", "", "", "", "" };
+                object[] plotStrings = new[] { "УПИ:", $"{Math.Round(plotAreasImp[plotName] / areaConvert, 2)}", "m2", "", 
+                    "Самостоятелни обекти и паркоместа:", "", "", "", "", "", "", "Обекти на терен:", "", "", "", "", "", "Забележки:", "", "", "", "", "" };
                 plotRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, plotStrings);
 
                 // build up area row
                 x++;
                 Range baRange = workSheet.Range[$"A{x}", $"W{x}"];
-                object[] baStrings = new[] { "ЗП:", $"{Math.Round(plotBuildAreas[plotName], 3)}", "m2", "", "Ателиета:", "", "", "", "0", "бр", "", "Паркоместа:", "", "", "0", "бр", "", "За целите на ценообразуването и площообразуването, от площта на общите части са приспаднати ХХ.ХХкв.м. :", "", "", "", "", "" };
+                object[] baStrings = new[] { "ЗП:", $"{Math.Round(plotBuildAreas[plotName], 2)}", "m2", "", "Ателиета:", "", "", "", "0", "бр", "", "Паркоместа:",
+                    "", "", "0", "бр", "", "За целите на ценообразуването и площообразуването, от площта на общите части са приспаднати ХХ.ХХкв.м. :", "", "", "", "", "" };
                 baRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, baStrings);
 
                 // total build area row
                 x++;
                 Range tbaRange = workSheet.Range[$"A{x}", $"W{x}"];
-                string[] tbaStrings = new[] { "РЗП:", $"{Math.Round(plotTotalBuild[plotName], 3)}", "m2", "", "Апартаменти:", "", "", "", "0", "бр", "", "Дворове:", "", "", "0", "бр", "", "", "", "", "", "", "" };
+                string[] tbaStrings = new[] { "РЗП:", $"{Math.Round(plotTotalBuild[plotName], 2)}", "m2", "",
+                    "Апартаменти:", "", "", "", "0", "бр", "", "Дворове:", "", "", "0", "бр", "", "", "", "", "", "", "" };
                 tbaRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, tbaStrings);
 
                 // underground row
                 x++;
                 Range uRange = workSheet.Range[$"A{x}", $"W{x}"];
-                string[] uStrings = new[] { "Сутерени:", $"{Math.Round(plotUndergroundAreas[plotName], 3)}", "m2", "", "Магазини:", "", "", "", "0", "бр", "", "Трафопост:", "", "", "0", "бр", "", "", "", "", "", "", "" };
+                string[] uStrings = new[] { "Сутерени:", $"{Math.Round(plotUndergroundAreas[plotName], 2)}", "m2", "", 
+                    "Магазини:", "", "", "", "0", "бр", "", "Трафопост:", "", "", "0", "бр", "", "", "", "", "", "", "" };
                 uRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, uStrings);
 
                 // underground + tba row
                 x++;
                 Range utbaRange = workSheet.Range[$"A{x}", $"W{x}"];
-                string[] utbaStrings = new[] { "РЗП + Сутерени:", $"{Math.Round(plotUndergroundAreas[plotName], 3) + Math.Round(plotTotalBuild[plotName], 3)}", "m2", "", "Офиси", "", "", "", "0", "бг", "", "", "", "", "", "", "", "", "", "", "", "", "" };
+                string[] utbaStrings = new[] { "РЗП + Сутерени:", $"{Math.Round(plotUndergroundAreas[plotName], 2) + Math.Round(plotTotalBuild[plotName], 2)}", 
+                    "m2", "", "Офиси", "", "", "", "0", "бг", "", "", "", "", "", "", "", "", "", "", "", "", "" };
                 utbaRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, utbaStrings);
 
                 // CO row
                 x++;
                 Range coRange = workSheet.Range[$"A{x}", $"W{x}"];
-                string[] coStrings = new[] { "Общо СО", $"{Math.Round(plotIndividualAreas[plotName], 3)}", "m2", "", "Гаражи", "", "", "", "0", "бр", "", "Данни за обекта:", "", "", "", "", "", "", "", "", "", "", "" };
+                string[] coStrings = new[] { "Общо СО", $"{Math.Round(plotIndividualAreas[plotName], 2)}", "m2", "", 
+                    "Гаражи", "", "", "", "0", "бр", "", "Данни за обекта:", "", "", "", "", "", "", "", "", "", "", "" };
                 coRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, coStrings);
 
                 // CA row
                 x++;
                 Range caRange = workSheet.Range[$"A{x}", $"W{x}"];
-                string[] caStrings = new[] { "Общо ОЧ", $"{Math.Round(plotCommonAreas[plotName], 3)}", "m2", "", "Складове", "", "", "", "0", "бр", "", "Етажност", "", "", "ет", "", "", "", "", "", "", "", "" };
+                string[] caStrings = new[] { "Общо ОЧ", $"{Math.Round(plotCommonAreas[plotName], 2)}", "m2", "", 
+                    "Складове", "", "", "", "0", "бр", "", "Етажност", "", "", "ет", "", "", "", "", "", "", "", "" };
                 caRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, caStrings);
 
                 // land row
                 x += 1;
                 Range landRange = workSheet.Range[$"A{x}", $"W{x}"];
-                string[] landStrings = new[] { "Земя към СО:", $"{Math.Round(plotLandAreas[plotName], 3)}", "m2", "", "Паркоместа", "", "", "", "0", "бр", "", "Система", "", "монолитна", "", "", "", "", "", "", "", "", "" };
+                string[] landStrings = new[] { "Земя към СО:", $"{Math.Round(plotLandAreas[plotName], 2)}", "m2", "", 
+                    "Паркоместа", "", "", "", "0", "бр", "", "Система", "", "монолитна", "", "", "", "", "", "", "", "", "" };
                 landRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, landStrings);
 
                 // set borders
@@ -1213,7 +1237,11 @@ namespace AreaCalculations
 
                         x++;
                         Range propertyDataRange = workSheet.Range[$"A{x}", $"W{x}"];
-                        string[] propertyData = new[] { $"ПЛОЩ СО: {propertyIndividualAreas[plotName][property]} кв.м", $"ОБЩО ОЧ: {propertyCommonAreasAll[plotName][property]} кв.м", $"ОЧ: {propertyCommonAreas[plotName][property]} кв.м", $"СП.ОЧ: {propertyCommonAreasSpecial[plotName][property]} кв.м", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
+                        string[] propertyData = new[] { $"ПЛОЩ СО: {Math.Round(propertyIndividualAreas[plotName][property], 2)} кв.м", 
+                            $"ОБЩО ОЧ: {Math.Round(propertyCommonAreasAll[plotName][property], 2)} кв.м", 
+                            $"ОЧ: {Math.Round(propertyCommonAreas[plotName][property], 2)} кв.м", 
+                            $"СП.ОЧ: {Math.Round(propertyCommonAreasSpecial[plotName][property], 2)} кв.м",
+                            "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
                         propertyDataRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, propertyData);
                         propertyDataRange.Font.Bold = true;
                         propertyDataRange.Borders.LineStyle = XlLineStyle.xlContinuous;
@@ -1223,7 +1251,8 @@ namespace AreaCalculations
 
                         x++;
                         Range parameterNamesRange = workSheet.Range[$"A{x}", $"W{x}"];
-                        string[] parameterNamesData = new[] { "ПЛОЩ СО", "НАИМЕНОВАНИЕ СО", "ПЛОЩ F1(F2)", "ПРИЛЕЖАЩА ПЛОЩ", "Кпг", "Ки", "Кв", "Км", "Кив", "Кпп", "Кок", "Ксп", "Кк", "К", "C1(C2)", "ОБЩИ ЧАСТИ - F3", "", "СП.ОБЩИ ЧАСТИ - F4", "", "ОБЩО-F1(F2)+F3+F4", "ПРАВО НА СТРОЕЖ", "ЗЕМЯ", ""};
+                        string[] parameterNamesData = new[] { "ПЛОЩ СО", "НАИМЕНОВАНИЕ СО", "ПЛОЩ F1(F2)", "ПРИЛЕЖАЩА ПЛОЩ", "Кпг", "Ки", "Кв", "Км", "Кив", "Кпп", 
+                            "Кок", "Ксп", "Кк", "К", "C1(C2)", "ОБЩИ ЧАСТИ - F3", "", "СП.ОБЩИ ЧАСТИ - F4", "", "ОБЩО-F1(F2)+F3+F4", "ПРАВО НА СТРОЕЖ", "ЗЕМЯ", ""};
                         parameterNamesRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, parameterNamesData);
                         parameterNamesRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
                         parameterNamesRange.Font.Bold = true;
@@ -1338,29 +1367,29 @@ namespace AreaCalculations
 
                                     string areaNumber = area.LookupParameter("Number").AsString() ?? "SOMETHING'S WRONG";
                                     string areaName = area.LookupParameter("Name")?.AsString() ?? "SOMETHING'S WRONG";
-                                    double areaArea = Math.Round(area.LookupParameter("A Instance Gross Area")?.AsDouble() / areaConvert ?? 0.0, 3);
+                                    double areaArea = Math.Round(area.LookupParameter("A Instance Gross Area")?.AsDouble() / areaConvert ?? 0.0, 2);
                                     // TODO: rework properly for adjascent area
                                     object areaSubjected = DBNull.Value;
                                     // TODO: rework properly for adjascent area
-                                    double ACGA = Math.Round(area.LookupParameter("A Coefficient Garage (Кпг)")?.AsDouble() ?? 0.0, 3);
-                                    double ACOR = Math.Round(area.LookupParameter("A Coefficient Orientation (Ки)")?.AsDouble() ?? 0.0, 3);
-                                    double ACLE = Math.Round(area.LookupParameter("A Coefficient Level (Кв)")?.AsDouble() ?? 0.0, 3);
-                                    double ACLO = Math.Round(area.LookupParameter("A Coefficient Location (Км)")?.AsDouble() ?? 0.0, 3);
-                                    double ACHE = Math.Round(area.LookupParameter("A Coefficient Height (Кив)")?.AsDouble() ?? 0.0, 3);
-                                    double ACRO = Math.Round(area.LookupParameter("A Coefficient Roof (Кпп)")?.AsDouble() ?? 0.0, 3);
-                                    double ACSP = Math.Round(area.LookupParameter("A Coefficient Special (Кок)")?.AsDouble() ?? 0.0, 3);
-                                    double ACST = Math.Round(area.LookupParameter("A Coefficient Storage (Ксп)")?.AsDouble() ?? 0.0, 3);
-                                    double ACZO = Math.Round(area.LookupParameter("A Coefficient Zones (Кк)")?.AsDouble() ?? 0.0, 3);
-                                    double ACCO = Math.Round(area.LookupParameter("A Coefficient Multiplied")?.AsDouble() ?? 0.0, 3);
-                                    double C1C2 = Math.Round(area.LookupParameter("A Instance Price C1/C2")?.AsDouble() ?? 0.0, 3);
+                                    double ACGA = area.LookupParameter("A Coefficient Garage (Кпг)")?.AsDouble() ?? 0.0;
+                                    double ACOR = area.LookupParameter("A Coefficient Orientation (Ки)")?.AsDouble() ?? 0.0;
+                                    double ACLE = area.LookupParameter("A Coefficient Level (Кв)")?.AsDouble() ?? 0.0;
+                                    double ACLO = area.LookupParameter("A Coefficient Location (Км)")?.AsDouble() ?? 0.0;
+                                    double ACHE = area.LookupParameter("A Coefficient Height (Кив)")?.AsDouble() ?? 0.0;
+                                    double ACRO = area.LookupParameter("A Coefficient Roof (Кпп)")?.AsDouble() ?? 0.0;
+                                    double ACSP = area.LookupParameter("A Coefficient Special (Кок)")?.AsDouble() ?? 0.0;
+                                    double ACST = area.LookupParameter("A Coefficient Storage (Ксп)")?.AsDouble() ?? 0.0;
+                                    double ACZO = area.LookupParameter("A Coefficient Zones (Кк)")?.AsDouble() ?? 0.0;
+                                    double ACCO = area.LookupParameter("A Coefficient Multiplied")?.AsDouble() ?? 0.0;
+                                    double C1C2 = Math.Round(area.LookupParameter("A Instance Price C1/C2")?.AsDouble() ?? 0.0, 2);
                                     double areaCommonPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3);
-                                    double areaCommonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 3);
+                                    double areaCommonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 2);
                                     double areaCommonAreaSpecialPercent = Math.Round(area.LookupParameter("A Instance Common Area Special %")?.AsDouble() / areaConvert ?? 0.0, 3);
-                                    double areaCommonAreaSpecial = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() / areaConvert ?? 0.0, 3);
-                                    double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0), 3);
+                                    double areaCommonAreaSpecial = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() / areaConvert ?? 0.0, 2);
+                                    double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0), 2);
                                     double areaPermitPercent = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3);
                                     double areaRLPPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3);
-                                    double areaRLP = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3);
+                                    double areaRLP = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 2);
 
                                     string[] areaStringData = new[] { areaNumber, areaName };
                                     object[] areasDoubleData = new object[] { areaArea, areaSubjected, ACGA, ACOR, ACLE, ACLO, ACHE, ACRO, ACSP, ACST, ACZO, ACCO, C1C2, areaCommonPercent, areaCommonArea, areaCommonAreaSpecialPercent, areaCommonAreaSpecial, areaTotalArea, areaPermitPercent, areaRLPPercentage, areaRLP};
@@ -1396,11 +1425,11 @@ namespace AreaCalculations
 
                                         Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"W{x}"];
                                         areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value,
-                                                    Math.Round(areaSub.LookupParameter("Area").AsDouble() / areaConvert, 3), DBNull.Value, DBNull.Value,
+                                                    Math.Round(areaSub.LookupParameter("Area").AsDouble() / areaConvert, 2), DBNull.Value, DBNull.Value,
                                                     DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
                                                     DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
                                                     Math.Round(areaSub.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3),
-                                                    Math.Round(areaSub.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3) });
+                                                    Math.Round(areaSub.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 2) });
 
                                         Borders areaAdjRangeBorders = areaAdjRangeDouble.Borders;
                                         areaAdjRangeBorders[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
@@ -1429,11 +1458,11 @@ namespace AreaCalculations
 
                                             Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"W{x}"];
                                             areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value,
-                                                    Math.Round(areaGround.LookupParameter("Area").AsDouble() / areaConvert, 3), DBNull.Value, DBNull.Value,
+                                                    Math.Round(areaGround.LookupParameter("Area").AsDouble() / areaConvert, 2), DBNull.Value, DBNull.Value,
                                                     DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
                                                     DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
                                                     Math.Round(areaGround.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3),
-                                                    Math.Round(areaGround.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3) });
+                                                    Math.Round(areaGround.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 2) });
 
                                             Borders areaAdjRangeBorders = areaAdjRangeDouble.Borders;
                                             areaAdjRangeBorders[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
