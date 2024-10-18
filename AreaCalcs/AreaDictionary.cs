@@ -483,27 +483,16 @@ namespace AreaCalculations
 
                         // redistribute square meters area accordingly
                         area.LookupParameter(parameterNameArea).Set(calculatedArea * areaConvert);
-
-                        //
-                        //
-                        //
-                        /*
-                        if (parameterNameArea == "A Instance Common Area")
-                        {
-                            TaskDialog.Show("Test", $"{area.Name} | Calculated percent: {calculatedPercent}" +
-                                $" | Total common areas: {totalAreaToCalculateFrom} | Final area: {calculatedArea} | Remaining surplus: {surplus}");
-                        }
-                        */
-                        //
-                        //
-                        //
                     }
                 }
 
                 counter++;
 
                 if (counter == 10)
+                {
+
                     surplus = 0;
+                }
             }
 
             transaction.Commit();
