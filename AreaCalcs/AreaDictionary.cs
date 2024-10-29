@@ -405,7 +405,7 @@ namespace AreaCalculations
             double surplus = Math.Round(100 - buildingPermitTotal, 3);
             int counter = 0;
 
-            while (surplus != 0)
+            while (Math.Abs(surplus) >= 0.0005)
             {
                 if (counter >= areaGroup.Keys.ToList().Count())
                 {
@@ -413,7 +413,7 @@ namespace AreaCalculations
                 }
                 string group = areaGroup.Keys.ToList()[counter];
 
-                if ((Math.Abs(surplus) * 1000) >= areaGroup[group].Count())
+                if (Math.Round(Math.Abs(surplus) * 1000) >= areaGroup[group].Count())
                 {
                     // calculate the deduction total, depending on whether the surplis is positive or negatibe
                     double coefficient = surplus / Math.Abs(surplus);
@@ -454,16 +454,29 @@ namespace AreaCalculations
 
             double surplus = Math.Round(100 - buildingPermitTotal, 3);
             int counter = 0;
+            int numbOfCycles = 0;
 
-            while (surplus != 0)
+            while (Math.Abs(surplus) >= 0.0005)
             {
+                if (numbOfCycles == 3)
+                {
+                    string randomGroup = areaGroup.Keys.ToList()[0];
+                    Area randomArea = areaGroup[randomGroup][0];
+                    string areasInfo = $"plot: {randomArea.LookupParameter("A Instance Area Plot").AsString()} and area group: {randomArea.LookupParameter("A Instance Area Group").AsString()}";
+
+                    TaskDialog.Show("Warning", $"Surplus could not be distributed for parameters {parameterNamePercent} and {parameterNameArea} for {areasInfo}");
+
+                    transaction.Commit();
+                    return;
+                }
                 if (counter >= areaGroup.Keys.ToList().Count())
                 {
                     counter = 0;
+                    numbOfCycles++;
                 }
                 string group = areaGroup.Keys.ToList()[counter];
 
-                if ((Math.Abs(surplus) * 1000) >= areaGroup[group].Count())
+                if (Math.Round(Math.Abs(surplus) * 1000) >= areaGroup[group].Count())
                 {
                     // calculate the deduction total, depending on whether the surplis is positive or negatibe
                     double coefficient = surplus / Math.Abs(surplus);
@@ -487,14 +500,67 @@ namespace AreaCalculations
                 }
 
                 counter++;
+            }
 
-                if (counter == 10)
+            // check if the area was calculated accordingly or if there is a newly formed surplus
+            double totalAreaSum = 0;
+            foreach (string group in areaGroup.Keys)
+            {
+                foreach (Area area in areaGroup[group])
                 {
-
-                    surplus = 0;
+                    totalAreaSum += Math.Round(area.LookupParameter(parameterNameArea).AsDouble() / areaConvert, 2);
                 }
             }
 
+            double areaSurplus = Math.Round(totalAreaToCalculateFrom - totalAreaSum, 2);
+            int areaCounter = 0;
+            int numbOfAreaCycles = 0;
+
+            // check if areasurplus is 0, and if yes, redistribute it accordingly as well
+            while (Math.Abs(areaSurplus) >= 0.005)
+            {
+                if (numbOfAreaCycles == 2)
+                {
+                    string randomGroup = areaGroup.Keys.ToList()[0];
+                    Area randomArea = areaGroup[randomGroup][0];
+                    string areasInfo = $"plot: {randomArea.LookupParameter("A Instance Area Plot").AsString()} and area group: {randomArea.LookupParameter("A Instance Area Group").AsString()}";
+
+                    TaskDialog.Show("Warning", $"Surplus area could not be distributed for parameters {parameterNameArea} for {areasInfo}. " +
+                        $"// Remaining surplus is {areaSurplus} | Number of cycles: {numbOfAreaCycles}");
+
+                    transaction.Commit();
+                    return;
+                }
+
+                if (areaCounter >= areaGroup.Keys.ToList().Count())
+                {
+                    areaCounter = 0;
+                    numbOfAreaCycles++;
+                }
+
+                string group = areaGroup.Keys.ToList()[areaCounter];
+
+                if (Math.Round(Math.Abs(areaSurplus) * 100) >= areaGroup[group].Count())
+                {
+                    // calculate the deduction total, depending on whether the surplis is positive or negatibe
+                    double coefficient = areaSurplus / Math.Abs(areaSurplus);
+                    // so far, the result is either 1 or -1
+                    double finalDeduction = 0.01 * coefficient;
+                    // this is the final deduction calculated value, which would be either -0.01 or 0.01
+
+                    foreach (Area area in areaGroup[group])
+                    {
+                        // calculate the updated area
+                        double calculatedArea = Math.Round(area.LookupParameter(parameterNameArea).AsDouble() / areaConvert + finalDeduction, 2);
+                        area.LookupParameter(parameterNameArea).Set(Math.Round(calculatedArea * areaConvert, 2));
+
+                        areaSurplus -= finalDeduction;
+                    }
+                }
+
+                areaCounter++;
+            }
+            
             transaction.Commit();
         }
         public void setGrossArea()
@@ -1010,7 +1076,7 @@ namespace AreaCalculations
                     areaGroupsNoLand[key] = group.ToList();
                     sequence++;
                 }
-
+                
                 // calculate building permit surplus
                 calculateSurplusPercent(areaGroupsNoLand, "A Instance Building Permit %");
                 // calculate RLP area percent and RLP Area
@@ -1022,7 +1088,7 @@ namespace AreaCalculations
                     {
                         calculateSurplusPercentandArea(areaGroupsSeperateProperties[property], "A Instance Common Area %", "A Instance Common Area", propertyCommonAreas[plotName][property]);
                     }
-                }
+                }                
             }            
         }
 
