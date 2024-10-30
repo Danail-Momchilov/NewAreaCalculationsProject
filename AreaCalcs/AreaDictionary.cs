@@ -390,6 +390,11 @@ namespace AreaCalculations
         }
         private void calculateSurplusPercent(Dictionary<string, List<Area>> areaGroup, string parameterName)
         {
+            if (areaGroup.Keys.ToList().Count == 0)
+            {
+                return;
+            }
+
             transaction.Start();
 
             // calculate building permit surplus
@@ -440,6 +445,11 @@ namespace AreaCalculations
         }
         private void calculateSurplusPercentandArea(Dictionary<string, List<Area>> areaGroup, string parameterNamePercent, string parameterNameArea, double totalAreaToCalculateFrom)
         {
+            if (areaGroup.Keys.ToList().Count == 0)
+            {
+                return;
+            }
+
             transaction.Start();
 
             // calculate building permit surplus
@@ -458,7 +468,7 @@ namespace AreaCalculations
 
             while (Math.Abs(surplus) >= 0.0005)
             {
-                if (numbOfCycles == 3)
+                if (numbOfCycles == 5)
                 {
                     string randomGroup = areaGroup.Keys.ToList()[0];
                     Area randomArea = areaGroup[randomGroup][0];
@@ -474,6 +484,7 @@ namespace AreaCalculations
                     counter = 0;
                     numbOfCycles++;
                 }
+
                 string group = areaGroup.Keys.ToList()[counter];
 
                 if (Math.Round(Math.Abs(surplus) * 1000) >= areaGroup[group].Count())
@@ -519,7 +530,7 @@ namespace AreaCalculations
             // check if areasurplus is 0, and if yes, redistribute it accordingly as well
             while (Math.Abs(areaSurplus) >= 0.005)
             {
-                if (numbOfAreaCycles == 2)
+                if (numbOfAreaCycles == 5)
                 {
                     string randomGroup = areaGroup.Keys.ToList()[0];
                     Area randomArea = areaGroup[randomGroup][0];
@@ -561,6 +572,74 @@ namespace AreaCalculations
                 areaCounter++;
             }
             
+            transaction.Commit();
+        }
+        private void calculateSpecialCommonAreaSurplus(Dictionary<string, List<Area>> areaGroup, string parameterNameArea, double totalAreaToCalculateFrom)
+        {
+            if (areaGroup.Keys.ToList().Count == 0)
+            {
+                return;
+            }
+
+            transaction.Start();
+
+            double totalCalculatedArea = 0;
+            foreach (string group in areaGroup.Keys)
+            {
+                foreach (Area area in areaGroup[group])
+                {
+                    totalCalculatedArea += Math.Round(area.LookupParameter(parameterNameArea).AsDouble() / areaConvert, 2);
+                }
+            }
+
+            double surplus = Math.Round(totalAreaToCalculateFrom - totalCalculatedArea, 2);
+            int counter = 0;
+            int numbOfCycles = 0;
+
+            while (Math.Abs(surplus) >= 0.0005)
+            {
+                if (numbOfCycles == 5)
+                {
+                    string randomGroup = areaGroup.Keys.ToList()[0];
+                    Area randomArea = areaGroup[randomGroup][0];
+                    string areasInfo = $"plot: {randomArea.LookupParameter("A Instance Area Plot").AsString()} and area group: {randomArea.LookupParameter("A Instance Area Group").AsString()}";
+
+                    TaskDialog.Show("Warning", $"Surplus could not be distributed for parameter {parameterNameArea}, {areasInfo}");
+
+                    transaction.Commit();
+                    return;
+                }
+                if (counter >= areaGroup.Keys.ToList().Count())
+                {
+                    counter = 0;
+                    numbOfCycles++;
+                }
+
+                string group = areaGroup.Keys.ToList()[counter];
+
+                // calculate the deduction total, depending on whether the surplis is positive or negatibe
+                double coefficient = surplus / Math.Abs(surplus);
+                // so far, the result is either 1 or -1
+                double finalDeduction = 0.01 * coefficient;
+                // this is the final deduction calculated value, which would be either -0.01 or 0.01
+
+                foreach (Area area in areaGroup[group])
+                {
+                    if (area.LookupParameter("A Instance Common Area Special").HasValue &&
+                        Math.Round(area.LookupParameter("A Instance Common Area Special").AsDouble() / areaConvert, 2) != 0 &&
+                        area.LookupParameter("A Instance Common Area Special").AsString() != "")
+                    {
+                        // calculate the updated area
+                        double calculatedArea = Math.Round(area.LookupParameter(parameterNameArea).AsDouble() / areaConvert + finalDeduction, 2);
+                        area.LookupParameter(parameterNameArea).Set(Math.Round(calculatedArea * areaConvert, 2));
+
+                        surplus -= finalDeduction;
+                    }
+                }
+
+                counter++;
+            }
+
             transaction.Commit();
         }
         public void setGrossArea()
@@ -1084,14 +1163,11 @@ namespace AreaCalculations
                 // calculate common area percent and common area
                 foreach (string property in areaGroupsSeperateProperties.Keys)
                 {
-                    foreach (string group in areaGroupsSeperateProperties[property].Keys)
-                    {
-                        calculateSurplusPercentandArea(areaGroupsSeperateProperties[property], "A Instance Common Area %", "A Instance Common Area", propertyCommonAreas[plotName][property]);
-                    }
-                }                
+                    calculateSurplusPercentandArea(areaGroupsSeperateProperties[property], "A Instance Common Area %", "A Instance Common Area", propertyCommonAreas[plotName][property]);
+                    calculateSpecialCommonAreaSurplus(areaGroupsSeperateProperties[property], "A Instance Common Area Special", propertyCommonAreasSpecial[plotName][property]);
+                }              
             }            
         }
-
         public void exportToExcel(string filePath, string sheetName)
         {
             Microsoft.Office.Interop.Excel.Application excelApplication = new Microsoft.Office.Interop.Excel.Application();
