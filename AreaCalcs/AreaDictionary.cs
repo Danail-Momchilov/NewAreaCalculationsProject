@@ -1204,14 +1204,14 @@ namespace AreaCalculations
 
             // set columns' width
             workSheet.Range["A:A"].ColumnWidth = 30;
-            workSheet.Range["B:B"].ColumnWidth = 45;
-            workSheet.Range["C:C"].ColumnWidth = 20;
-            workSheet.Range["D:D"].ColumnWidth = 20;
+            workSheet.Range["B:B"].ColumnWidth = 30;
+            workSheet.Range["C:C"].ColumnWidth = 15;
+            workSheet.Range["D:D"].ColumnWidth = 15;
             workSheet.Range["E:E"].ColumnWidth = 10;
             workSheet.Range["F:N"].ColumnWidth = 5;
             workSheet.Range["O:O"].ColumnWidth = 10;
-            workSheet.Range["P:T"].ColumnWidth = 20;
-            workSheet.Range["U:W"].ColumnWidth = 20;
+            workSheet.Range["P:T"].ColumnWidth = 15;
+            workSheet.Range["U:W"].ColumnWidth = 15;
 
             int x = 1;
 
@@ -1379,6 +1379,9 @@ namespace AreaCalculations
                 bordersEight[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
                 cellsEight.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
 
+                // a list, storing data about end lines of each separate property group
+                List<string> propertyEndLinesLandSum = new List<string>();
+
                 foreach (string property in plotProperties[plotName])
                 {
                     if (!property.Contains("+") && !property.ToLower().Contains("траф"))
@@ -1410,16 +1413,21 @@ namespace AreaCalculations
 
                         x++;
                         Range parameterNamesRange = workSheet.Range[$"A{x}", $"W{x}"];
-                        string[] parameterNamesData = new[] { "ПЛОЩ СО", "НАИМЕНОВАНИЕ СО", "ПЛОЩ F1(F2)", "ПРИЛЕЖАЩА ПЛОЩ", "Кпг", "Ки", "Кв", "Км", "Кив", "Кпп", 
-                            "Кок", "Ксп", "Кк", "К", "C1(C2)", "ОБЩИ ЧАСТИ - F3", "", "СП.ОБЩИ ЧАСТИ - F4", "", "ОБЩО-F1(F2)+F3+F4", "ПРАВО НА СТРОЕЖ", "ЗЕМЯ", ""};
+                        string[] parameterNamesData = new[] { "ПЛОЩ СО", "НАИМЕНОВАНИЕ СО", "ПЛОЩ F1(F2)", "ПРИЛЕЖАЩА \nПЛОЩ", "Кпг", "Ки", "Кв", "Км", "Кив", "Кпп", 
+                            "Кок", "Ксп", "Кк", "К", "C1(C2)", "И.Ч. \nПАРКОМЕСТА", "ОБЩИ ЧАСТИ - F3", "", "СП.ОБЩИ \nЧАСТИ - F4", "ОБЩО-\nF1(F2)+F3+F4", "ПРАВО \nНА СТРОЕЖ", "ЗЕМЯ", ""};
                         parameterNamesRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, parameterNamesData);
                         parameterNamesRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
                         parameterNamesRange.Font.Bold = true;
                         parameterNamesRange.Borders.LineStyle = XlLineStyle.xlContinuous;
+                        parameterNamesRange.VerticalAlignment = XlVAlign.xlVAlignTop;
+                        Range commonAreasMerge = workSheet.Range[$"Q{x}", $"R{x}"];
+                        commonAreasMerge.Merge();
+                        Range landMerge = workSheet.Range[$"V{x}", $"W{x}"];
+                        landMerge.Merge();
 
                         x++;
                         Range parametersTypeRange = workSheet.Range[$"A{x}", $"W{x}"];
-                        string[] parametersTypeData = new[] { "", "", "m2", "m2", "", "", "", "", "", "", "", "", "", "", "", "% и.ч.", "m2", "% и.ч.", "m2", "m2", "% и.ч.", "% и.ч.", "m2" };
+                        string[] parametersTypeData = new[] { "", "", "m2", "m2", "", "", "", "", "", "", "", "", "", "", "", "% и.ч.", "% и.ч.", "m2", "m2", "m2", "% и.ч.", "% и.ч.", "m2" };
                         parametersTypeRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, parametersTypeData);
                         parametersTypeRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
                         parametersTypeRange.Font.Bold = true;
@@ -1543,15 +1551,14 @@ namespace AreaCalculations
                                     double C1C2 = Math.Round(area.LookupParameter("A Instance Price C1/C2")?.AsDouble() ?? 0.0, 2);
                                     double areaCommonPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3);
                                     double areaCommonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 2);
-                                    double areaCommonAreaSpecialPercent = Math.Round(area.LookupParameter("A Instance Common Area Special %")?.AsDouble() / areaConvert ?? 0.0, 3);
-                                    double areaCommonAreaSpecial = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() / areaConvert ?? 0.0, 2);
-                                    double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0), 2);
+                                    double areaCommonAreaSpecialPercent = Math.Round(area.LookupParameter("A Instance Common Area Special %")?.AsDouble() / areaConvert ?? 0.0, 3);                                    double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0), 2);
                                     double areaPermitPercent = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3);
                                     double areaRLPPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3);
                                     double areaRLP = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 2);
 
                                     string[] areaStringData = new[] { areaNumber, areaName };
-                                    object[] areasDoubleData = new object[] { areaArea, areaSubjected, ACGA, ACOR, ACLE, ACLO, ACHE, ACRO, ACSP, ACST, ACZO, ACCO, C1C2, areaCommonPercent, areaCommonArea, areaCommonAreaSpecialPercent, areaCommonAreaSpecial, areaTotalArea, areaPermitPercent, areaRLPPercentage, areaRLP};
+                                    object[] areasDoubleData = new object[] { areaArea, areaSubjected, ACGA, ACOR, ACLE, ACLO, ACHE, ACRO, ACSP, ACST, ACZO, ACCO, C1C2, DBNull.Value, 
+                                        areaCommonPercent, areaCommonArea, areaCommonAreaSpecialPercent, areaTotalArea, areaPermitPercent, areaRLPPercentage, areaRLP};
 
                                     cellRangeString.set_Value(XlRangeValueDataType.xlRangeValueDefault, areaStringData);
                                     cellRangeString.Borders.LineStyle = XlLineStyle.xlContinuous;
@@ -1696,7 +1703,7 @@ namespace AreaCalculations
                                         areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value,
                                                         Math.Round(room.LookupParameter("Area").AsDouble() / areaConvert, 2), DBNull.Value, DBNull.Value,
                                                         DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
-                                                        DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, percentage, DBNull.Value, DBNull.Value, 
+                                                        DBNull.Value, DBNull.Value, percentage, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, 
                                                         DBNull.Value, DBNull.Value, DBNull.Value});
 
                                         Borders areaAdjRangeBorders = areaAdjRangeDouble.Borders;
@@ -1712,6 +1719,7 @@ namespace AreaCalculations
                         }
 
                         int endLine = x - 1;
+                        propertyEndLinesLandSum.Add($"V{x}");
 
                         Range colorRange = workSheet.Range[$"C{startLine}", $"W{endLine}"];
                         colorRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.AliceBlue);
@@ -1728,21 +1736,17 @@ namespace AreaCalculations
                         Range sumC1C2 = workSheet.Range[$"O{x}", $"O{x}"];
                         sumC1C2.Formula = $"=SUM(O{startLine + 2}:O{endLine})";
 
-                        // set a formula for the total sum of Common Areas Percentage
-                        Range sumCommonPercent = workSheet.Range[$"P{x}", $"P{x}"];
-                        sumCommonPercent.Formula = $"=SUM(P{startLine + 2}:P{endLine})";
-
                         // set a formula for the total sum of Common Areas 
-                        Range sumCommonAreas = workSheet.Range[$"Q{x}", $"Q{x}"];
-                        sumCommonAreas.Formula = $"=SUM(Q{startLine + 2}:Q{endLine})";
+                        Range sumCommonAreasPercentage = workSheet.Range[$"Q{x}", $"Q{x}"];
+                        sumCommonAreasPercentage.Formula = $"=SUM(Q{startLine + 2}:Q{endLine})";
 
                         // set a formula for the total sum of Special Common Areas Percentage
-                        Range sumSpecialAreaPercentage = workSheet.Range[$"R{x}", $"R{x}"];
-                        sumSpecialAreaPercentage.Formula = $"=SUM(R{startLine + 2}:R{endLine})";
+                        Range sumCommonArea = workSheet.Range[$"R{x}", $"R{x}"];
+                        sumCommonArea.Formula = $"=SUM(R{startLine + 2}:R{endLine})";
 
                         // set a formula for the total sum of Special Common Areas Percentage
-                        Range sumSpecialCommonAreaPercentage = workSheet.Range[$"S{x}", $"S{x}"];
-                        sumSpecialCommonAreaPercentage.Formula = $"=SUM(S{startLine + 2}:S{endLine})";
+                        Range sumSpecialCommonArea = workSheet.Range[$"S{x}", $"S{x}"];
+                        sumSpecialCommonArea.Formula = $"=SUM(S{startLine + 2}:S{endLine})";
 
                         // set a formula for the total sum of Total Area
                         Range totalAreaF1F2F3F4 = workSheet.Range[$"T{x}", $"T{x}"];
@@ -1767,6 +1771,9 @@ namespace AreaCalculations
                         x++;
                     }
                 }
+
+                string propertyLandSumFormula = $"=SUM({string.Join(",", propertyEndLinesLandSum)})";
+                workSheet.Range[$"V{x}"].Formula = propertyLandSumFormula;
             }
 
             workBook.Save();
