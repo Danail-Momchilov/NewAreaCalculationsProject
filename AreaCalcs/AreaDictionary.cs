@@ -670,6 +670,36 @@ namespace AreaCalculations
 
             return rooms;
         }
+        /*
+        private Dictionary<string, List<object>> returnAdjascentRoomsTest(string areaNumber, double areaArea)
+        {
+            Dictionary<string, List<object>> keyValuePairs = new Dictionary<string, List<object>>();
+
+            List<Room> rooms = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType()
+            .Where(room => room.LookupParameter("A Instance Area Primary").AsString() == areaNumber).Cast<Room>().ToList();
+
+            rooms.OrderBy(room => room.LookupParameter("Number").AsString());
+
+            double totalPercentage = 0;
+
+            // construct the dictionary
+            foreach (Room room in rooms)
+            {
+                string number = room.LookupParameter("Number").AsString();
+
+                keyValuePairs.Add(number, new List<object>());
+                keyValuePairs[number].Add(room.LookupParameter("Name").AsString());
+                keyValuePairs[number].Add(room.LookupParameter("Area").AsDouble());
+
+                double percentage = Math.Round(100 * room.LookupParameter("Area").AsDouble() / areaArea, 3);
+                totalPercentage += percentage;
+
+                keyValuePairs[number].Add(percentage);
+            }
+
+            // TODO: calculate surplus
+        }
+        */
         public void setGrossArea()
         {
             transaction.Start();
@@ -1379,8 +1409,11 @@ namespace AreaCalculations
                 bordersEight[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
                 cellsEight.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
 
-                // a list, storing data about end lines of each separate property group
+                // a list, storing data about end lines of each separate property group with respect to column V
                 List<string> propertyEndLinesLandSum = new List<string>();
+                // a list, storing data about end lines of each separate proeprty group with respect to column W
+                List<string> propertyEndLineslandSumArea = new List<string>();
+
 
                 foreach (string property in plotProperties[plotName])
                 {
@@ -1720,6 +1753,7 @@ namespace AreaCalculations
 
                         int endLine = x - 1;
                         propertyEndLinesLandSum.Add($"V{x}");
+                        propertyEndLineslandSumArea.Add($"W{x}");
 
                         Range colorRange = workSheet.Range[$"C{startLine}", $"W{endLine}"];
                         colorRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.AliceBlue);
@@ -1774,6 +1808,11 @@ namespace AreaCalculations
 
                 string propertyLandSumFormula = $"=SUM({string.Join(",", propertyEndLinesLandSum)})";
                 workSheet.Range[$"V{x}"].Formula = propertyLandSumFormula;
+                workSheet.Range[$"V{x}"].Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.AntiqueWhite);
+
+                string propertyLandSumAreaFormula = $"=SUM({string.Join(",", propertyEndLineslandSumArea)})";
+                workSheet.Range[$"W{x}"].Formula = propertyLandSumAreaFormula;
+                workSheet.Range[$"W{x}"].Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.AntiqueWhite);
             }
 
             workBook.Save();
