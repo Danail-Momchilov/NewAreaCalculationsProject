@@ -669,37 +669,98 @@ namespace AreaCalculations
             rooms.OrderBy(room => room.LookupParameter("Number").AsString());
 
             return rooms;
-        }
-        /*
-        private Dictionary<string, List<object>> returnAdjascentRoomsTest(string areaNumber, double areaArea)
+        }        
+        private Dictionary<List<object>, Room> returnAdjascentRoomsTest(string areaNumber, double areaArea)
         {
             Dictionary<string, List<object>> keyValuePairs = new Dictionary<string, List<object>>();
 
             List<Room> rooms = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType()
             .Where(room => room.LookupParameter("A Instance Area Primary").AsString() == areaNumber).Cast<Room>().ToList();
 
-            rooms.OrderBy(room => room.LookupParameter("Number").AsString());
+            // group rooms, based on their Area
+            var groupedRooms = rooms.GroupBy(room => Math.Round(room.LookupParameter("Area").AsDouble(), 3));
 
-            double totalPercentage = 0;
+            // create a dictionary from these groups
+            Dictionary<List<double>, List<Room>> percentageDict = new Dictionary<List<double>, List<Room>>();
+            double totalpercentage = 0;
 
-            // construct the dictionary
-            foreach (Room room in rooms)
+            foreach (var group in groupedRooms)
             {
-                string number = room.LookupParameter("Number").AsString();
+                List<double> listData = new List<double>();
+                listData.Add(group.Count());
 
-                keyValuePairs.Add(number, new List<object>());
-                keyValuePairs[number].Add(room.LookupParameter("Name").AsString());
-                keyValuePairs[number].Add(room.LookupParameter("Area").AsDouble());
+                double percentage = Math.Round(group.First().LookupParameter("Area").AsDouble()*100/areaArea, 3);
+                listData.Add(percentage);
 
-                double percentage = Math.Round(100 * room.LookupParameter("Area").AsDouble() / areaArea, 3);
-                totalPercentage += percentage;
+                percentageDict.Add(listData, new List<Room>());
 
-                keyValuePairs[number].Add(percentage);
+                foreach (Room room in group)
+                {
+                    percentageDict[listData].Add(room);
+                    totalpercentage += percentage;
+                }
             }
 
-            // TODO: calculate surplus
+            // calculate surplus
+            double surplus = Math.Round(100 - totalpercentage, 3);
+            int counter = 0;
+
+            // redistribute surplus if any
+            while (Math.Abs(surplus) >= 0.0005)
+            {
+                if (counter >= percentageDict.Keys.Count())
+                {
+                    counter = 0;
+                }
+                List<double> dictList = percentageDict.Keys.ToList()[counter];
+
+                if (Math.Round(Math.Abs(surplus) * 1000) >= percentageDict[dictList].Count)
+                {
+                    // calculate the deduction total, depending on whether the surplis is positive or negatibe
+                    double coefficient = surplus / Math.Abs(surplus);
+                    // so far, the result is either 1 or -1
+                    double finalDeduction = 0.001 * coefficient;
+                    // this is the final deduction calculated value, which would be either -0.001 or 0.001
+
+                    percentageDict.Keys.ToList()[counter][1] += finalDeduction;
+
+                    foreach (Room room in percentageDict[dictList])
+                    {
+                        surplus -= finalDeduction;
+                    }
+                }
+            }
+
+            // construct new dictionary
+            Dictionary<List<object>, Room> flattenedDict = new Dictionary<List<object>, Room>();
+
+            // tterate through the percentageDict to populate the new dictionary
+            foreach (var kvp in percentageDict)
+            {
+                List<double> keyList = kvp.Key;
+                List<Room> roomsList = kvp.Value;
+
+                double percentage = keyList[1];
+
+                foreach (Room room in roomsList)
+                {
+                    // Create the new key with the room number and percentage
+                    List<object> newKey = new List<object>
+                    {
+                        room.LookupParameter("Number").AsString(), percentage
+                    };
+
+                    // Add to the new dictionary
+                    flattenedDict[newKey] = room;
+                }
+            }
+
+            // sort the flattened dictionary based on room number
+            var sortedFlattenedDict = flattenedDict.OrderBy(kvp => (string)kvp.Key[0]).ToDictionary(kvp => kvp.Key, kvp => kvp.Value); 
+
+            return sortedFlattenedDict;
         }
-        */
+        
         public void setGrossArea()
         {
             transaction.Start();
@@ -876,10 +937,6 @@ namespace AreaCalculations
             }
 
             transaction.Commit();
-        }
-        public void calculateSpecialCommonAreaPercent()
-        {
-            // TODO
         }
         public void calculateSpecialCommonAreas()
         {
@@ -1719,6 +1776,36 @@ namespace AreaCalculations
                                 {
                                     double totalArea = Math.Round(area.LookupParameter("A Instance Gross Area").AsDouble(), 3);
 
+                                    Dictionary<List<object>, Room> adjascentRooms = returnAdjascentRoomsTest(area.LookupParameter("Number").AsString(), totalArea);
+
+                                    foreach (List<object> key in adjascentRooms.Keys)
+                                    {
+                                        Room room = adjascentRooms[key];
+
+                                        Range areaAdjRangeStr = workSheet.Range[$"A{x}", $"B{x}"];
+                                        areaAdjRangeStr.set_Value(XlRangeValueDataType.xlRangeValueDefault,
+                                            new[] { key[0], room.LookupParameter("Name").AsString() });
+
+                                        areaAdjRangeStr.HorizontalAlignment = XlHAlign.xlHAlignRight;
+                                        areaAdjRangeStr.Borders.LineStyle = XlLineStyle.xlContinuous;
+
+                                        Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"W{x}"];
+                                        areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value,
+                                                        Math.Round(room.LookupParameter("Area").AsDouble() / areaConvert, 2), DBNull.Value, DBNull.Value,
+                                                        DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
+                                                        DBNull.Value, DBNull.Value, key[1], DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
+                                                        DBNull.Value, DBNull.Value, DBNull.Value});
+
+                                        Borders areaAdjRangeBorders = areaAdjRangeDouble.Borders;
+                                        areaAdjRangeBorders[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
+                                        areaAdjRangeBorders[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
+                                        areaAdjRangeBorders[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
+                                        areaAdjRangeBorders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+
+                                        x++;
+                                    }
+
+                                    /*
                                     foreach(Room room in returnAdjascentRooms(area.LookupParameter("Number").AsString()))
                                     {
                                         double roomArea = Math.Round(room.LookupParameter("Area").AsDouble(), 3);
@@ -1747,6 +1834,7 @@ namespace AreaCalculations
 
                                         x++;
                                     }
+                                    */
                                 }
                             }
                         }
