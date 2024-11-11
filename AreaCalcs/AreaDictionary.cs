@@ -1471,7 +1471,6 @@ namespace AreaCalculations
                 // a list, storing data about end lines of each separate proeprty group with respect to column W
                 List<string> propertyEndLineslandSumArea = new List<string>();
 
-
                 foreach (string property in plotProperties[plotName])
                 {
                     if (!property.Contains("+") && !property.ToLower().Contains("траф"))
@@ -1641,7 +1640,7 @@ namespace AreaCalculations
                                     double C1C2 = Math.Round(area.LookupParameter("A Instance Price C1/C2")?.AsDouble() ?? 0.0, 2);
                                     double areaCommonPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3);
                                     double areaCommonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 2);
-                                    double areaCommonAreaSpecialPercent = Math.Round(area.LookupParameter("A Instance Common Area Special %")?.AsDouble() / areaConvert ?? 0.0, 3);                                    double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0), 2);
+                                    double areaCommonAreaSpecialPercent = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() / areaConvert ?? 0.0, 2);                                    double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0), 2);
                                     double areaPermitPercent = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3);
                                     double areaRLPPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3);
                                     double areaRLP = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 2);
@@ -1804,37 +1803,6 @@ namespace AreaCalculations
 
                                         x++;
                                     }
-
-                                    /*
-                                    foreach(Room room in returnAdjascentRooms(area.LookupParameter("Number").AsString()))
-                                    {
-                                        double roomArea = Math.Round(room.LookupParameter("Area").AsDouble(), 3);
-
-                                        double percentage = Math.Round(100 * roomArea / totalArea, 3);
-
-                                        Range areaAdjRangeStr = workSheet.Range[$"A{x}", $"B{x}"];
-                                        areaAdjRangeStr.set_Value(XlRangeValueDataType.xlRangeValueDefault, 
-                                            new[] { room.LookupParameter("Number").AsString(), room.LookupParameter("Name").AsString() });
-
-                                        areaAdjRangeStr.HorizontalAlignment = XlHAlign.xlHAlignRight;
-                                        areaAdjRangeStr.Borders.LineStyle = XlLineStyle.xlContinuous;
-
-                                        Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"W{x}"];
-                                        areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value,
-                                                        Math.Round(room.LookupParameter("Area").AsDouble() / areaConvert, 2), DBNull.Value, DBNull.Value,
-                                                        DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
-                                                        DBNull.Value, DBNull.Value, percentage, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, 
-                                                        DBNull.Value, DBNull.Value, DBNull.Value});
-
-                                        Borders areaAdjRangeBorders = areaAdjRangeDouble.Borders;
-                                        areaAdjRangeBorders[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
-                                        areaAdjRangeBorders[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
-                                        areaAdjRangeBorders[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
-                                        areaAdjRangeBorders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
-
-                                        x++;
-                                    }
-                                    */
                                 }
                             }
                         }
