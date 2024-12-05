@@ -3,12 +3,18 @@
   "WorkspaceRootPath": "B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{241A5378-9D1E-434B-8D74-005952A0B595}|AreaCalculations.csproj|b:\\06. bim automation\\02. c#\\area calculations\\newareacalculationsproject\\areacalcs\\areadictionary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{241A5378-9D1E-434B-8D74-005952A0B595}|AreaCalculations.csproj|solutionrelative:areacalcs\\areadictionary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{241A5378-9D1E-434B-8D74-005952A0B595}|AreaCalculations.csproj|b:\\06. bim automation\\02. c#\\area calculations\\newareacalculationsproject\\app.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{241A5378-9D1E-434B-8D74-005952A0B595}|AreaCalculations.csproj|solutionrelative:app.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{241A5378-9D1E-434B-8D74-005952A0B595}|AreaCalculations.csproj|B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject\\excel\\exporttoexcel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{241A5378-9D1E-434B-8D74-005952A0B595}|AreaCalculations.csproj|solutionrelative:excel\\exporttoexcel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{00000000-0000-0000-0000-000000000000}|\u003CSolution\u003E|AreaCalculations||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{241A5378-9D1E-434B-8D74-005952A0B595}|AreaCalculations.csproj|b:\\06. bim automation\\02. c#\\area calculations\\newareacalculationsproject\\sitecalcs\\sitecalcs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{241A5378-9D1E-434B-8D74-005952A0B595}|AreaCalculations.csproj|solutionrelative:sitecalcs\\sitecalcs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{241A5378-9D1E-434B-8D74-005952A0B595}|AreaCalculations.csproj|b:\\06. bim automation\\02. c#\\area calculations\\newareacalculationsproject\\||{B270807C-D8C6-49EB-8EBE-8E8D566637A1}|5e9a8ac2-4f34-4521-858f-4c248ba31532"
     }
   ],
   "DocumentGroupContainers": [
@@ -21,33 +27,46 @@
           "SelectedChildIndex": 1,
           "Children": [
             {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AreaCalculations",
+              "DocumentMoniker": "B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject\\AreaCalculations.csproj",
+              "RelativeDocumentMoniker": "AreaCalculations.csproj",
+              "ToolTip": "B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject\\AreaCalculations.csproj",
+              "RelativeToolTip": "AreaCalculations.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-12-05T12:15:44.679Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "App.cs",
+              "DocumentMoniker": "B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject\\App.cs",
+              "RelativeDocumentMoniker": "App.cs",
+              "ToolTip": "B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject\\App.cs",
+              "RelativeToolTip": "App.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-05T12:01:19.696Z",
+              "EditorCaption": ""
+            },
+            {
               "$type": "Bookmark",
               "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "AreaDictionary.cs",
-              "DocumentMoniker": "B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject\\AreaCalcs\\AreaDictionary.cs",
-              "RelativeDocumentMoniker": "AreaCalcs\\AreaDictionary.cs",
-              "ToolTip": "B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject\\AreaCalcs\\AreaDictionary.cs",
-              "RelativeToolTip": "AreaCalcs\\AreaDictionary.cs",
-              "ViewState": "AgIAAH4DAAAAAAAAAAAIwKYDAAASAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "SiteCalcs.cs",
+              "DocumentMoniker": "B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject\\SiteCalcs\\SiteCalcs.cs",
+              "RelativeDocumentMoniker": "SiteCalcs\\SiteCalcs.cs",
+              "ToolTip": "B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject\\SiteCalcs\\SiteCalcs.cs",
+              "RelativeToolTip": "SiteCalcs\\SiteCalcs.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-19T12:38:56.37Z",
+              "WhenOpened": "2024-12-05T12:11:17.584Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ExportToExcel.cs",
-              "DocumentMoniker": "B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject\\Excel\\ExportToExcel.cs",
-              "RelativeDocumentMoniker": "Excel\\ExportToExcel.cs",
-              "ToolTip": "B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject\\Excel\\ExportToExcel.cs",
-              "RelativeToolTip": "Excel\\ExportToExcel.cs",
-              "ViewState": "AgIAABEAAAAAAAAAAAAAwB4AAABcAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-13T15:47:49.669Z"
             }
           ]
         }
