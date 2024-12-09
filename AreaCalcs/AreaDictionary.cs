@@ -1315,8 +1315,32 @@ namespace AreaCalculations
             areaAdjRangeBorders[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
             areaAdjRangeBorders[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
             areaAdjRangeBorders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+
         }
         // TODO: make private after restart
+
+        private void setBoldRange(Worksheet workSheet, string startCell, string endCell, int row)
+        {
+            Range boldRange = workSheet.Range[$"{startCell}{row}", $"{endCell}{row}"];
+            boldRange.Font.Bold = true;
+        }
+
+        private void setWrapRange(Worksheet worksheet, string startCell, string endCell, int row)
+        {
+            Range wrapRange = worksheet.Range[$"{startCell}{row}", $"{endCell}{row}"];
+            wrapRange.WrapText = true;
+        }
+
+        private void setPlotBoundaries(Worksheet workSheet, string start, string end, int rangeStart, int rangeEnd)
+        {
+            Range cellsFive = workSheet.Range[$"{start}{rangeStart}", $"{end}{rangeEnd}"];
+            Borders bordersFive = cellsFive.Borders;
+            bordersFive[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
+            bordersFive[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
+            bordersFive[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
+            bordersFive[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+            cellsFive.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
+        }
 
         public void exportToExcel(string filePath, string sheetName)
         {
@@ -1325,12 +1349,12 @@ namespace AreaCalculations
             Worksheet workSheet = (Worksheet)workBook.Worksheets[sheetName];
 
             // set columns' width
-            workSheet.Range["A:A"].ColumnWidth = 30;
-            workSheet.Range["B:B"].ColumnWidth = 50;
-            workSheet.Range["C:C"].ColumnWidth = 15;
-            workSheet.Range["D:D"].ColumnWidth = 15;
+            workSheet.Range["A:A"].ColumnWidth = 15;
+            workSheet.Range["B:B"].ColumnWidth = 25;
+            workSheet.Range["C:C"].ColumnWidth = 10;
+            workSheet.Range["D:D"].ColumnWidth = 10;
             workSheet.Range["E:F"].ColumnWidth = 10;
-            workSheet.Range["G:O"].ColumnWidth = 15;
+            workSheet.Range["G:O"].ColumnWidth = 10;
 
             int x = 1;
 
@@ -1339,36 +1363,40 @@ namespace AreaCalculations
             workSheet.Cells[x, 1] = "IPID";
             workSheet.Cells[x, 2] = doc.ProjectInformation.LookupParameter("Project Number").AsString();
 
-            Range mergeRange = workSheet.Range[$"B{x}", $"W{x}"];
+            Range ipIdRange = workSheet.Range[$"A{x}", $"A{x}"];
+            ipIdRange.Font.Bold = true;
+            ipIdRange.Borders.LineStyle = XlLineStyle.xlContinuous;
+            ipIdRange.HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            ipIdRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
+
+            Range mergeRange = workSheet.Range[$"B{x}", $"O{x}"];
             mergeRange.Merge();
+            mergeRange.Font.Bold = true;
             mergeRange.Borders.LineStyle = XlLineStyle.xlContinuous;
             mergeRange.HorizontalAlignment = XlHAlign.xlHAlignLeft;
             mergeRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
             mergeRange.RowHeight = 35;
             // mergeRange.VerticalAlignment = XlVAlign.xlVAlignTop;
 
-            Range ipIdRange = workSheet.Range[$"A{x}", $"A{x}"];
-            ipIdRange.Borders.LineStyle = XlLineStyle.xlContinuous;
-            ipIdRange.HorizontalAlignment = XlHAlign.xlHAlignLeft;
-            ipIdRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
-
             // main title : project name
             x += 2;
             workSheet.Cells[x, 1] = "ОБЕКТ";
             workSheet.Cells[x, 2] = doc.ProjectInformation.LookupParameter("Project Address").AsString();
 
-            Range mergeRangeObject = workSheet.Range[$"B{x}", $"W{x}"];
+            Range mergeRangeProjName = workSheet.Range[$"A{x}", $"A{x}"];
+            mergeRangeProjName.Font.Bold = true;
+            mergeRangeProjName.Borders.LineStyle = XlLineStyle.xlContinuous;
+            mergeRangeProjName.HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            mergeRangeProjName.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
+
+            Range mergeRangeObject = workSheet.Range[$"B{x}", $"O{x}"];
             mergeRangeObject.Merge();
+            mergeRangeObject.Font.Bold = true;
             mergeRangeObject.Borders.LineStyle = XlLineStyle.xlContinuous;
             mergeRangeObject.HorizontalAlignment = XlHAlign.xlHAlignLeft;
             mergeRangeObject.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
             mergeRangeObject.RowHeight = 35;
             // mergeRangeObject.VerticalAlignment = XlVAlign.xlVAlignTop;
-
-            Range mergeRangeProjName = workSheet.Range[$"A{x}", $"A{x}"];
-            mergeRangeProjName.Borders.LineStyle = XlLineStyle.xlContinuous;
-            mergeRangeProjName.HorizontalAlignment = XlHAlign.xlHAlignLeft;
-            mergeRangeProjName.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
 
             foreach (string plotName in plotNames)
             {
@@ -1377,126 +1405,76 @@ namespace AreaCalculations
 
                 // general plot data
                 // plot row
-                Range plotRange = workSheet.Range[$"A{x}", $"W{x}"];
-                object[] plotStrings = new[] { "УПИ:", $"{Math.Round(plotAreasImp[plotName] / areaConvert, 2)}", "m2", "", 
-                    "Самостоятелни обекти и паркоместа:", "", "", "", "", "", "", "Обекти на терен:", "", "", "", "", "", "Забележки:", "", "", "", "", "" };
+                Range plotRange = workSheet.Range[$"A{x}", $"O{x}"];
+                object[] plotStrings = new[] { "УПИ:", $"{Math.Round(plotAreasImp[plotName] / areaConvert, 2)}", "кв.м.", "", 
+                    "Самостоятелни обекти и паркоместа:", "", "", "", "", "", "Забележки:", "", "", "", "", "" };
                 plotRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, plotStrings);
+                plotRange.Font.Bold = true;
 
                 // build up area row
                 x++;
-                Range baRange = workSheet.Range[$"A{x}", $"W{x}"];
-                object[] baStrings = new[] { "ЗП:", $"{Math.Round(plotBuildAreas[plotName], 2)}", "m2", "", "Ателиета:", "", "", "", "0", "бр", "", "Паркоместа:",
-                    "", "", "0", "бр", "", "За целите на ценообразуването и площообразуването, от площта на общите части са приспаднати ХХ.ХХкв.м. :", "", "", "", "", "" };
+                Range baRange = workSheet.Range[$"A{x}", $"O{x}"];
+                object[] baStrings = new[] { "ЗП:", $"{Math.Round(plotBuildAreas[plotName], 2)}", "кв.м.", "", "Ателиета:", "", "", "0", "бр", "", 
+                    "За целите на ценообразуването и площообразуването,", "", "", "", "", ""};
                 baRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, baStrings);
+                setBoldRange(workSheet, "A", "C", x);
 
                 // total build area row
                 x++;
-                Range tbaRange = workSheet.Range[$"A{x}", $"W{x}"];
-                string[] tbaStrings = new[] { "РЗП:", $"{Math.Round(plotTotalBuild[plotName], 2)}", "m2", "",
-                    "Апартаменти:", "", "", "", "0", "бр", "", "Дворове:", "", "", "0", "бр", "", "", "", "", "", "", "" };
+                Range tbaRange = workSheet.Range[$"A{x}", $"O{x}"];
+                string[] tbaStrings = new[] { "РЗП:", $"{Math.Round(plotTotalBuild[plotName], 2)}", "кв.м.", "",
+                    "Апартаменти:", "", "", "0", "бр", "", "от площта на общите части са приспаднати XX.XX кв.м.", "", "", "", "", ""};
                 tbaRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, tbaStrings);
+                setBoldRange(workSheet, "A", "C", x);
 
                 // underground row
                 x++;
-                Range uRange = workSheet.Range[$"A{x}", $"W{x}"];
-                string[] uStrings = new[] { "Сутерени:", $"{Math.Round(plotUndergroundAreas[plotName], 2)}", "m2", "", 
-                    "Магазини:", "", "", "", "0", "бр", "", "Трафопост:", "", "", "0", "бр", "", "", "", "", "", "", "" };
+                Range uRange = workSheet.Range[$"A{x}", $"O{x}"];
+                string[] uStrings = new[] { "Сутерени:", $"{Math.Round(plotUndergroundAreas[plotName], 2)}", "кв.м.", "", 
+                    "Магазини:", "", "", "0", "бр", "", "", "", "", "", "" };
                 uRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, uStrings);
+                setBoldRange(workSheet, "A", "C", x);
 
                 // underground + tba row
                 x++;
-                Range utbaRange = workSheet.Range[$"A{x}", $"W{x}"];
+                Range utbaRange = workSheet.Range[$"A{x}", $"O{x}"];
                 string[] utbaStrings = new[] { "РЗП + Сутерени:", $"{Math.Round(plotUndergroundAreas[plotName], 2) + Math.Round(plotTotalBuild[plotName], 2)}", 
-                    "m2", "", "Офиси", "", "", "", "0", "бг", "", "", "", "", "", "", "", "", "", "", "", "", "" };
+                    "кв.м.", "", "Офиси", "", "", "0", "бр", "", "", "", "", "", "" };
                 utbaRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, utbaStrings);
+                setBoldRange(workSheet, "A", "C", x);
 
                 // CO row
                 x++;
-                Range coRange = workSheet.Range[$"A{x}", $"W{x}"];
-                string[] coStrings = new[] { "Общо СО", $"{Math.Round(plotIndividualAreas[plotName], 2)}", "m2", "", 
-                    "Гаражи", "", "", "", "0", "бр", "", "Данни за обекта:", "", "", "", "", "", "", "", "", "", "", "" };
+                Range coRange = workSheet.Range[$"A{x}", $"O{x}"];
+                string[] coStrings = new[] { "Общо СО", $"{Math.Round(plotIndividualAreas[plotName], 2)}", "кв.м.", "", 
+                    "Гаражи", "", "", "0", "бр", "", "", "", "", "", "", "" };
                 coRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, coStrings);
+                setBoldRange(workSheet, "A", "C", x);
 
                 // CA row
                 x++;
-                Range caRange = workSheet.Range[$"A{x}", $"W{x}"];
-                string[] caStrings = new[] { "Общо ОЧ", $"{Math.Round(plotCommonAreas[plotName], 2)}", "m2", "", 
-                    "Складове", "", "", "", "0", "бр", "", "Етажност", "", "", "ет", "", "", "", "", "", "", "", "" };
+                Range caRange = workSheet.Range[$"A{x}", $"O{x}"];
+                string[] caStrings = new[] { "Общо ОЧ", $"{Math.Round(plotCommonAreas[plotName], 2)}", "кв.м.", "", 
+                    "Складове", "", "", "0", "бр", "", "", "", "", "", "" };
                 caRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, caStrings);
+                setBoldRange(workSheet, "A", "C", x);
 
                 // land row
                 x += 1;
-                Range landRange = workSheet.Range[$"A{x}", $"W{x}"];
-                string[] landStrings = new[] { "Земя към СО:", $"{Math.Round(plotLandAreas[plotName], 2)}", "m2", "", 
-                    "Паркоместа", "", "", "", "0", "бр", "", "Система", "", "монолитна", "", "", "", "", "", "", "", "", "" };
+                Range landRange = workSheet.Range[$"A{x}", $"O{x}"];
+                string[] landStrings = new[] { "Земя към СО:", $"{Math.Round(plotLandAreas[plotName], 2)}", "кв.м.", "", 
+                    "Паркоместа", "", "", "0", "бр", "", "", "", "", "", "" };
                 landRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, landStrings);
+                setBoldRange(workSheet, "A", "C", x);
 
                 // set borders
                 int rangeEnd = x;
 
-                Range cellsOne = workSheet.Range[$"A{rangeStart}", $"C{rangeEnd}"];
-                Borders bordersOne = cellsOne.Borders;
-                bordersOne[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
-                bordersOne[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
-                bordersOne[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
-                bordersOne[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
-                cellsOne.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
-
-                Range cellsTwo = workSheet.Range[$"D{rangeStart}", $"D{rangeEnd}"];
-                Borders bordersTwo = cellsTwo.Borders;
-                bordersTwo[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
-                bordersTwo[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
-                bordersTwo[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
-                bordersTwo[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
-                cellsTwo.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
-
-                Range cellsThree = workSheet.Range[$"E{rangeStart}", $"J{rangeEnd}"];
-                Borders bordersThree = cellsThree.Borders;
-                bordersThree[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
-                bordersThree[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
-                bordersThree[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
-                bordersThree[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
-                cellsThree.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
-
-                Range cellsFour = workSheet.Range[$"K{rangeStart}", $"K{rangeEnd}"];
-                Borders bordersFour = cellsFour.Borders;
-                bordersFour[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
-                bordersFour[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
-                bordersFour[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
-                bordersFour[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
-                cellsFour.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
-
-                Range cellsFive = workSheet.Range[$"L{rangeStart}", $"P{rangeEnd}"];
-                Borders bordersFive = cellsFive.Borders;
-                bordersFive[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
-                bordersFive[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
-                bordersFive[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
-                bordersFive[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
-                cellsFive.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
-
-                Range cellsSix = workSheet.Range[$"Q{rangeStart}", $"Q{rangeEnd}"];
-                Borders bordersSix = cellsSix.Borders;
-                bordersSix[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
-                bordersSix[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
-                bordersSix[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
-                bordersSix[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
-                cellsSix.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
-
-                Range cellsSeven = workSheet.Range[$"R{rangeStart}", $"V{rangeEnd}"];
-                Borders bordersSeven = cellsSeven.Borders;
-                bordersSeven[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
-                bordersSeven[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
-                bordersSeven[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
-                bordersSeven[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
-                cellsSeven.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
-
-                Range cellsEight = workSheet.Range[$"R{rangeStart}", $"W{rangeEnd}"];
-                Borders bordersEight = cellsEight.Borders;
-                bordersEight[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
-                bordersEight[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
-                bordersEight[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
-                bordersEight[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
-                cellsEight.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
+                setPlotBoundaries(workSheet, "A", "C", rangeStart, rangeEnd);
+                setPlotBoundaries(workSheet, "D", "D", rangeStart, rangeEnd);
+                setPlotBoundaries(workSheet, "E", "I", rangeStart, rangeEnd);
+                setPlotBoundaries(workSheet, "J", "J", rangeStart, rangeEnd);
+                setPlotBoundaries(workSheet, "K", "O", rangeStart, rangeEnd);
 
                 // a list, storing data about end lines of each separate proeprty group with respect to column M
                 List<string> propertyEndLinesBuildingRigts = new List<string>();
@@ -1545,8 +1523,8 @@ namespace AreaCalculations
 
                         x++;
                         Range parameterNamesRange = workSheet.Range[$"A{x}", $"O{x}"];
-                        string[] parameterNamesData = new[] { "ПЛОЩ СО", "НАИМЕНОВАНИЕ СО", "ПЛОЩ F1(F2)", "ПРИЛЕЖАЩА \nПЛОЩ", "К", "C1(C2)", 
-                            "И.Ч. \nПАРКОМЕСТА", "ОБЩИ ЧАСТИ", "", "СП. ОБЩИ \nЧАСТИ", "ОБЩО О.Ч.", "ОБЩО-\nF1(F2)+F3", "ПРАВО \nНА СТРОЕЖ", "ЗЕМЯ", ""};
+                        string[] parameterNamesData = new[] { "НОМЕР СО", "НАИМЕНОВАНИЕ СО", "ПЛОЩ\nF1(F2)", "ПРИЛ.\nПЛОЩ", "КОЕФ.", "C1(C2)", 
+                            "И.Ч.\nПАРКОМ.", "СТАНДАРТНИ\nО.Ч.", "", "СПЕЦ.\nО.Ч.", "ОБЩО\nО.Ч.", "ОБЩО\nF1(F2)+F3", "ПРАВО\nНА\nСТРОЕЖ", "ЗЕМЯ", ""};
                         parameterNamesRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, parameterNamesData);
                         parameterNamesRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
                         parameterNamesRange.Font.Bold = true;
@@ -1694,6 +1672,11 @@ namespace AreaCalculations
 
                                     cellRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, areasDoubleData);
                                     cellRangeDouble.Borders.LineStyle = XlLineStyle.xlContinuous;
+
+                                    setBoldRange(workSheet, "C", "C", x);
+                                    setBoldRange(workSheet, "H", "I", x);
+                                    setBoldRange(workSheet, "L", "O", x);
+                                    setWrapRange(workSheet, "B", "B", x);
                                 }
                                 catch
                                 {
@@ -1751,11 +1734,6 @@ namespace AreaCalculations
                                     if (adjascentAreasLand.Count != 0)
                                     {
                                         adjascentAreasLand.OrderBy(adjArea => adjArea.LookupParameter("Number").AsString()).ToList();
-                                        
-                                        if (adjascentAreasRegular.Count == 0)
-                                        {
-                                            adjascentAreasLand.Insert(0, area);
-                                        }
 
                                         foreach (Area areaSub in adjascentAreasLand)
                                         {
