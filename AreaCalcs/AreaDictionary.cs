@@ -1282,20 +1282,18 @@ namespace AreaCalculations
                 }              
             }            
         }
-
-
-        // TODO: make private after restart
-        public void exportToExcelAdjascentRegular(Worksheet workSheet, int x, Area areaSub, bool isLand, string mainAreaNumber)
+        private void exportToExcelAdjascentRegular(Worksheet workSheet, int x, Area areaSub, bool isLand, string mainAreaNumber)
         {
             Range areaAdjRangeStr = workSheet.Range[$"A{x}", $"B{x}"];
-            areaAdjRangeStr.set_Value(XlRangeValueDataType.xlRangeValueDefault, new[] { areaSub.LookupParameter("Number").AsString(), areaSub.LookupParameter("Name").AsString() });
+            areaAdjRangeStr.set_Value(XlRangeValueDataType.xlRangeValueDefault, new[] { areaSub.LookupParameter("Number").AsString(), areaSub.LookupParameter("Custom Name").AsString() });
 
             areaAdjRangeStr.HorizontalAlignment = XlHAlign.xlHAlignRight;
             areaAdjRangeStr.Borders.LineStyle = XlLineStyle.xlContinuous;
+            areaAdjRangeStr.Font.Italic = true;
 
             Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"O{x}"];
 
-            if (isLand && areaSub.LookupParameter("Number").AsString() != mainAreaNumber)
+            if (isLand)
             {
                 areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {DBNull.Value,
                                                         Math.Round(areaSub.LookupParameter("Area").AsDouble() / areaConvert, 2), DBNull.Value, DBNull.Value,
@@ -1316,21 +1314,18 @@ namespace AreaCalculations
             areaAdjRangeBorders[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
             areaAdjRangeBorders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
 
+            setBoldRange(workSheet, "N", "O", x);
         }
-        // TODO: make private after restart
-
         private void setBoldRange(Worksheet workSheet, string startCell, string endCell, int row)
         {
             Range boldRange = workSheet.Range[$"{startCell}{row}", $"{endCell}{row}"];
             boldRange.Font.Bold = true;
         }
-
         private void setWrapRange(Worksheet worksheet, string startCell, string endCell, int row)
         {
             Range wrapRange = worksheet.Range[$"{startCell}{row}", $"{endCell}{row}"];
             wrapRange.WrapText = true;
         }
-
         private void setPlotBoundaries(Worksheet workSheet, string start, string end, int rangeStart, int rangeEnd)
         {
             Range cellsFive = workSheet.Range[$"{start}{rangeStart}", $"{end}{rangeEnd}"];
@@ -1341,7 +1336,6 @@ namespace AreaCalculations
             bordersFive[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
             cellsFive.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
         }
-
         public void exportToExcel(string filePath, string sheetName)
         {
             Microsoft.Office.Interop.Excel.Application excelApplication = new Microsoft.Office.Interop.Excel.Application();
@@ -1603,13 +1597,17 @@ namespace AreaCalculations
                                 if (!entrances.Contains(area.LookupParameter("A Instance Area Entrance").AsString()))
                                 {
                                     entrances.Add(area.LookupParameter("A Instance Area Entrance").AsString());
-                                    workSheet.Cells[x, 1] = area.LookupParameter("A Instance Area Entrance").AsString();
-                                    Range entranceRangeString = workSheet.Range[$"A{x}", $"O{x}"];
-                                    entranceRangeString.Merge();
-                                    entranceRangeString.UnMerge();
-                                    entranceRangeString.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
-                                    x++;
-                                    levels.Clear();
+
+                                    if (area.LookupParameter("A Instance Area Entrance").AsString().ToLower() != "НЕПРИЛОЖИМО")
+                                    {
+                                        workSheet.Cells[x, 1] = area.LookupParameter("A Instance Area Entrance").AsString();
+                                        Range entranceRangeString = workSheet.Range[$"A{x}", $"O{x}"];
+                                        entranceRangeString.Merge();
+                                        entranceRangeString.UnMerge();
+                                        entranceRangeString.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+                                        x++;
+                                        levels.Clear();
+                                    }
                                 }
 
                                 if (!levels.Contains(area.LookupParameter("Level").AsValueString()))
@@ -1657,7 +1655,7 @@ namespace AreaCalculations
                                     double C1C2 = Math.Round(area.LookupParameter("A Instance Price C1/C2")?.AsDouble() ?? 0.0, 2);
                                     double areaCommonPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3);
                                     double areaCommonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 2);
-                                    double areaCommonAreaSpecial = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() / areaConvert ?? 0.0, 2);
+                                    double areaCommonAreaSpecial = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() ?? 0.0 / areaConvert, 2);
                                     double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0), 2);
                                     double areaPermitPercent = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3);
                                     double areaRLPPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3);
@@ -1666,7 +1664,15 @@ namespace AreaCalculations
                                     string[] areaStringData = new[] { areaNumber, areaName };
                                     object[] areasDoubleData = new object[] { areaArea, areaSubjected, ACCO, C1C2, DBNull.Value, areaCommonPercent, areaCommonArea, areaCommonAreaSpecial, 
                                         areaCommonArea + areaCommonAreaSpecial, areaTotalArea, areaPermitPercent, areaRLPPercentage, areaRLP};
-
+                                    
+                                    for (int i = 0; i < areasDoubleData.Length; i++)
+                                    {
+                                        if (areasDoubleData[i] is double && (double)areasDoubleData[i] == 0.0)
+                                        {
+                                            areasDoubleData[i] = DBNull.Value;
+                                        }
+                                    }
+                                    
                                     cellRangeString.set_Value(XlRangeValueDataType.xlRangeValueDefault, areaStringData);
                                     cellRangeString.Borders.LineStyle = XlLineStyle.xlContinuous;
 
@@ -1798,6 +1804,7 @@ namespace AreaCalculations
                                         areaAdjRangeStr.set_Value(XlRangeValueDataType.xlRangeValueDefault,
                                             new[] { key[0], room.LookupParameter("Name").AsString() });
 
+                                        areaAdjRangeStr.Font.Italic = true;
                                         areaAdjRangeStr.HorizontalAlignment = XlHAlign.xlHAlignRight;
                                         areaAdjRangeStr.Borders.LineStyle = XlLineStyle.xlContinuous;
 
@@ -1830,6 +1837,7 @@ namespace AreaCalculations
                         // set a formula for the total area sum of F1/F2
                         Range sumF1F2 = workSheet.Range[$"C{x}", $"C{x}"];
                         sumF1F2.Formula = $"=SUM(C{startLine}:C{endLine})";
+                        setBoldRange(workSheet, "C", "C", x);
 
                         // set a formula for the total sum of adjascent areas
                         Range sumAdjascent = workSheet.Range[$"D{x}", $"D{x}"];
@@ -1842,10 +1850,12 @@ namespace AreaCalculations
                         // set a formula for the total sum of Common Areas 
                         Range sumCommonAreasPercentage = workSheet.Range[$"H{x}", $"H{x}"];
                         sumCommonAreasPercentage.Formula = $"=SUM(H{startLine}:H{endLine})";
+                        setBoldRange(workSheet, "H", "H", x);
 
                         // set a formula for the total sum of Special Common Areas Percentage
                         Range sumCommonArea = workSheet.Range[$"I{x}", $"I{x}"];
                         sumCommonArea.Formula = $"=SUM(I{startLine}:I{endLine})";
+                        setBoldRange(workSheet, "I", "I", x);
 
                         // set a formula for the total sum of Special Common Areas Percentage
                         Range sumSpecialCommonArea = workSheet.Range[$"J{x}", $"J{x}"];
@@ -1858,18 +1868,22 @@ namespace AreaCalculations
                         // set a formula for the total sum of Total Area
                         Range totalAreaF1F2F3F4 = workSheet.Range[$"L{x}", $"L{x}"];
                         totalAreaF1F2F3F4.Formula = $"=SUM(L{startLine}:L{endLine})";
+                        setBoldRange(workSheet, "L", "L", x);
 
                         // set a formula for the total sum of Building Right Percentage
                         Range sumBuildingRightPercentage = workSheet.Range[$"M{x}", $"M{x}"];
                         sumBuildingRightPercentage.Formula = $"=SUM(M{startLine}:M{endLine})";
+                        setBoldRange(workSheet, "M", "M", x);
 
                         // set a formula for the total sum of Land Area Percentage
                         Range landAreapercentage = workSheet.Range[$"N{x}", $"N{x}"];
                         landAreapercentage.Formula = $"=SUM(N{startLine}:N{endLine})";
+                        setBoldRange(workSheet, "N", "N", x);
 
                         // set a formula for the total sum of Land Area
                         Range landArea = workSheet.Range[$"O{x}", $"O{x}"];
                         landArea.Formula = $"=SUM(O{startLine}:O{endLine})";
+                        setBoldRange(workSheet, "O", "O", x);
 
                         // set coloring for the summed up rows
                         Range colorRangePropertySum = workSheet.Range[$"A{endLine + 1}", $"O{endLine + 1}"];
