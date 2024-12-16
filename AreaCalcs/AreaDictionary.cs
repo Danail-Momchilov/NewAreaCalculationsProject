@@ -14,6 +14,7 @@ using Regex = System.Text.RegularExpressions.Regex;
 using System.Windows.Input;
 using System.Globalization;
 using Autodesk.Revit.DB.Architecture;
+using System.IO;
 
 namespace AreaCalculations
 {
@@ -959,7 +960,7 @@ namespace AreaCalculations
                             area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != "")
                         {
                             // if such is found, find all of the areas, it is set to be adjascent to
-                            string[] mainAreaNames = area.LookupParameter("A Instance Area Primary").AsString().Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries)
+                            string[] mainAreaNumbers = area.LookupParameter("A Instance Area Primary").AsString().Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries)
                                 .Select(s => s.Trim())
                                 .ToArray();
 
@@ -967,11 +968,11 @@ namespace AreaCalculations
                             List<Area> mainAreaElements = new List<Area>();
 
                             // find all the areas it is adjascent to and calculate their total C1C2 and add them to a list
-                            foreach (string mainAreaName in mainAreaNames)
+                            foreach (string mainAreaNumber in mainAreaNumbers)
                             {
                                 foreach (Area mainArea in AreasOrganizer[plotName][property])
                                 {
-                                    if (mainArea.LookupParameter("Number").AsString() == mainAreaName)
+                                    if (mainArea.LookupParameter("Number").AsString() == mainAreaNumber)
                                     {
                                         sumC1C2 += mainArea.LookupParameter("A Instance Price C1/C2").AsDouble();
                                         mainAreaElements.Add(mainArea);
@@ -983,7 +984,7 @@ namespace AreaCalculations
                             foreach (Area mainArea in mainAreaElements)
                             {
                                 double percentage = mainArea.LookupParameter("A Instance Price C1/C2").AsDouble() * 100 / sumC1C2;
-
+                                
                                 mainArea.LookupParameter("A Instance Common Area Special")
                                     .Set(mainArea.LookupParameter("A Instance Common Area Special").AsDouble() + (percentage * area.Area / 100));
                             }
@@ -1505,7 +1506,7 @@ namespace AreaCalculations
 
                         x++;
                         Range propertyDataRange = workSheet.Range[$"A{x}", $"O{x}"];
-                        workSheet.Cells[x, 1] = $"ПЛОЩ ОЧ: {Math.Round(propertyCommonAreasAll[plotName][property], 2)} кв.м, от които" +
+                        workSheet.Cells[x, 1] = $"ПЛОЩ ОЧ: {Math.Round(propertyCommonAreasAll[plotName][property], 2)} кв.м, от които " +
                             $"стандартни ОЧ: {Math.Round(propertyCommonAreas[plotName][property], 2)} кв.м. " +
                             $"и специални ОЧ: {Math.Round(propertyCommonAreasSpecial[plotName][property], 2)} кв.м.";
                         propertyDataRange.Merge();
@@ -1592,7 +1593,7 @@ namespace AreaCalculations
 
                         foreach (Area area in sortedAreas)
                         {
-                            if (!area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != "")
+                            if (!(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                             {
                                 if (!entrances.Contains(area.LookupParameter("A Instance Area Entrance").AsString()))
                                 {
@@ -1655,7 +1656,7 @@ namespace AreaCalculations
                                     double C1C2 = Math.Round(area.LookupParameter("A Instance Price C1/C2")?.AsDouble() ?? 0.0, 2);
                                     double areaCommonPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3);
                                     double areaCommonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 2);
-                                    double areaCommonAreaSpecial = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() ?? 0.0 / areaConvert, 2);
+                                    double areaCommonAreaSpecial = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() / areaConvert ?? 0.0, 2);
                                     double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0), 2);
                                     double areaPermitPercent = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3);
                                     double areaRLPPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3);
