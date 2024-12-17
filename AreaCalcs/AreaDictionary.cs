@@ -411,12 +411,14 @@ namespace AreaCalculations
 
             double surplus = Math.Round(100 - buildingPermitTotal, 3);
             int counter = 0;
+            int loopCounter = 0;
 
             while (Math.Abs(surplus) >= 0.0005)
             {
                 if (counter >= areaGroup.Keys.ToList().Count())
                 {
                     counter = 0;
+                    loopCounter++;
                 }
                 string group = areaGroup.Keys.ToList()[counter];
 
@@ -439,7 +441,7 @@ namespace AreaCalculations
 
                 counter++;
 
-                if (counter == 10)
+                if (loopCounter == 10)
                     surplus = 0;
             }
 
@@ -1212,6 +1214,7 @@ namespace AreaCalculations
                         .OrderBy(area => area.LookupParameter("A Instance Gross Area").AsDouble())
                         .Reverse()
                         .ToList();
+
                     var groupedAreasProperty = orderedPropertyGroup.GroupBy(area => area.LookupParameter("A Instance Gross Area").AsDouble());
 
                     areaGroupsSeperateProperties.Add(property, new Dictionary<string, List<Area>>());
