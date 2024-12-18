@@ -18,17 +18,7 @@ namespace AreaCalculations
         public FilteredElementCollector areasCollector { get; set; }
         public Document doc { get; set; }
         Transaction transaction { get; set; }
-
         private double areaConvert = 10.763914692;
-
-        private bool hasValue(Parameter param)
-        {
-            if (param.HasValue)
-                return true;
-            else
-                return false;
-        }
-
         private bool updateIfNoValue(Parameter param, double value)
         {
             if (param.HasValue && param.AsValueString() != "" && param.AsDouble() != 0)
@@ -39,7 +29,6 @@ namespace AreaCalculations
                 return true;
             }
         }
-
         private object belongsToArea(Area area)
         {
             foreach (Area mainArea in areasCollector)
@@ -51,7 +40,6 @@ namespace AreaCalculations
 
             return null;
         }        
-
         public AreaCollection(Document document)
         {
             this.doc = document;
@@ -65,7 +53,6 @@ namespace AreaCalculations
 
             this.transaction = new Transaction(doc, "Update Areas");
         }
-
         public AreaCollection(Document document, List<string> plotNames)
         {
             this.doc = document;
@@ -126,13 +113,23 @@ namespace AreaCalculations
                 }
             }
         }
-
-        public string CheckAreasParameters(List<string> plotNames)
+        public string CheckAreasParameters(List<string> plotNames, ProjectInfo projInfo)
         {
             string errorMessage = "";
 
             List<string> AreaCategoryValues = new List<string> { "ИЗКЛЮЧЕНА ОТ ОЧ", "НЕПРИЛОЖИМО", "ОБЩА ЧАСТ", "САМОСТОЯТЕЛЕН ОБЕКТ" };
             List<string> AreaLocationValues = new List<string> { "НАДЗЕМНА", "НАЗЕМНА", "НЕПРИЛОЖИМО", "ПОДЗЕМНА", "ПОЛУПОДЗЕМНА" };
+            List<string> plotTypesValues = new List<string>();
+
+            if (new List<string> { "СТАНДАРТНО УПИ", "ЪГЛОВО УПИ", "УПИ В ДВЕ ЗОНИ" }.Contains(projInfo.LookupParameter("Plot Type").AsString()))
+            {
+                plotTypesValues.Add(projInfo.LookupParameter("Plot Number").AsString());
+            }
+            else if (projInfo.LookupParameter("Plot Type").AsString() == "ДВЕ УПИ")
+            {
+                plotTypesValues.Add(projInfo.LookupParameter("Plot Number 1st").AsString());
+                plotTypesValues.Add(projInfo.LookupParameter("Plot Number 2nd").AsString());
+            }
 
             foreach (Area area in areasCollector)
             {
@@ -177,6 +174,17 @@ namespace AreaCalculations
 
                         { errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id.ToString()} " +
                                 $"/ Параметър: A Instance Area Plot. Допустими стойности: {plotNames[0]} и {plotNames[1]}\n"; }
+                    }
+
+                    if (!plotTypesValues.Contains(area.LookupParameter("A Instance Area Plot").AsString()))
+                    {
+                        string allPlotsStr = "";
+
+                        foreach (string plot in plotTypesValues)
+                            allPlotsStr += $"| {plot} | ";
+
+                        errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id.ToString()} " +
+                            $"/ Параметър: A Instance Area Plot. Допустими стойности: {allPlotsStr}";
                     }
                 }
             }

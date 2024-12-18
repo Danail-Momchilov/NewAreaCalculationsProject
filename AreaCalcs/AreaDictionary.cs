@@ -664,6 +664,18 @@ namespace AreaCalculations
 
             return hasAdjRooms;
         }
+        private bool areAllLandAreasAdjascent(string plotName)
+        {
+            bool areAllLandAdjascent = true;
+
+            foreach (Area area in AreasOrganizer[plotName]["ЗЕМЯ"])
+            {
+                if (!(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
+                    areAllLandAdjascent = false;
+            }
+
+            return areAllLandAdjascent;
+        }
         private List<Room> returnAdjascentRooms(string areaNumber)
         {
             List<Room> rooms = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType()
@@ -1340,11 +1352,45 @@ namespace AreaCalculations
             bordersFive[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
             cellsFive.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
         }
+        private void setExcelDecimalsFormatting(Worksheet workSheet, int row)
+        {
+            workSheet.get_Range($"C{row}", $"D{row}").NumberFormat = "0.00";
+            workSheet.get_Range($"E{row}", $"E{row}").NumberFormat = "0.0";
+            workSheet.get_Range($"F{row}", $"F{row}").NumberFormat = "0.00";
+            workSheet.get_Range($"G{row}", $"H{row}").NumberFormat = "0.000";
+            workSheet.get_Range($"I{row}", $"L{row}").NumberFormat = "0.00";
+            workSheet.get_Range($"M{row}", $"N{row}").NumberFormat = "0.000";
+            workSheet.get_Range($"O{row}", $"O{row}").NumberFormat = "0.00";
+        }
         public void exportToExcel(string filePath, string sheetName)
         {
             Microsoft.Office.Interop.Excel.Application excelApplication = new Microsoft.Office.Interop.Excel.Application();
             Workbook workBook = excelApplication.Workbooks.Open(filePath, ReadOnly: false);
-            Worksheet workSheet = (Worksheet)workBook.Worksheets[sheetName];
+
+            // check if an excel sheet with the given name already exists
+            Worksheet workSheet = null;
+
+            bool doesSheetExist = false;
+            foreach (Worksheet excelSheet in workBook.Sheets)
+            {
+                if (excelSheet.Name == sheetName)
+                {
+                    doesSheetExist = true;
+                }
+            }
+
+            // if it does, get the existing one / if it does not, create a new one
+            if (doesSheetExist)
+            {
+                workSheet = (Worksheet)workBook.Worksheets[sheetName];
+            }
+            else
+            {
+                TaskDialog.Show("Известие", "Ще бъде създаден нов sheet с посоченото име");
+
+                workSheet = (Worksheet)workBook.Sheets.Add(After: workBook.Sheets[workBook.Sheets.Count]);
+                workSheet.Name = sheetName;
+            }
 
             // set columns' width
             workSheet.Range["A:A"].ColumnWidth = 15;
@@ -1483,7 +1529,7 @@ namespace AreaCalculations
 
                 foreach (string property in plotProperties[plotName])
                 {
-                    if (!property.Contains("+") && !property.ToLower().Contains("траф"))
+                    if (!property.Contains("+") && !property.ToLower().Contains("траф") && !(property.ToLower().Equals("земя") && areAllLandAreasAdjascent(plotName)))
                     {
                         x += 2;
                         workSheet.Cells[x, 1] = $"ПЛОЩООБРАЗУВАНЕ САМОСТОЯТЕЛНИ ОБЕКТИ - {property}";
@@ -1687,6 +1733,8 @@ namespace AreaCalculations
                                     setBoldRange(workSheet, "H", "I", x);
                                     setBoldRange(workSheet, "L", "O", x);
                                     setWrapRange(workSheet, "B", "B", x);
+
+                                    setExcelDecimalsFormatting(workSheet, x);
                                 }
                                 catch
                                 {
@@ -1892,6 +1940,9 @@ namespace AreaCalculations
                         // set coloring for the summed up rows
                         Range colorRangePropertySum = workSheet.Range[$"A{endLine + 1}", $"O{endLine + 1}"];
                         colorRangePropertySum.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+
+                        // set final decimal formatting
+                        setExcelDecimalsFormatting(workSheet, x);
 
                         x++;
                     }
