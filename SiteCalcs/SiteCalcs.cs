@@ -49,7 +49,7 @@ namespace AreaCalculations
 
                 // define output report string
                 OutputReport output = new OutputReport();
-                
+
                 // check if all the information in the Areas and Project info is set correctly
                 string errors = ProjInfo.CheckProjectInfo() + areaCalcs.CheckAreasParameters(ProjInfo.plotNames, doc.ProjectInformation) + greenery.errorReport;
                 if (errors != "")

@@ -1739,6 +1739,7 @@ namespace AreaCalculations
 
                         List<int> linesToExclude = new List<int>();
                         List<int> linesToExcludeLand = new List<int>();
+                        List<int> linesToExcludeParking = new List<int>();
 
                         foreach (Area area in sortedAreas)
                         {
@@ -1847,7 +1848,7 @@ namespace AreaCalculations
 
                                 if (!doesHaveRoomsAdjascent(area.LookupParameter("Number").AsString()))
                                 {
-                                    // identify adjascent areasa
+                                    // identify adjascent areas
                                     List<Area> adjascentAreasRegular = new List<Area>();
 
                                     foreach (Area areaSub in sortedAreas)
@@ -1975,6 +1976,8 @@ namespace AreaCalculations
                                         areaAdjRangeBorders[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
                                         areaAdjRangeBorders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
 
+                                        linesToExcludeParking.Add(x);
+
                                         x++;
                                     }
                                 }
@@ -2002,41 +2005,33 @@ namespace AreaCalculations
                         sumC1C2.Formula = $"=SUM(F{startLine}:F{endLine})";
 
                         // set a formula for the total sum of Common Areas 
-                        Range sumCommonAreasPercentage = workSheet.Range[$"H{x}", $"H{x}"];
-                        sumCommonAreasPercentage.Formula = $"=SUM(H{startLine}:H{endLine})";
+                        setSumFormulaExcludingRows(workSheet, "H", x, startLine, endLine, linesToExcludeParking);
                         setBoldRange(workSheet, "H", "H", x);
 
                         // set a formula for the total sum of Special Common Areas Percentage
-                        Range sumCommonArea = workSheet.Range[$"I{x}", $"I{x}"];
-                        sumCommonArea.Formula = $"=SUM(I{startLine}:I{endLine})";
+                        setSumFormulaExcludingRows(workSheet, "I", x, startLine, endLine, linesToExcludeParking);
                         setBoldRange(workSheet, "I", "I", x);
 
                         // set a formula for the total sum of Special Common Areas Percentage
-                        Range sumSpecialCommonArea = workSheet.Range[$"J{x}", $"J{x}"];
-                        sumSpecialCommonArea.Formula = $"=SUM(J{startLine}:J{endLine})";
+                        setSumFormulaExcludingRows(workSheet, "J", x, startLine, endLine, linesToExcludeParking);
 
                         // set a formula for the total sum of all common areas
-                        Range sumTotalCommonArea = workSheet.Range[$"K{x}", $"K{x}"];
-                        sumTotalCommonArea.Formula = $"=SUM(K{startLine}:K{endLine})";
+                        setSumFormulaExcludingRows(workSheet, "K", x, startLine, endLine, linesToExcludeParking);
 
                         // set a formula for the total sum of Total Area
-                        Range totalAreaF1F2F3F4 = workSheet.Range[$"L{x}", $"L{x}"];
-                        totalAreaF1F2F3F4.Formula = $"=SUM(L{startLine}:L{endLine})";
+                        setSumFormulaExcludingRows(workSheet, "L", x, startLine, endLine, linesToExcludeParking);
                         setBoldRange(workSheet, "L", "L", x);
 
                         // set a formula for the total sum of Building Right Percentage
-                        Range sumBuildingRightPercentage = workSheet.Range[$"M{x}", $"M{x}"];
-                        sumBuildingRightPercentage.Formula = $"=SUM(M{startLine}:M{endLine})";
+                        setSumFormulaExcludingRows(workSheet, "M", x, startLine, endLine, linesToExcludeParking);
                         setBoldRange(workSheet, "M", "M", x);
 
                         // set a formula for the total sum of Land Area Percentage
-                        Range landAreapercentage = workSheet.Range[$"N{x}", $"N{x}"];
-                        landAreapercentage.Formula = $"=SUM(N{startLine}:N{endLine})";
+                        setSumFormulaExcludingRows(workSheet, "N", x, startLine, endLine, linesToExcludeParking);
                         setBoldRange(workSheet, "N", "N", x);
 
                         // set a formula for the total sum of Land Area
-                        Range landArea = workSheet.Range[$"O{x}", $"O{x}"];
-                        landArea.Formula = $"=SUM(O{startLine}:O{endLine})";
+                        setSumFormulaExcludingRows(workSheet, "O", x, startLine, endLine, linesToExcludeParking);
                         setBoldRange(workSheet, "O", "O", x);
 
                         // set coloring for the summed up rows
