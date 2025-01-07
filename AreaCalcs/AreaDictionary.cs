@@ -648,6 +648,70 @@ namespace AreaCalculations
 
             transaction.Commit();
         }
+        private void calculateParkingPercentSurplus(Dictionary<List<double>, List<Room>> percentageDict, double totalPercentage, double totalPercentageAchieved, int index)
+        {
+            // calculate surplus
+            double surplus = Math.Round(totalPercentage - totalPercentageAchieved, 3);
+            int counter = 0;
+
+            // redistribute surplus if any
+            while (Math.Abs(surplus) >= 0.0005)
+            {
+                if (counter >= percentageDict.Keys.Count())
+                {
+                    counter = 0;
+                }
+                List<double> dictList = percentageDict.Keys.ToList()[counter];
+
+                if (Math.Round(Math.Abs(surplus) * 1000) >= percentageDict[dictList].Count)
+                {
+                    // calculate the deduction total, depending on whether the surplis is positive or negatibe
+                    double coefficient = surplus / Math.Abs(surplus);
+                    // so far, the result is either 1 or -1
+                    double finalDeduction = 0.001 * coefficient;
+                    // this is the final deduction calculated value, which would be either -0.001 or 0.001
+
+                    percentageDict.Keys.ToList()[counter][index] += finalDeduction;
+
+                    foreach (Room room in percentageDict[dictList])
+                    {
+                        surplus -= finalDeduction;
+                    }
+                }
+            }
+        }
+        private void calculateParkingAreaSurplus(Dictionary<List<double>, List<Room>> percentageDict, double totalArea, double totalAreaAchieved, int index)
+        {
+            // calculate surplus
+            double surplus = Math.Round(totalArea - totalAreaAchieved, 2);
+            int counter = 0;
+
+            // redistribute surplus if any
+            while (Math.Abs(surplus) >= 0.0005)
+            {
+                if (counter >= percentageDict.Keys.Count())
+                {
+                    counter = 0;
+                }
+                List<double> dictList = percentageDict.Keys.ToList()[counter];
+
+                if (Math.Round(Math.Abs(surplus) * 100) >= percentageDict[dictList].Count)
+                {
+                    // calculate the deduction total, depending on whether the surplis is positive or negatibe
+                    double coefficient = surplus / Math.Abs(surplus);
+                    // so far, the result is either 1 or -1
+                    double finalDeduction = 0.01 * coefficient;
+                    // this is the final deduction calculated value, which would be either -0.001 or 0.001
+
+                    percentageDict.Keys.ToList()[counter][index] += finalDeduction;
+
+                    foreach (Room room in percentageDict[dictList])
+                    {
+                        surplus -= finalDeduction;
+                    }
+                }
+            }
+        }
         private bool doesHaveRoomsAdjascent(string areaNumber)
         {
             bool hasAdjRooms = false;
@@ -678,17 +742,19 @@ namespace AreaCalculations
 
             return areAllLandAdjascent;
         }
-        private List<Room> returnAdjascentRooms(string areaNumber)
+        private Dictionary<List<object>, Room> returnAdjascentRooms(Area area)
         {
-            List<Room> rooms = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType()
-                .Where(room => room.LookupParameter("A Instance Area Primary").AsString() == areaNumber).Cast<Room>().ToList();
+            string areaNumber = area.LookupParameter("Number").AsString();
+            double areaArea = Math.Round(area.LookupParameter("A Instance Gross Area")?.AsDouble() ?? 0.0, 3);
+            double commonAreaPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3);
+            double commonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 2);
+            double specialCommonArea = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() / areaConvert ?? 0.0, 2);
+            double totalCommonArea = commonArea + specialCommonArea;
+            double totalArea = Math.Round(area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0, 2);
+            double buildingRight = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3);
+            double landPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3);
+            double landArea = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3);
 
-            rooms.OrderBy(room => room.LookupParameter("Number").AsString());
-
-            return rooms;
-        }        
-        private Dictionary<List<object>, Room> returnAdjascentRoomsTest(string areaNumber, double areaArea)
-        {
             Dictionary<string, List<object>> keyValuePairs = new Dictionary<string, List<object>>();
 
             List<Room> rooms = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType()
@@ -699,73 +765,104 @@ namespace AreaCalculations
 
             // create a dictionary from these groups
             Dictionary<List<double>, List<Room>> percentageDict = new Dictionary<List<double>, List<Room>>();
-            double totalpercentage = 0;
+            double totalPercentage = 0;
+            double totalPercentageShare = 0;
+            double totalBuildingRightShare = 0;
 
             foreach (var group in groupedRooms)
             {
+                // generate a list with all the calculated data
                 List<double> listData = new List<double>();
                 listData.Add(group.Count());
 
                 double percentage = Math.Round(group.First().LookupParameter("Area").AsDouble()*100/areaArea, 3);
                 listData.Add(percentage);
 
+                double percentageShare = Math.Round(percentage * commonAreaPercent / 100, 3);
+                listData.Add(percentageShare);
+
+                double commonAreaShare = Math.Round(percentage * commonArea / 100, 2);
+                listData.Add(commonAreaShare);
+
+                double commonAreaSpecialShare = Math.Round(percentage * specialCommonArea / 100, 2);
+                listData.Add(commonAreaSpecialShare);
+
+                double commonAreaTotalShare = Math.Round(percentage * totalCommonArea / 100, 2);
+                listData.Add(commonAreaTotalShare);
+
+                double totalAreaShare = Math.Round(percentage * totalArea / 100, 2);
+                listData.Add(totalAreaShare);
+
+                double buildingRightShare = Math.Round(percentage * buildingRight / 100, 3);
+                listData.Add(buildingRightShare);
+
+                double landPercentageShare = Math.Round(percentage * landPercentage / 100, 3);
+                listData.Add(landPercentageShare);
+
+                double landAreaShare = Math.Round(percentage * landArea / 100, 2);
+                listData.Add(landAreaShare);
+
+                // add the list to the dictionary as a key
                 percentageDict.Add(listData, new List<Room>());
 
+                // add all the rooms in the group to the same key
                 foreach (Room room in group)
                 {
                     percentageDict[listData].Add(room);
-                    totalpercentage += percentage;
+                    totalPercentage += percentage;
+                    totalPercentageShare += percentageShare;
+                    totalBuildingRightShare += buildingRightShare;
                 }
             }
 
-            // calculate surplus
-            double surplus = Math.Round(100 - totalpercentage, 3);
-            int counter = 0;
-
-            // redistribute surplus if any
-            while (Math.Abs(surplus) >= 0.0005)
-            {
-                if (counter >= percentageDict.Keys.Count())
-                {
-                    counter = 0;
-                }
-                List<double> dictList = percentageDict.Keys.ToList()[counter];
-
-                if (Math.Round(Math.Abs(surplus) * 1000) >= percentageDict[dictList].Count)
-                {
-                    // calculate the deduction total, depending on whether the surplis is positive or negatibe
-                    double coefficient = surplus / Math.Abs(surplus);
-                    // so far, the result is either 1 or -1
-                    double finalDeduction = 0.001 * coefficient;
-                    // this is the final deduction calculated value, which would be either -0.001 or 0.001
-
-                    percentageDict.Keys.ToList()[counter][1] += finalDeduction;
-
-                    foreach (Room room in percentageDict[dictList])
-                    {
-                        surplus -= finalDeduction;
-                    }
-                }
-            }
+            calculateParkingPercentSurplus(percentageDict, 100, totalPercentage, 1);
+            calculateParkingPercentSurplus(percentageDict, area.LookupParameter("A Instance Common Area %").AsDouble(), totalPercentageShare, 2);
+            calculateParkingPercentSurplus(percentageDict, area.LookupParameter("A Instance Building Permit %").AsDouble(), totalBuildingRightShare, 2);
 
             // construct new dictionary
             Dictionary<List<object>, Room> flattenedDict = new Dictionary<List<object>, Room>();
 
-            // tterate through the percentageDict to populate the new dictionary
+            // iterate through the percentageDict to populate the new dictionary
             foreach (var kvp in percentageDict)
             {
                 List<double> keyList = kvp.Key;
                 List<Room> roomsList = kvp.Value;
 
                 double percentage = keyList[1];
+                double percentageShare = keyList[2];
+                double commonAreaShare = keyList[3];
+                double commonAreaSpecialShare = keyList[4];
+                double commonAreaTotalShare = keyList[5];
+                double totalAreaShare = keyList[6];
+                double buildingRightShare = keyList[7];
+                double landPercentageShare = keyList[8];
+                double landAreaShare = keyList[9];
 
                 foreach (Room room in roomsList)
                 {
-                    // Create the new key with the room number and percentage
+                    // create the new key with the room number and percentage
                     List<object> newKey = new List<object>
                     {
-                        room.LookupParameter("Number").AsString(), percentage
+                        room.LookupParameter("Number").AsString(),
+                        percentage,
+                        percentageShare,
+                        commonAreaShare,
+                        commonAreaSpecialShare,
+                        commonAreaTotalShare,
+                        totalAreaShare,
+                        buildingRightShare,
+                        landPercentageShare,
+                        landAreaShare
                     };
+
+                    // replace 0.0 values with nulls
+                    for (int i = 0; i < newKey.Count; i++)
+                    {
+                        if (newKey[i] is double && (double)newKey[i] == 0.0)
+                        {
+                            newKey[i] = DBNull.Value;
+                        }
+                    }
 
                     // Add to the new dictionary
                     flattenedDict[newKey] = room;
@@ -1948,9 +2045,7 @@ namespace AreaCalculations
 
                                 else
                                 {
-                                    double totalArea = Math.Round(area.LookupParameter("A Instance Gross Area").AsDouble(), 3);
-
-                                    Dictionary<List<object>, Room> adjascentRooms = returnAdjascentRoomsTest(area.LookupParameter("Number").AsString(), totalArea);
+                                    Dictionary<List<object>, Room> adjascentRooms = returnAdjascentRooms(area);
 
                                     foreach (List<object> key in adjascentRooms.Keys)
                                     {
@@ -1966,9 +2061,8 @@ namespace AreaCalculations
 
                                         Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"O{x}"];
                                         areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {
-                                                        Math.Round(room.LookupParameter("Area").AsDouble() / areaConvert, 2), DBNull.Value, DBNull.Value,
-                                                        DBNull.Value, key[1], DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, 
-                                                        DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value});
+                                                        Math.Round(room.LookupParameter("Area").AsDouble() / areaConvert, 2), DBNull.Value, DBNull.Value, DBNull.Value, 
+                                                        key[1], key[2], key[3], key[4], key[5], key[6], key[7], key[8], key[9], DBNull.Value, DBNull.Value});
 
                                         Borders areaAdjRangeBorders = areaAdjRangeDouble.Borders;
                                         areaAdjRangeBorders[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
