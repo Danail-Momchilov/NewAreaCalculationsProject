@@ -120,8 +120,6 @@ namespace AreaCalculations
             List<string> AreaCategoryValues = new List<string> { "ИЗКЛЮЧЕНА ОТ ОЧ", "НЕПРИЛОЖИМО", "ОБЩА ЧАСТ", "САМОСТОЯТЕЛЕН ОБЕКТ" };
             List<string> AreaLocationValues = new List<string> { "НАДЗЕМНА", "НАЗЕМНА", "НЕПРИЛОЖИМО", "ПОДЗЕМНА", "ПОЛУПОДЗЕМНА" };
 
-            // THIS IS NOT FUNCTIONING PROPERLY. TO BE REVISED OR DELETED
-            /*
             List<string> plotTypesValues = new List<string>();
 
             if (new List<string> { "СТАНДАРТНО УПИ", "ЪГЛОВО УПИ", "УПИ В ДВЕ ЗОНИ" }.Contains(projInfo.LookupParameter("Plot Type").AsString()))
@@ -133,7 +131,6 @@ namespace AreaCalculations
                 plotTypesValues.Add(projInfo.LookupParameter("Plot Number 1st").AsString());
                 plotTypesValues.Add(projInfo.LookupParameter("Plot Number 2nd").AsString());
             }
-            */
 
             foreach (Area area in areasCollector)
             {
@@ -179,7 +176,7 @@ namespace AreaCalculations
                         { errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id.ToString()} " +
                                 $"/ Параметър: A Instance Area Plot. Допустими стойности: {plotNames[0]} и {plotNames[1]}\n"; }
                     }
-                    /*
+                    
                     if (!plotTypesValues.Contains(area.LookupParameter("A Instance Area Plot").AsString()))
                     {
                         string allPlotsStr = "";
@@ -189,8 +186,7 @@ namespace AreaCalculations
 
                         errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} / id: {area.Id.ToString()} " +
                             $"/ Параметър: A Instance Area Plot. Допустими стойности: {allPlotsStr}\n";
-                    }
-                    */
+                    }                    
                 }
             }
 

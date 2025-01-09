@@ -650,19 +650,10 @@ namespace AreaCalculations
         }
         private void calculateParkingPercentSurplus(Dictionary<List<double>, List<Room>> percentageDict, double totalPercentage, double totalPercentageAchieved, int index)
         {
-            //
-            //
-            //
-            
-            // TODO: СЛОЖИ НЯКАКЪВ СТОПЕР ТУКА, КАКТО ИМА В МОМЕНТА В ДРУГИТЕ РАЗПРЕДЕЛЯНИЯ
-
-            //
-            //
-            //
-
             // calculate surplus
             double surplus = Math.Round(totalPercentage - totalPercentageAchieved, 3);
             int counter = 0;
+            int loopCounter = 0;
 
             // redistribute surplus if any
             while (Math.Abs(surplus) >= 0.0005)
@@ -670,6 +661,7 @@ namespace AreaCalculations
                 if (counter >= percentageDict.Keys.Count())
                 {
                     counter = 0;
+                    loopCounter++;
                 }
                 List<double> dictList = percentageDict.Keys.ToList()[counter];
 
@@ -688,23 +680,19 @@ namespace AreaCalculations
                         surplus -= finalDeduction;
                     }
                 }
+
+                counter++;
+
+                if (loopCounter == 10)
+                    surplus = 0;
             }
         }
         private void calculateParkingAreaSurplus(Dictionary<List<double>, List<Room>> percentageDict, double totalArea, double totalAreaAchieved, int index)
         {
-            //
-            //
-            //
-
-            // TODO: СЛОЖИ НЯКАКЪВ СТОПЕР ТУКА, КАКТО ИМА В МОМЕНТА В ДРУГИТЕ РАЗПРЕДЕЛЯНИЯ
-
-            //
-            //
-            //
-
             // calculate surplus
             double surplus = Math.Round(totalArea - totalAreaAchieved, 2);
             int counter = 0;
+            int loopCounter = 0;
 
             // redistribute surplus if any
             while (Math.Abs(surplus) >= 0.0005)
@@ -712,6 +700,7 @@ namespace AreaCalculations
                 if (counter >= percentageDict.Keys.Count())
                 {
                     counter = 0;
+                    loopCounter++;
                 }
                 List<double> dictList = percentageDict.Keys.ToList()[counter];
 
@@ -730,6 +719,11 @@ namespace AreaCalculations
                         surplus -= finalDeduction;
                     }
                 }
+
+                counter++;
+
+                if (loopCounter == 10)
+                    surplus = 0;
             }
         }
         private bool doesHaveRoomsAdjascent(string areaNumber)
@@ -1526,6 +1520,27 @@ namespace AreaCalculations
 
             range.Formula = sumFormula;
         }
+        private void setMergeBordersColorAndAlignment(Worksheet workSheet, string rangeStart, string rangeEnd, int row, bool setRowHeight, int rowHeight, 
+            bool wrapText, bool setVerticalTop, bool colorWhite, bool colorGrey, bool setHorizontalCenter)
+        {
+            Range mergeRangeObject = workSheet.Range[$"{rangeStart}{row}", $"{rangeEnd}{row}"];
+            mergeRangeObject.Merge();
+            mergeRangeObject.Font.Bold = true;
+            mergeRangeObject.Borders.LineStyle = XlLineStyle.xlContinuous;
+            mergeRangeObject.HorizontalAlignment = XlHAlign.xlHAlignLeft;
+
+            if (colorWhite) mergeRangeObject.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
+
+            if (colorGrey) mergeRangeObject.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+
+            if (setRowHeight) mergeRangeObject.RowHeight = rowHeight;
+
+            if (wrapText) mergeRangeObject.WrapText = true;
+
+            if (setVerticalTop) mergeRangeObject.VerticalAlignment = XlVAlign.xlVAlignTop;
+
+            if (setHorizontalCenter) mergeRangeObject.HorizontalAlignment = XlHAlign.xlHAlignCenter;
+        }
         public void exportToExcel(string filePath, string sheetName)
         {
             Microsoft.Office.Interop.Excel.Application excelApplication = new Microsoft.Office.Interop.Excel.Application();
@@ -1571,42 +1586,16 @@ namespace AreaCalculations
             workSheet.Cells[x, 1] = "IPID";
             workSheet.Cells[x, 2] = doc.ProjectInformation.LookupParameter("Project Number").AsString();
 
-            Range ipIdRange = workSheet.Range[$"A{x}", $"A{x}"];
-            ipIdRange.Font.Bold = true;
-            ipIdRange.Borders.LineStyle = XlLineStyle.xlContinuous;
-            ipIdRange.HorizontalAlignment = XlHAlign.xlHAlignLeft;
-            ipIdRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
-
-            Range mergeRange = workSheet.Range[$"B{x}", $"O{x}"];
-            mergeRange.Merge();
-            mergeRange.Font.Bold = true;
-            mergeRange.Borders.LineStyle = XlLineStyle.xlContinuous;
-            mergeRange.HorizontalAlignment = XlHAlign.xlHAlignLeft;
-            mergeRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
-            mergeRange.RowHeight = 35;
-            mergeRange.WrapText = true;
-            // mergeRange.VerticalAlignment = XlVAlign.xlVAlignTop;
+            setMergeBordersColorAndAlignment(workSheet, "A", "A", x, false, 0, false, false, true, false, false);
+            setMergeBordersColorAndAlignment(workSheet, "B", "O", x, true, 35, true, false, true, false, false);
 
             // main title : project name
             x += 2;
             workSheet.Cells[x, 1] = "ОБЕКТ";
             workSheet.Cells[x, 2] = doc.ProjectInformation.LookupParameter("Project Name").AsString();
 
-            Range mergeRangeProjName = workSheet.Range[$"A{x}", $"A{x}"];
-            mergeRangeProjName.Font.Bold = true;
-            mergeRangeProjName.Borders.LineStyle = XlLineStyle.xlContinuous;
-            mergeRangeProjName.HorizontalAlignment = XlHAlign.xlHAlignLeft;
-            mergeRangeProjName.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
-
-            Range mergeRangeObject = workSheet.Range[$"B{x}", $"O{x}"];
-            mergeRangeObject.Merge();
-            mergeRangeObject.Font.Bold = true;
-            mergeRangeObject.Borders.LineStyle = XlLineStyle.xlContinuous;
-            mergeRangeObject.HorizontalAlignment = XlHAlign.xlHAlignLeft;
-            mergeRangeObject.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.White);
-            mergeRangeObject.RowHeight = 35;
-            mergeRangeObject.WrapText = true;
-            // mergeRangeObject.VerticalAlignment = XlVAlign.xlVAlignTop;
+            setMergeBordersColorAndAlignment(workSheet, "A", "A", x, false, 0, false, false, true, false, false);
+            setMergeBordersColorAndAlignment(workSheet, "B", "O", x, true, 35, true, false, true, false, false);
 
             foreach (string plotName in plotNames)
             {
@@ -1699,14 +1688,16 @@ namespace AreaCalculations
                     {
                         x += 2;
                         workSheet.Cells[x, 1] = $"ПЛОЩООБРАЗУВАНЕ САМОСТОЯТЕЛНИ ОБЕКТИ - {property}";
-                        Range propertyTitleRange = workSheet.Range[$"A{x}", $"O{x}"];
-                        propertyTitleRange.Merge();
-                        propertyTitleRange.HorizontalAlignment = XlHAlign.xlHAlignCenter;
-                        propertyTitleRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
-                        propertyTitleRange.Font.Bold = true;
-                        propertyTitleRange.Borders.LineStyle = XlLineStyle.xlContinuous;
-                        propertyTitleRange.RowHeight = 35;
-                        propertyTitleRange.VerticalAlignment = XlVAlign.xlVAlignTop;
+
+                        setMergeBordersColorAndAlignment(workSheet, "A", "O", x, true, 35, false, true, false, true, true);
+
+                        //
+                        //
+                        //
+
+                        //
+                        //
+                        //
 
                         x++;
                         Range indivdualRange = workSheet.Range[$"A{x}", $"O{x}"];
@@ -1745,7 +1736,7 @@ namespace AreaCalculations
                         x++;
                         Range parameterNamesRange = workSheet.Range[$"A{x}", $"O{x}"];
                         string[] parameterNamesData = new[] { "НОМЕР СО", "НАИМЕНОВАНИЕ СО", "ПЛОЩ\nF1(F2)", "ПРИЛ.\nПЛОЩ", "КОЕФ.", "C1(C2)",
-                            "ДЯЛ ОТ\nПОДЗЕМЕН\nПАРКИНГ\nГАРАЖ", "СТАНДАРТНИ\nО.Ч.", "", "СПЕЦ.\nО.Ч.", "ОБЩО\nО.Ч.", "ОБЩО\nF1(F2)+F3", "ПРАВО\nНА\nСТРОЕЖ", "ЗЕМЯ", ""};
+                            "ДЯЛ ОТ\nПОДЗЕМЕН\nПАРКИНГ\nГАРАЖ", "О.Ч.", "", "СПЕЦ.\nО.Ч.", "ОБЩО\nО.Ч.", "ОБЩО\nF1(F2)+F3", "ПРАВО\nНА\nСТРОЕЖ", "ЗЕМЯ", ""};
                         parameterNamesRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, parameterNamesData);
                         parameterNamesRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
                         parameterNamesRange.Borders.LineStyle = XlLineStyle.xlContinuous;
@@ -1923,7 +1914,7 @@ namespace AreaCalculations
                                         levelHeightStr = $"± {tempString}";
                                     }
 
-                                    workSheet.Cells[x, 1] = $"{area.LookupParameter("Level").AsValueString()}, КОТА {levelHeightStr}";
+                                    workSheet.Cells[x, 1] = $"КОТА {levelHeightStr}";
                                     Range levelsRangeString = workSheet.Range[$"A{x}", $"O{x}"];
                                     levelsRangeString.Merge();
                                     levelsRangeString.UnMerge();
