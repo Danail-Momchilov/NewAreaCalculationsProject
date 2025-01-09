@@ -650,6 +650,16 @@ namespace AreaCalculations
         }
         private void calculateParkingPercentSurplus(Dictionary<List<double>, List<Room>> percentageDict, double totalPercentage, double totalPercentageAchieved, int index)
         {
+            //
+            //
+            //
+            
+            // TODO: СЛОЖИ НЯКАКЪВ СТОПЕР ТУКА, КАКТО ИМА В МОМЕНТА В ДРУГИТЕ РАЗПРЕДЕЛЯНИЯ
+
+            //
+            //
+            //
+
             // calculate surplus
             double surplus = Math.Round(totalPercentage - totalPercentageAchieved, 3);
             int counter = 0;
@@ -682,6 +692,16 @@ namespace AreaCalculations
         }
         private void calculateParkingAreaSurplus(Dictionary<List<double>, List<Room>> percentageDict, double totalArea, double totalAreaAchieved, int index)
         {
+            //
+            //
+            //
+
+            // TODO: СЛОЖИ НЯКАКЪВ СТОПЕР ТУКА, КАКТО ИМА В МОМЕНТА В ДРУГИТЕ РАЗПРЕДЕЛЯНИЯ
+
+            //
+            //
+            //
+
             // calculate surplus
             double surplus = Math.Round(totalArea - totalAreaAchieved, 2);
             int counter = 0;
@@ -768,6 +788,12 @@ namespace AreaCalculations
             double totalPercentage = 0;
             double totalPercentageShare = 0;
             double totalBuildingRightShare = 0;
+            double totalLandPercentageShare = 0;
+            double totalCommonAreaShare = 0;
+            double totalCommonAreaSpecialShare = 0;
+            double totalCommonAreaTotalShare = 0;
+            double totalAreaTotalShare = 0;
+            double totalLandAreaShare = 0;
 
             foreach (var group in groupedRooms)
             {
@@ -775,7 +801,7 @@ namespace AreaCalculations
                 List<double> listData = new List<double>();
                 listData.Add(group.Count());
 
-                double percentage = Math.Round(group.First().LookupParameter("Area").AsDouble()*100/areaArea, 3);
+                double percentage = Math.Round(group.First().LookupParameter("Area").AsDouble() * 100/areaArea, 3);
                 listData.Add(percentage);
 
                 double percentageShare = Math.Round(percentage * commonAreaPercent / 100, 3);
@@ -812,13 +838,29 @@ namespace AreaCalculations
                     totalPercentage += percentage;
                     totalPercentageShare += percentageShare;
                     totalBuildingRightShare += buildingRightShare;
+                    totalLandPercentageShare += landPercentageShare;
+
+                    totalCommonAreaShare += commonAreaShare;
+                    totalCommonAreaSpecialShare += commonAreaSpecialShare;
+                    totalCommonAreaTotalShare += commonAreaTotalShare;
+                    totalAreaTotalShare += totalAreaShare;
+                    totalLandAreaShare += landAreaShare;
                 }
             }
-
+            
+            // redistribute surplus for percentage coefficients
             calculateParkingPercentSurplus(percentageDict, 100, totalPercentage, 1);
-            calculateParkingPercentSurplus(percentageDict, area.LookupParameter("A Instance Common Area %").AsDouble(), totalPercentageShare, 2);
-            calculateParkingPercentSurplus(percentageDict, area.LookupParameter("A Instance Building Permit %").AsDouble(), totalBuildingRightShare, 2);
+            calculateParkingPercentSurplus(percentageDict, commonAreaPercent, totalPercentageShare, 2);
+            calculateParkingPercentSurplus(percentageDict, buildingRight, totalBuildingRightShare, 7);
+            calculateParkingPercentSurplus(percentageDict, landPercentage, totalLandPercentageShare, 8);
 
+            // redistribute surplus for area coefficients
+            calculateParkingAreaSurplus(percentageDict, commonArea, totalCommonAreaShare, 3);
+            calculateParkingAreaSurplus(percentageDict, specialCommonArea, totalCommonAreaSpecialShare, 4);
+            calculateParkingAreaSurplus(percentageDict, totalCommonArea, totalCommonAreaTotalShare, 5);
+            calculateParkingAreaSurplus(percentageDict, totalArea, totalAreaTotalShare, 6);
+            calculateParkingAreaSurplus(percentageDict, landArea, totalLandAreaShare, 9);
+            
             // construct new dictionary
             Dictionary<List<object>, Room> flattenedDict = new Dictionary<List<object>, Room>();
 
@@ -1410,8 +1452,9 @@ namespace AreaCalculations
 
             if (isLand)
             {
-                areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] { Math.Round(areaSub.LookupParameter("Area").AsDouble() / areaConvert, 2), 
-                                                        DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, 
+                areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] { DBNull.Value, 
+                                                        Math.Round(areaSub.LookupParameter("Area").AsDouble() / areaConvert, 2), 
+                                                        DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, 
                                                         DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value,
                                                         Math.Round(areaSub.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3),
                                                         Math.Round(areaSub.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 2) });
@@ -1701,8 +1744,8 @@ namespace AreaCalculations
 
                         x++;
                         Range parameterNamesRange = workSheet.Range[$"A{x}", $"O{x}"];
-                        string[] parameterNamesData = new[] { "НОМЕР СО", "НАИМЕНОВАНИЕ СО", "ПЛОЩ\nF1(F2)", "ПРИЛ.\nПЛОЩ", "КОЕФ.", "C1(C2)", 
-                            "И.Ч.\nПАРКОМ.", "СТАНДАРТНИ\nО.Ч.", "", "СПЕЦ.\nО.Ч.", "ОБЩО\nО.Ч.", "ОБЩО\nF1(F2)+F3", "ПРАВО\nНА\nСТРОЕЖ", "ЗЕМЯ", ""};
+                        string[] parameterNamesData = new[] { "НОМЕР СО", "НАИМЕНОВАНИЕ СО", "ПЛОЩ\nF1(F2)", "ПРИЛ.\nПЛОЩ", "КОЕФ.", "C1(C2)",
+                            "ДЯЛ ОТ\nПОДЗЕМЕН\nПАРКИНГ\nГАРАЖ", "СТАНДАРТНИ\nО.Ч.", "", "СПЕЦ.\nО.Ч.", "ОБЩО\nО.Ч.", "ОБЩО\nF1(F2)+F3", "ПРАВО\nНА\nСТРОЕЖ", "ЗЕМЯ", ""};
                         parameterNamesRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, parameterNamesData);
                         parameterNamesRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
                         parameterNamesRange.Borders.LineStyle = XlLineStyle.xlContinuous;
@@ -1880,7 +1923,7 @@ namespace AreaCalculations
                                         levelHeightStr = $"± {tempString}";
                                     }
 
-                                    workSheet.Cells[x, 1] = $"{area.LookupParameter("Level").AsValueString()} {levelHeightStr}";
+                                    workSheet.Cells[x, 1] = $"{area.LookupParameter("Level").AsValueString()}, КОТА {levelHeightStr}";
                                     Range levelsRangeString = workSheet.Range[$"A{x}", $"O{x}"];
                                     levelsRangeString.Merge();
                                     levelsRangeString.UnMerge();
@@ -2071,6 +2114,8 @@ namespace AreaCalculations
                                         areaAdjRangeBorders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
 
                                         linesToExcludeParking.Add(x);
+
+                                        setExcelDecimalsFormatting(workSheet, x);
 
                                         x++;
                                     }
