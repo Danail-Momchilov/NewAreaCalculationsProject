@@ -145,12 +145,10 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][plotProperty])
                     {
-                        if ((area.LookupParameter("A Instance Area Location").AsString().ToLower() == "надземна" 
+                        if (area.LookupParameter("A Instance Area Location").AsString().ToLower() == "надземна" 
                             || area.LookupParameter("A Instance Area Location").AsString().ToLower() == "наземна")
-                            && area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект"
-                            && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            plotTotalBuild[plotName] += Math.Round(area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert, 2);
+                            plotTotalBuild[plotName] += Math.Round(area.Area / areaConvert, 2);
                         }
                     }
                 }
@@ -167,7 +165,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() == "ПОДЗЕМНА")
                         {
-                            plotUndergroundAreas[plotName] += Math.Round(area.LookupParameter("A Instance Total Area").AsDouble() / areaConvert, 2);
+                            plotUndergroundAreas[plotName] += Math.Round(area.Area / areaConvert, 2);
                         }
                     }
                 }
@@ -1870,7 +1868,7 @@ namespace AreaCalculations
 
                         List<int> linesToExclude = new List<int>();
                         List<int> linesToExcludeLand = new List<int>();
-                        List<int> linesToExcludeParking = new List<int>();
+                        // List<int> linesToExcludeParking = new List<int>();
 
                         foreach (Area area in sortedAreas)
                         {
@@ -2030,7 +2028,6 @@ namespace AreaCalculations
                                         foreach (Area areaSub in adjascentAreasLand)
                                         {
                                             exportToExcelAdjascentRegular(workSheet, x, areaSub, true, area.LookupParameter("Number").AsString());
-                                            linesToExclude.Add(x);
                                             x++;
                                         }
                                     }
@@ -2104,9 +2101,10 @@ namespace AreaCalculations
                                         areaAdjRangeBorders[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
                                         areaAdjRangeBorders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
 
-                                        linesToExcludeParking.Add(x);
-
                                         setExcelDecimalsFormatting(workSheet, x);
+
+                                        linesToExclude.Add(x);
+                                        linesToExcludeLand.Add(x);
 
                                         x++;
                                     }
@@ -2135,33 +2133,33 @@ namespace AreaCalculations
                         sumC1C2.Formula = $"=SUM(F{startLine}:F{endLine})";
 
                         // set a formula for the total sum of Common Areas 
-                        setSumFormulaExcludingRows(workSheet, "H", x, startLine, endLine, linesToExcludeParking);
+                        setSumFormulaExcludingRows(workSheet, "H", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "H", "H", x);
 
                         // set a formula for the total sum of Special Common Areas Percentage
-                        setSumFormulaExcludingRows(workSheet, "I", x, startLine, endLine, linesToExcludeParking);
+                        setSumFormulaExcludingRows(workSheet, "I", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "I", "I", x);
 
                         // set a formula for the total sum of Special Common Areas Percentage
-                        setSumFormulaExcludingRows(workSheet, "J", x, startLine, endLine, linesToExcludeParking);
+                        setSumFormulaExcludingRows(workSheet, "J", x, startLine, endLine, linesToExclude);
 
                         // set a formula for the total sum of all common areas
-                        setSumFormulaExcludingRows(workSheet, "K", x, startLine, endLine, linesToExcludeParking);
+                        setSumFormulaExcludingRows(workSheet, "K", x, startLine, endLine, linesToExclude);
 
                         // set a formula for the total sum of Total Area
-                        setSumFormulaExcludingRows(workSheet, "L", x, startLine, endLine, linesToExcludeParking);
+                        setSumFormulaExcludingRows(workSheet, "L", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "L", "L", x);
 
                         // set a formula for the total sum of Building Right Percentage
-                        setSumFormulaExcludingRows(workSheet, "M", x, startLine, endLine, linesToExcludeParking);
+                        setSumFormulaExcludingRows(workSheet, "M", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "M", "M", x);
 
                         // set a formula for the total sum of Land Area Percentage
-                        setSumFormulaExcludingRows(workSheet, "N", x, startLine, endLine, linesToExcludeParking);
+                        setSumFormulaExcludingRows(workSheet, "N", x, startLine, endLine, linesToExcludeLand);
                         setBoldRange(workSheet, "N", "N", x);
 
                         // set a formula for the total sum of Land Area
-                        setSumFormulaExcludingRows(workSheet, "O", x, startLine, endLine, linesToExcludeParking);
+                        setSumFormulaExcludingRows(workSheet, "O", x, startLine, endLine, linesToExcludeLand);
                         setBoldRange(workSheet, "O", "O", x);
 
                         // set coloring for the summed up rows
