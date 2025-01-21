@@ -22,7 +22,7 @@ namespace AreaCalculations
 
         public string errorReport = "";
 
-        double areaConvert = 10.763914692;
+        double areaConvert = 10.7639104167097223083335055559;
 
         double lengthConvert = 30.48;
 

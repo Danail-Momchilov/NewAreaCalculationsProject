@@ -18,7 +18,7 @@ namespace AreaCalculations
         public FilteredElementCollector areasCollector { get; set; }
         public Document doc { get; set; }
         Transaction transaction { get; set; }
-        private double areaConvert = 10.763914692;
+        private double areaConvert = 10.7639104167097223083335055559;
         private bool updateIfNoValue(Parameter param, double value)
         {
             if (param.HasValue && param.AsValueString() != "" && param.AsDouble() != 0)

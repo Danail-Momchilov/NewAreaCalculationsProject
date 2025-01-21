@@ -18,7 +18,7 @@ namespace AreaCalculations
 
         public bool isPlotTypeCorrect = true;
 
-        double areaConvert = 10.763914692;
+        double areaConvert = 10.7639104167097223083335055559;
 
         public ProjInfoUpdater(ProjectInfo projectInfo, Document Doc)
         {

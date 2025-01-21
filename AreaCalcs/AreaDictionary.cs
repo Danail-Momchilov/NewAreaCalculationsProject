@@ -22,7 +22,7 @@ namespace AreaCalculations
 {
     internal class AreaDictionary
     {
-        private readonly double areaConvert = 10.763914692;
+        private readonly double areaConvert = 10.7639104167097223083335055559;
         private readonly double lengthConvert = 30.48;
         public Dictionary<string, Dictionary<string, List<Area>>> AreasOrganizer { get; set; }
         public List<string> plotNames { get; set; }
@@ -908,6 +908,12 @@ namespace AreaCalculations
 
             return sortedFlattenedDict;
         }        
+        private double smartRound(Area area, string parameterName)
+        {
+            double result = Math.Round(area.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero) * areaConvert;
+
+            return result;
+        }
         public void setGrossArea()
         {
             transaction.Start();
@@ -918,7 +924,9 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        area.LookupParameter("A Instance Gross Area").Set(area.LookupParameter("Area").AsDouble());
+                        double calculatedArea = smartRound(area, "Area");
+
+                        area.LookupParameter("A Instance Gross Area").Set(calculatedArea);
                     }
                 }
             }
@@ -959,7 +967,7 @@ namespace AreaCalculations
                                             if (secArea.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект")
                                             {
                                                 mainArea.LookupParameter("A Instance Gross Area").Set(
-                                                    mainArea.LookupParameter("A Instance Gross Area").AsDouble() + secArea.Area);
+                                                    mainArea.LookupParameter("A Instance Gross Area").AsDouble() + smartRound(secArea, "Area"));
                                             }
                                         }
                                     }
@@ -980,7 +988,7 @@ namespace AreaCalculations
                                                     if (secArea.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект")
                                                     {
                                                         mainArea.LookupParameter("A Instance Gross Area").Set(
-                                                            mainArea.LookupParameter("A Instance Gross Area").AsDouble() + secArea.Area);
+                                                            mainArea.LookupParameter("A Instance Gross Area").AsDouble() + smartRound(secArea, "Area"));
                                                     }
                                                 }
                                             }
@@ -1015,8 +1023,8 @@ namespace AreaCalculations
                 if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ"
                     && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                 {
-                    area.LookupParameter("A Instance Price C1/C2").Set(area.LookupParameter("A Instance Gross Area").AsDouble()
-                        * area.LookupParameter("A Coefficient Multiplied").AsDouble() / areaConvert);
+                    area.LookupParameter("A Instance Price C1/C2").Set(Math.Round(area.LookupParameter("A Instance Gross Area").AsDouble()
+                        * area.LookupParameter("A Coefficient Multiplied").AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero));
                 }
             }
 
@@ -1048,7 +1056,7 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue 
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            double commonAreaPercent = (area.LookupParameter("A Instance Price C1/C2").AsDouble() / totalC1C2) * 100;
+                            double commonAreaPercent = Math.Round(area.LookupParameter("A Instance Price C1/C2").AsDouble() / totalC1C2 * 100, 2, MidpointRounding.AwayFromZero);
                             area.LookupParameter("A Instance Common Area %").Set(commonAreaPercent);
                         }
                     }
@@ -1076,7 +1084,8 @@ namespace AreaCalculations
                         {
                             double commonArea;
 
-                            commonArea = Math.Round(area.LookupParameter("A Instance Common Area %").AsDouble() * propertyCommonArea / 100 * areaConvert, 2);
+                            commonArea = Math.Round(area.LookupParameter("A Instance Common Area %").AsDouble() * propertyCommonArea / 100, 
+                                2, MidpointRounding.AwayFromZero) * areaConvert;       
                             area.LookupParameter("A Instance Common Area").Set(commonArea);
                         }
                     }
@@ -1130,10 +1139,22 @@ namespace AreaCalculations
                             // for each area of the list, calculate its Special Common Area
                             foreach (Area mainArea in mainAreaElements)
                             {
-                                double percentage = mainArea.LookupParameter("A Instance Price C1/C2").AsDouble() * 100 / sumC1C2;
+                                double percentage = Math.Round(mainArea.LookupParameter("A Instance Price C1/C2").AsDouble() * 100 / sumC1C2, 
+                                    3, MidpointRounding.AwayFromZero);
                                 
+                                //
+                                //
+                                //
+
+                                // FIX THAT
+
                                 mainArea.LookupParameter("A Instance Common Area Special")
-                                    .Set(mainArea.LookupParameter("A Instance Common Area Special").AsDouble() + (percentage * area.Area / 100));
+                                    .Set(mainArea.LookupParameter("A Instance Common Area Special").AsDouble() + 
+                                    (percentage * area.Area / 100));
+
+                                //
+                                //
+                                //
                             }
                         }
                     }
