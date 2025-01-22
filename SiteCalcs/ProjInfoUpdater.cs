@@ -15,11 +15,14 @@ namespace AreaCalculations
         Transaction transaction { get; set; }
         public List<double> plotAreas { get; set; } = new List<double>();
         public List<string> plotNames { get; set; } = new List<string>();
-
         public bool isPlotTypeCorrect = true;
-
         double areaConvert = 10.7639104167097223083335055559;
+        private double smartRoundProjInfo(ProjectInfo projectInfo, string parameterName)
+        {
+            double result = Math.Round(projectInfo.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero) * areaConvert;
 
+            return result;
+        }
         public ProjInfoUpdater(ProjectInfo projectInfo, Document Doc)
         {
             this.ProjectInfo = projectInfo;
@@ -30,16 +33,16 @@ namespace AreaCalculations
             {
                 case "СТАНДАРТНО УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
-                    plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert, 2));
+                    plotAreas.Add(smartRoundProjInfo(projectInfo, "Plot Area"));
                     break;
 
                 case "ЪГЛОВО УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
-                    plotAreas.Add(projectInfo.LookupParameter("Plot Area").AsDouble() / areaConvert);
+                    plotAreas.Add(smartRoundProjInfo(projectInfo, "Plot Area"));
                     break;
 
                 case "УПИ В ДВЕ ЗОНИ":
-                    double plotAr = Math.Round((projectInfo.LookupParameter("Zone Area 1st").AsDouble() / areaConvert) + (projectInfo.LookupParameter("Zone Area 2nd").AsDouble() / areaConvert), 2);
+                    double plotAr = smartRoundProjInfo(projectInfo, "Zone Area 1st") + smartRoundProjInfo(projectInfo, "Zone Area 2nd");
                     plotAreas.Add(plotAr);
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
                     break;
@@ -47,8 +50,8 @@ namespace AreaCalculations
                 case "ДВЕ УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number 1st").AsString());
                     plotNames.Add(projectInfo.LookupParameter("Plot Number 2nd").AsString());
-                    plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area 1st").AsDouble() / areaConvert, 2));
-                    plotAreas.Add(Math.Round(projectInfo.LookupParameter("Plot Area 2nd").AsDouble() / areaConvert, 2));
+                    plotAreas.Add(smartRoundProjInfo(projectInfo, "Plot Area 1st"));
+                    plotAreas.Add(smartRoundProjInfo(projectInfo, "Plot Area 2nd"));
                     break;
 
                 default:
@@ -56,7 +59,6 @@ namespace AreaCalculations
                     break;
             }
         }
-
         private static bool hasValue(Parameter param)
         {
             if (param.HasValue)
@@ -64,7 +66,6 @@ namespace AreaCalculations
             else
                 return false;
         }
-
         public string CheckProjectInfo()
         {
             string errorMessage = "";
@@ -132,7 +133,6 @@ namespace AreaCalculations
 
             return errorMessage;
         }            
-
         public string CheckProjectInfoParameters()
         {
             try
@@ -261,7 +261,6 @@ namespace AreaCalculations
                 throw e;
             }
         }
-
         public void SetAchievedStandard(double buildArea, double grossArea, double intensity, double density, double greenArea, double achievedPercentage)
         {
             transaction.Start();
@@ -272,8 +271,7 @@ namespace AreaCalculations
             ProjectInfo.LookupParameter("Achieved Green Area").Set(greenArea);
             ProjectInfo.LookupParameter("Achieved Green Area Percentage").Set(achievedPercentage);
             transaction.Commit();
-        }
-        
+        }        
         public void SetRequired(double buildArea, double grossArea, double intensity, double density)
         {
             transaction.Start();
@@ -283,7 +281,6 @@ namespace AreaCalculations
             ProjectInfo.LookupParameter("Required Built up Density").Set(density);
             transaction.Commit();
         }
-
         public void SetAllTwoZones(double plotArea, double buildArea, double totalBuild, double kint, double density, double greenArea, double achievedPercentage)
         {
             transaction.Start();
@@ -310,7 +307,6 @@ namespace AreaCalculations
             // check this with the Simo
             transaction.Commit();
         }
-
         public void SetAchievedTwoPlots(double buildArea1, double totalBuild1, double kint1, double density1, double buildArea2, double totalBuild2, double kint2, double density2, double greenArea1, double greenArea2, double percentage1, double percentage2)
         {
             transaction.Start();

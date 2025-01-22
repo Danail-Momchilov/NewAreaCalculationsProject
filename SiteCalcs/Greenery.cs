@@ -19,13 +19,21 @@ namespace AreaCalculations
         public double achievedPercentage2 { get; set; }
         public List<double> greenAreas { get; set; } = new List<double>();
         public List<double> achievedPercentages { get; set; } = new List<double>();
+        private double smartRoundFloor(Floor floor, string parameterName)
+        {
+            double result = Math.Round(floor.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero) * areaConvert;
 
+            return result;
+        }
+        private double smartRoundWall(Wall wall, string parameterName)
+        {
+            double result = Math.Round(wall.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero) * areaConvert;
+
+            return result;
+        }
         public string errorReport = "";
-
         double areaConvert = 10.7639104167097223083335055559;
-
         double lengthConvert = 30.48;
-
         public Greenery(Document doc, List<string> plotNames, List<double> plotAreas)
         {
             FilteredElementCollector allFloors = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Floors).WhereElementIsNotElementType();
@@ -36,16 +44,16 @@ namespace AreaCalculations
             {
                 foreach (Floor floor in allFloors)
                     if (floor.FloorType.LookupParameter("Green Area").AsInteger() == 1)
-                        greenArea += Math.Round(floor.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                        greenArea += smartRoundFloor(floor, "Area");
 
                 foreach (Wall wall in allWalls)
                 {
                     if (wall.WallType.LookupParameter("Green Area").AsInteger() == 1)
                     {
                         if ((wall.LookupParameter("Unconnected Height").AsDouble() * lengthConvert) <= 200)
-                            greenArea += Math.Round(wall.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                            greenArea += smartRoundWall(wall, "Area");
                         else
-                            greenArea += Math.Round((((wall.LookupParameter("Length").AsDouble() * lengthConvert)/100) * 2), 2);
+                            greenArea += Math.Round(wall.LookupParameter("Length").AsDouble() * lengthConvert / 100 * 2, 2, MidpointRounding.AwayFromZero);
                     }
                 }
                 
@@ -57,9 +65,10 @@ namespace AreaCalculations
                     if (railingType.LookupParameter("Green Area").AsInteger() == 1)
                     {
                         if (railingType.LookupParameter("Railing Height").AsDouble() * lengthConvert <= 200)
-                            greenArea += Math.Round((((railing.LookupParameter("Length").AsDouble() * lengthConvert)/100) * ((railingType.LookupParameter("Railing Height").AsDouble() * lengthConvert)/100)), 2);
+                            greenArea += Math.Round(railing.LookupParameter("Length").AsDouble() * lengthConvert / 100 * 
+                                railingType.LookupParameter("Railing Height").AsDouble() * lengthConvert / 100, 2, MidpointRounding.AwayFromZero);
                         else
-                            greenArea += Math.Round((((railing.LookupParameter("Length").AsDouble() * lengthConvert)/100) * 2), 2);
+                            greenArea += Math.Round(railing.LookupParameter("Length").AsDouble() * lengthConvert / 100 * 2, 2, MidpointRounding.AwayFromZero);
                     }
                 }
 
@@ -134,7 +143,7 @@ namespace AreaCalculations
                 achievedPercentages.Add(achievedPercentage2);
                 greenAreas.Add(greenArea1);
                 greenAreas.Add(greenArea2);
-            }
+            } //FIX THAT ONE LATER
         }
     }
 }

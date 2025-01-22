@@ -130,7 +130,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА")
                         {
-                            plotBuildAreas[plotName] += Math.Round(area.Area / areaConvert, 2);
+                            plotBuildAreas[plotName] += smartRound(area, "Area");
                         }
                     }
                 }
@@ -148,7 +148,7 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Location").AsString().ToLower() == "надземна" 
                             || area.LookupParameter("A Instance Area Location").AsString().ToLower() == "наземна")
                         {
-                            plotTotalBuild[plotName] += Math.Round(area.Area / areaConvert, 2);
+                            plotTotalBuild[plotName] += smartRound(area, "Area");
                         }
                     }
                 }
@@ -165,7 +165,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() == "ПОДЗЕМНА")
                         {
-                            plotUndergroundAreas[plotName] += Math.Round(area.Area / areaConvert, 2);
+                            plotUndergroundAreas[plotName] += smartRound(area, "Area");
                         }
                     }
                 }
@@ -183,7 +183,7 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект" 
                             && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            plotIndividualAreas[plotName] += Math.Round(area.LookupParameter("A Instance Gross Area").AsDouble() / areaConvert, 2);
+                            plotIndividualAreas[plotName] += smartRound(area, "A Instance Gross Area");
                         }
                     }
                 }
@@ -200,7 +200,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част")
                         {
-                            plotCommonAreas[plotName] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                            plotCommonAreas[plotName] += smartRound(area, "Area");
                         }
                     }
                 }
@@ -219,7 +219,7 @@ namespace AreaCalculations
                             && (area.LookupParameter("A Instance Area Primary").HasValue
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            plotCommonAreasSpecial[plotName] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                            plotCommonAreasSpecial[plotName] += smartRound(area, "Area");
                         }
                     }
                 }
@@ -236,7 +236,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част")
                         {
-                            plotCommonAreasAll[plotName] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                            plotCommonAreasAll[plotName] += smartRound(area, "Area");
                         }
                     }
                 }
@@ -257,7 +257,7 @@ namespace AreaCalculations
                             && !(area.LookupParameter("A Instance Area Primary").HasValue
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            propertyCommonAreas[plotName][plotProperty] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                            propertyCommonAreas[plotName][plotProperty] += smartRound(area, "Area");
                         }
                     }
                 }
@@ -315,7 +315,7 @@ namespace AreaCalculations
                             && (area.LookupParameter("A Instance Area Primary").HasValue
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            propertyCommonAreasSpecial[plotName][plotProperty] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                            propertyCommonAreasSpecial[plotName][plotProperty] += smartRound(area, "Area");
                         }
                     }
                 }
@@ -348,7 +348,7 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект"
                             && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            propertyIndividualAreas[plotName][plotProperty] += Math.Round(area.LookupParameter("A Instance Gross Area").AsDouble() / areaConvert, 2);
+                            propertyIndividualAreas[plotName][plotProperty] += smartRound(area, "A Instance Gross Area");
                         }
                     }
                 }
@@ -365,7 +365,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Group").AsString().ToLower() == "земя")
                         {
-                            plotLandAreas[plotName] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                            plotLandAreas[plotName] += smartRound(area, "A Instance Gross Area");
                         }
                     }
                 }
@@ -1141,20 +1141,11 @@ namespace AreaCalculations
                             {
                                 double percentage = Math.Round(mainArea.LookupParameter("A Instance Price C1/C2").AsDouble() * 100 / sumC1C2, 
                                     3, MidpointRounding.AwayFromZero);
-                                
-                                //
-                                //
-                                //
 
-                                // FIX THAT
+                                double areaToAdd = Math.Round((percentage * area.Area / 100) / areaConvert, 2, MidpointRounding.AwayFromZero) * areaConvert;
 
                                 mainArea.LookupParameter("A Instance Common Area Special")
-                                    .Set(mainArea.LookupParameter("A Instance Common Area Special").AsDouble() + 
-                                    (percentage * area.Area / 100));
-
-                                //
-                                //
-                                //
+                                    .Set(mainArea.LookupParameter("A Instance Common Area Special").AsDouble() + areaToAdd);
                             }
                         }
                     }
@@ -1191,7 +1182,7 @@ namespace AreaCalculations
 
             foreach (string plotName in plotNames)
             {
-                double totalPlotC1C2 = 0;
+                double totalPlotC1C2IMP = 0;
 
                 foreach (string property in plotProperties[plotName])
                 {
@@ -1200,7 +1191,7 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" 
                             && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            totalPlotC1C2 += area.LookupParameter("A Instance Price C1/C2").AsDouble();
+                            totalPlotC1C2IMP += area.LookupParameter("A Instance Price C1/C2").AsDouble();
                         }
                     }
                 }
@@ -1212,7 +1203,8 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" 
                             && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            double buildingPercentPermit = (area.LookupParameter("A Instance Price C1/C2").AsDouble() / totalPlotC1C2) * 100;
+                            double buildingPercentPermit = Math.Round((area.LookupParameter("A Instance Price C1/C2").AsDouble() 
+                                                            / totalPlotC1C2IMP) * 100, 3, MidpointRounding.AwayFromZero);
                             area.LookupParameter("A Instance Building Permit %").Set(buildingPercentPermit);
                         }
                     }
@@ -1233,7 +1225,7 @@ namespace AreaCalculations
                 double reductionPercentage = 0;
 
                 // also find the total C1C2 for all individual areas in the property
-                double totalC1C2 = 0;
+                double totalC1C2IMP = 0;
 
                 // calculate the total C1C2 and reduction percentage for the whole plot
                 foreach (string property in plotProperties[plotName])
@@ -1242,7 +1234,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Group").AsString().ToLower() == "земя")
                         {
-                            double areaPercentage = 100 * area.LookupParameter("Area").AsDouble() / plotArea;
+                            double areaPercentage = Math.Round(100 * area.LookupParameter("Area").AsDouble() / plotArea, 3, MidpointRounding.AwayFromZero);
                             area.LookupParameter("A Instance RLP Area %").Set(areaPercentage);
                             reductionPercentage += areaPercentage;
                         }
@@ -1251,7 +1243,7 @@ namespace AreaCalculations
                             && !(area.LookupParameter("A Instance Area Primary").HasValue 
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            totalC1C2 += area.LookupParameter("A Instance Price C1/C2").AsDouble();
+                            totalC1C2IMP += area.LookupParameter("A Instance Price C1/C2").AsDouble();
                         }
                     }
                 }
@@ -1265,9 +1257,9 @@ namespace AreaCalculations
                             && !(area.LookupParameter("A Instance Area Primary").HasValue
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            double rlpAreaPercent = area.LookupParameter("A Instance Price C1/C2").AsDouble() * 100 / totalC1C2;
+                            double rlpAreaPercent = area.LookupParameter("A Instance Price C1/C2").AsDouble() * 100 / totalC1C2IMP;
 
-                            rlpAreaPercent = rlpAreaPercent * (100 - reductionPercentage) / 100;
+                            rlpAreaPercent = Math.Round(rlpAreaPercent * (100 - reductionPercentage) / 100, 3, MidpointRounding.AwayFromZero);
 
                             area.LookupParameter("A Instance RLP Area %").Set(rlpAreaPercent);
                         }
@@ -1291,7 +1283,10 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        area.LookupParameter("A Instance RLP Area").Set(area.LookupParameter("A Instance RLP Area %").AsDouble() * remainingPlotArea / 100);
+                        double calculatedArea = Math.Round(area.LookupParameter("A Instance RLP Area %").AsDouble() * remainingPlotArea / 100 / areaConvert,
+                            2, MidpointRounding.AwayFromZero) * areaConvert;
+
+                        area.LookupParameter("A Instance RLP Area").Set(calculatedArea);
                     }
                 }
             }
@@ -1318,7 +1313,7 @@ namespace AreaCalculations
                                 double commonAreaImp = area.LookupParameter("A Instance Common Area").AsDouble();
                                 double totalAreaImp = area.LookupParameter("A Instance Total Area").AsDouble();
 
-                                double commonAreaPercent = (commonAreaImp * 100) / totalAreaImp;
+                                double commonAreaPercent = Math.Round((commonAreaImp * 100) / totalAreaImp, 3, MidpointRounding.AwayFromZero);
 
                                 area.LookupParameter("A Instance Property Common Area %").Set(commonAreaPercent);
                             }
