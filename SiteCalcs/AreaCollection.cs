@@ -19,6 +19,12 @@ namespace AreaCalculations
         public Document doc { get; set; }
         Transaction transaction { get; set; }
         private double areaConvert = 10.7639104167097223083335055559;
+        private double semiRoundArea(Area area, string parameterName)
+        {
+            double result = Math.Round(area.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero);
+
+            return result;
+        }
         private bool updateIfNoValue(Parameter param, double value)
         {
             if (param.HasValue && param.AsValueString() != "" && param.AsDouble() != 0)
@@ -28,18 +34,7 @@ namespace AreaCalculations
                 param.Set(value);
                 return true;
             }
-        }
-        private object belongsToArea(Area area)
-        {
-            foreach (Area mainArea in areasCollector)
-            {
-                if (area.LookupParameter("A Instance Area Entrance").AsString() == mainArea.LookupParameter("Number").AsString())
-                    return mainArea;
-                break;
-            }
-
-            return null;
-        }        
+        }     
         public AreaCollection(Document document)
         {
             this.doc = document;
@@ -82,27 +77,25 @@ namespace AreaCalculations
                     if (plotNames.Count == 1)
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНА")
-                            this.build[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                            this.build[0] += semiRoundArea(area, "Area");
                         if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА")
-                        {
-                            this.totalBuild[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
-                        }
+                            this.totalBuild[0] += semiRoundArea(area, "Area");
                     }
                     else if (plotNames.Count == 2)
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНА")
                         {
                             if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
-                                this.build[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                                this.build[0] += semiRoundArea(area, "Area");
                             else if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[1])
-                                this.build[1] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                                this.build[1] += semiRoundArea(area, "Area");
                         }
                         else if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА")
                         {
                             if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
-                                this.totalBuild[0] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                                this.totalBuild[0] += semiRoundArea(area, "Area");
                             else if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[1])
-                                this.totalBuild[1] += Math.Round(area.LookupParameter("Area").AsDouble() / areaConvert, 2);
+                                this.totalBuild[1] += semiRoundArea(area, "Area");
                         }
                     }
                     else

@@ -22,7 +22,7 @@ namespace AreaCalculations
 {
     internal class AreaDictionary
     {
-        private readonly double areaConvert = 10.7639104167097223083335055559;
+        private readonly double areaConvert = 10.7639104167096;
         private readonly double lengthConvert = 30.48;
         public Dictionary<string, Dictionary<string, List<Area>>> AreasOrganizer { get; set; }
         public List<string> plotNames { get; set; }
@@ -130,7 +130,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА")
                         {
-                            plotBuildAreas[plotName] += smartRound(area, "Area");
+                            plotBuildAreas[plotName] += smartSemiRound(area, "Area");
                         }
                     }
                 }
@@ -148,7 +148,7 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Location").AsString().ToLower() == "надземна" 
                             || area.LookupParameter("A Instance Area Location").AsString().ToLower() == "наземна")
                         {
-                            plotTotalBuild[plotName] += smartRound(area, "Area");
+                            plotTotalBuild[plotName] += smartSemiRound(area, "Area");
                         }
                     }
                 }
@@ -165,7 +165,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() == "ПОДЗЕМНА")
                         {
-                            plotUndergroundAreas[plotName] += smartRound(area, "Area");
+                            plotUndergroundAreas[plotName] += smartSemiRound(area, "Area");
                         }
                     }
                 }
@@ -183,7 +183,7 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект" 
                             && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            plotIndividualAreas[plotName] += smartRound(area, "A Instance Gross Area");
+                            plotIndividualAreas[plotName] += smartSemiRound(area, "A Instance Gross Area");
                         }
                     }
                 }
@@ -200,7 +200,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част")
                         {
-                            plotCommonAreas[plotName] += smartRound(area, "Area");
+                            plotCommonAreas[plotName] += smartSemiRound(area, "Area");
                         }
                     }
                 }
@@ -219,7 +219,7 @@ namespace AreaCalculations
                             && (area.LookupParameter("A Instance Area Primary").HasValue
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            plotCommonAreasSpecial[plotName] += smartRound(area, "Area");
+                            plotCommonAreasSpecial[plotName] += smartSemiRound(area, "Area");
                         }
                     }
                 }
@@ -236,7 +236,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "обща част")
                         {
-                            plotCommonAreasAll[plotName] += smartRound(area, "Area");
+                            plotCommonAreasAll[plotName] += smartSemiRound(area, "Area");
                         }
                     }
                 }
@@ -257,7 +257,7 @@ namespace AreaCalculations
                             && !(area.LookupParameter("A Instance Area Primary").HasValue
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            propertyCommonAreas[plotName][plotProperty] += smartRound(area, "Area");
+                            propertyCommonAreas[plotName][plotProperty] += smartSemiRound(area, "Area");
                         }
                     }
                 }
@@ -315,7 +315,7 @@ namespace AreaCalculations
                             && (area.LookupParameter("A Instance Area Primary").HasValue
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            propertyCommonAreasSpecial[plotName][plotProperty] += smartRound(area, "Area");
+                            propertyCommonAreasSpecial[plotName][plotProperty] += smartSemiRound(area, "Area");
                         }
                     }
                 }
@@ -348,7 +348,7 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект"
                             && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            propertyIndividualAreas[plotName][plotProperty] += smartRound(area, "A Instance Gross Area");
+                            propertyIndividualAreas[plotName][plotProperty] += smartSemiRound(area, "A Instance Gross Area");
                         }
                     }
                 }
@@ -365,7 +365,7 @@ namespace AreaCalculations
                     {
                         if (area.LookupParameter("A Instance Area Group").AsString().ToLower() == "земя")
                         {
-                            plotLandAreas[plotName] += smartRound(area, "A Instance Gross Area");
+                            plotLandAreas[plotName] += smartSemiRound(area, "A Instance Gross Area");
                         }
                     }
                 }
@@ -910,7 +910,13 @@ namespace AreaCalculations
         }        
         private double smartRound(Area area, string parameterName)
         {
-            double result = Math.Round(area.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero) * areaConvert;
+            double result = Math.Round(area.LookupParameter(parameterName).AsDouble() / areaConvert , 2, MidpointRounding.AwayFromZero) * areaConvert;
+
+            return result;
+        }
+        private double smartSemiRound(Area area, string parameterName)
+        {
+            double result = Math.Round(area.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero);
 
             return result;
         }

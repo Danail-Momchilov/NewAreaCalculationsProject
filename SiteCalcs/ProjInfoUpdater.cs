@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.ExtensibleStorage;
+using Autodesk.Revit.UI;
 
 namespace AreaCalculations
 {
@@ -23,6 +24,12 @@ namespace AreaCalculations
 
             return result;
         }
+        private double semiRoundProjInfo(ProjectInfo projectInfo, string parameterName)
+        {
+            double result = Math.Round(projectInfo.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero);
+
+            return result;
+        }
         public ProjInfoUpdater(ProjectInfo projectInfo, Document Doc)
         {
             this.ProjectInfo = projectInfo;
@@ -33,12 +40,12 @@ namespace AreaCalculations
             {
                 case "СТАНДАРТНО УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
-                    plotAreas.Add(smartRoundProjInfo(projectInfo, "Plot Area"));
+                    plotAreas.Add(semiRoundProjInfo(projectInfo, "Plot Area"));
                     break;
 
                 case "ЪГЛОВО УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
-                    plotAreas.Add(smartRoundProjInfo(projectInfo, "Plot Area"));
+                    plotAreas.Add(semiRoundProjInfo(projectInfo, "Plot Area"));
                     break;
 
                 case "УПИ В ДВЕ ЗОНИ":
@@ -50,8 +57,8 @@ namespace AreaCalculations
                 case "ДВЕ УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number 1st").AsString());
                     plotNames.Add(projectInfo.LookupParameter("Plot Number 2nd").AsString());
-                    plotAreas.Add(smartRoundProjInfo(projectInfo, "Plot Area 1st"));
-                    plotAreas.Add(smartRoundProjInfo(projectInfo, "Plot Area 2nd"));
+                    plotAreas.Add(semiRoundProjInfo(projectInfo, "Plot Area 1st"));
+                    plotAreas.Add(semiRoundProjInfo(projectInfo, "Plot Area 2nd"));
                     break;
 
                 default:

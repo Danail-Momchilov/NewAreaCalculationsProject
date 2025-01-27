@@ -12,7 +12,7 @@ namespace AreaCalculations
     [TransactionAttribute(TransactionMode.Manual)]
     public class SiteCalcs : IExternalCommand
     {
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        public Result Execute (ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             try
             {
@@ -34,7 +34,8 @@ namespace AreaCalculations
                 if (!ProjInfo.isPlotTypeCorrect)
                 {
                     TaskDialog plotTypeError = new TaskDialog("Неправилно въведен Plot Type");
-                    plotTypeError.MainInstruction = "За да продължите напред, моля попълнете параметър 'Plot Type' с една от четирите посочени опции: СТАНДАРТНО УПИ, ЪГЛОВО УПИ, УПИ В ДВЕ ЗОНИ, ДВЕ УПИ!";
+                    plotTypeError.MainInstruction = "За да продължите напред, моля попълнете параметър 'Plot Type' " +
+                        "с една от четирите посочени опции: СТАНДАРТНО УПИ, ЪГЛОВО УПИ, УПИ В ДВЕ ЗОНИ, ДВЕ УПИ!";
                     plotTypeError.Show();
                     return Result.Failed;
                 }
@@ -99,7 +100,7 @@ namespace AreaCalculations
                 }
 
                 // output report
-                output.updateFinalOutput(ProjInfo.plotAreas, ProjInfo.plotNames, areaCalcs.build, density, areaCalcs.totalBuild, kint, greenery.greenAreas, greenery.achievedPercentages);
+                output.updateFinalOutput (ProjInfo.plotAreas, ProjInfo.plotNames, areaCalcs.build, density, areaCalcs.totalBuild, kint, greenery.greenAreas, greenery.achievedPercentages);
 
                 TaskDialog testDialog = new TaskDialog("Report");
                 testDialog.MainInstruction = output.outputString;
