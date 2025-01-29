@@ -17,7 +17,7 @@ namespace AreaCalculations
             String path = System.IO.Path.GetDirectoryName(assembName);
 
             // create a tab
-            String tabName = "&More";
+            String tabName = "MIPA";
             application.CreateRibbonTab(tabName);
 
             // creatte a panel

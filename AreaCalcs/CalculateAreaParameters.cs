@@ -57,8 +57,6 @@ namespace AreaCalculations
                 areaDict.calculateCommonAreaPerc();
                 // calculate A Instance Common Area Parameter
                 areaDict.calculateCommonArea();
-                // calculate A Instance Total Area
-                areaDict.calculateTotalArea();
                 // calculate A Instance Building Permit %
                 areaDict.calculateBuildingPercentPermit();
                 // calculate A Instance RLP Area %
@@ -67,6 +65,8 @@ namespace AreaCalculations
                 areaDict.calculateRlpArea();
                 // calculate A Instance Common Area Special
                 areaDict.calculateSpecialCommonAreas();
+                // calculate A Instance Total Area
+                areaDict.calculateTotalArea();
                 // calculate A Instance Common Area Percentage
                 errrorMessage += areaDict.calculateInstancePropertyCommonAreaPercentage();
                 // after calculations are complete, redistribute the final surplus left

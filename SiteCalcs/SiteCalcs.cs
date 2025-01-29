@@ -68,25 +68,28 @@ namespace AreaCalculations
                 {
                     case "СТАНДАРТНО УПИ":
                         output.addString("Тип на УПИ: Стандартно\n");
-                        density.Add(Math.Round(areaCalcs.build[0] / ProjInfo.plotAreas[0], 2));
-                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / ProjInfo.plotAreas[0], 2));
-                        ProjInfo.SetAchievedStandard(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], greenery.greenArea, greenery.achievedPercentage);
+                        density.Add(Math.Round(areaCalcs.build[0] / ProjInfo.plotAreas[0], 2, MidpointRounding.AwayFromZero));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / ProjInfo.plotAreas[0], 2, MidpointRounding.AwayFromZero));
+                        ProjInfo.SetAchievedStandard(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], 
+                            greenery.greenArea, greenery.achievedPercentage);
                         break;
 
                     case "ЪГЛОВО УПИ":
                         output.addString("Тип на УПИ: Ъглово\n");
-                        density.Add(Math.Round(areaCalcs.build[0] / ProjInfo.plotAreas[0], 2));
-                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / ProjInfo.plotAreas[0], 2));
-                        ProjInfo.SetAchievedStandard(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], greenery.greenArea, greenery.achievedPercentage);
+                        density.Add(Math.Round(areaCalcs.build[0] / ProjInfo.plotAreas[0], 2, MidpointRounding.AwayFromZero));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / ProjInfo.plotAreas[0], 2, MidpointRounding.AwayFromZero));
+                        ProjInfo.SetAchievedStandard(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], 
+                            greenery.greenArea, greenery.achievedPercentage);
                         ProjInfo.SetRequired(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0]);
                         break;
 
                     case "УПИ В ДВЕ ЗОНИ":
                         output.addString("Тип на УПИ: Един имот в две устройствени зони\n");
                         output.addString("Отделните параметри 1st и 2nd бяха сумирани\n");
-                        density.Add(Math.Round(areaCalcs.build[0] / ProjInfo.plotAreas[0], 2));
-                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / ProjInfo.plotAreas[0], 2));
-                        ProjInfo.SetAllTwoZones(ProjInfo.plotAreas[0], areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], greenery.greenArea, greenery.achievedPercentage);
+                        density.Add(Math.Round(areaCalcs.build[0] / ProjInfo.plotAreas[0], 2, MidpointRounding.AwayFromZero));
+                        kint.Add(Math.Round(areaCalcs.totalBuild[0] / ProjInfo.plotAreas[0], 2, MidpointRounding.AwayFromZero));
+                        ProjInfo.SetAllTwoZones(ProjInfo.plotAreas[0], areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], 
+                            greenery.greenArea, greenery.achievedPercentage);
                         break;
 
                     case "ДВЕ УПИ":
@@ -95,12 +98,15 @@ namespace AreaCalculations
                         kint.Add(Math.Round(areaCalcs.totalBuild[0] / ProjInfo.plotAreas[0], 2));
                         density.Add(Math.Round(areaCalcs.build[1] / ProjInfo.plotAreas[1], 2));
                         kint.Add(Math.Round(areaCalcs.totalBuild[1] / ProjInfo.plotAreas[1], 2));
-                        ProjInfo.SetAchievedTwoPlots(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], density[0], areaCalcs.build[1], areaCalcs.totalBuild[1], kint[1], density[1], greenery.greenArea1, greenery.greenArea2, greenery.achievedPercentage1, greenery.achievedPercentage2);
+                        ProjInfo.SetAchievedTwoPlots(areaCalcs.build[0], areaCalcs.totalBuild[0], kint[0], 
+                            density[0], areaCalcs.build[1], areaCalcs.totalBuild[1], kint[1], density[1], greenery.greenArea1, 
+                            greenery.greenArea2, greenery.achievedPercentage1, greenery.achievedPercentage2);
                         break;
                 }
 
                 // output report
-                output.updateFinalOutput (ProjInfo.plotAreas, ProjInfo.plotNames, areaCalcs.build, density, areaCalcs.totalBuild, kint, greenery.greenAreas, greenery.achievedPercentages);
+                output.updateFinalOutput (ProjInfo.plotAreas, ProjInfo.plotNames, areaCalcs.build, density, 
+                    areaCalcs.totalBuild, kint, greenery.greenAreas, greenery.achievedPercentages);
 
                 TaskDialog testDialog = new TaskDialog("Report");
                 testDialog.MainInstruction = output.outputString;

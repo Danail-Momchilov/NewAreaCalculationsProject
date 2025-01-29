@@ -18,7 +18,7 @@ namespace AreaCalculations
         public FilteredElementCollector areasCollector { get; set; }
         public Document doc { get; set; }
         Transaction transaction { get; set; }
-        private double areaConvert = 10.7639104167097223083335055559;
+        private double areaConvert = 10.7639104167096;
         private double semiRoundArea(Area area, string parameterName)
         {
             double result = Math.Round(area.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero);

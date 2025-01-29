@@ -17,7 +17,7 @@ namespace AreaCalculations
         public List<double> plotAreas { get; set; } = new List<double>();
         public List<string> plotNames { get; set; } = new List<string>();
         public bool isPlotTypeCorrect = true;
-        double areaConvert = 10.7639104167097223083335055559;
+        double areaConvert = 10.7639104167096;
         private double smartRoundProjInfo(ProjectInfo projectInfo, string parameterName)
         {
             double result = Math.Round(projectInfo.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero) * areaConvert;
@@ -49,7 +49,7 @@ namespace AreaCalculations
                     break;
 
                 case "УПИ В ДВЕ ЗОНИ":
-                    double plotAr = smartRoundProjInfo(projectInfo, "Zone Area 1st") + smartRoundProjInfo(projectInfo, "Zone Area 2nd");
+                    double plotAr = semiRoundProjInfo(projectInfo, "Zone Area 1st") + semiRoundProjInfo(projectInfo, "Zone Area 2nd");
                     plotAreas.Add(plotAr);
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
                     break;
@@ -271,19 +271,19 @@ namespace AreaCalculations
         public void SetAchievedStandard(double buildArea, double grossArea, double intensity, double density, double greenArea, double achievedPercentage)
         {
             transaction.Start();
-            ProjectInfo.LookupParameter("Achieved Built up Area").Set(buildArea);
-            ProjectInfo.LookupParameter("Achieved Gross External Area").Set(grossArea);
-            ProjectInfo.LookupParameter("Achieved Area Intensity").Set(grossArea);
+            ProjectInfo.LookupParameter("Achieved Built up Area").Set(buildArea * areaConvert);
+            ProjectInfo.LookupParameter("Achieved Gross External Area").Set(grossArea * areaConvert);
+            ProjectInfo.LookupParameter("Achieved Area Intensity").Set(intensity);
             ProjectInfo.LookupParameter("Achieved Built up Density").Set(density);
-            ProjectInfo.LookupParameter("Achieved Green Area").Set(greenArea);
+            ProjectInfo.LookupParameter("Achieved Green Area").Set(greenArea * areaConvert);
             ProjectInfo.LookupParameter("Achieved Green Area Percentage").Set(achievedPercentage);
             transaction.Commit();
         }        
         public void SetRequired(double buildArea, double grossArea, double intensity, double density)
         {
             transaction.Start();
-            ProjectInfo.LookupParameter("Required Built up Area").Set(buildArea);
-            ProjectInfo.LookupParameter("Required Gross External Area").Set(grossArea);
+            ProjectInfo.LookupParameter("Required Built up Area").Set(buildArea * areaConvert);
+            ProjectInfo.LookupParameter("Required Gross External Area").Set(grossArea * areaConvert);
             ProjectInfo.LookupParameter("Required Area Intensity").Set(intensity);
             ProjectInfo.LookupParameter("Required Built up Density").Set(density);
             transaction.Commit();
@@ -304,12 +304,12 @@ namespace AreaCalculations
                 .Set((ProjectInfo.LookupParameter("Required Green Area Percentage 1st").AsDouble() + ProjectInfo.LookupParameter("Required Green Area Percentage 2nd").AsDouble()) / 2);
             ProjectInfo.LookupParameter("Required Green Area")
                 .Set(ProjectInfo.LookupParameter("Required Green Area 1st").AsDouble() + ProjectInfo.LookupParameter("Required Green Area 2nd").AsDouble());
-            ProjectInfo.LookupParameter("Achieved Built up Area").Set(buildArea);
-            ProjectInfo.LookupParameter("Achieved Gross External Area").Set(totalBuild);
+            ProjectInfo.LookupParameter("Achieved Built up Area").Set(buildArea * areaConvert);
+            ProjectInfo.LookupParameter("Achieved Gross External Area").Set(totalBuild * areaConvert);
             ProjectInfo.LookupParameter("Achieved Area Intensity").Set(kint);
             ProjectInfo.LookupParameter("Achieved Built up Density").Set(density);
             // check this with the Simo
-            ProjectInfo.LookupParameter("Achieved Green Area").Set(greenArea);
+            ProjectInfo.LookupParameter("Achieved Green Area").Set(greenArea * areaConvert);
             ProjectInfo.LookupParameter("Achieved Green Area Percentage").Set(achievedPercentage);
             // check this with the Simo
             transaction.Commit();
@@ -317,17 +317,17 @@ namespace AreaCalculations
         public void SetAchievedTwoPlots(double buildArea1, double totalBuild1, double kint1, double density1, double buildArea2, double totalBuild2, double kint2, double density2, double greenArea1, double greenArea2, double percentage1, double percentage2)
         {
             transaction.Start();
-            ProjectInfo.LookupParameter("Achieved Built up Area 1st").Set(buildArea1);
-            ProjectInfo.LookupParameter("Achieved Gross External Area 1st").Set(totalBuild1);
+            ProjectInfo.LookupParameter("Achieved Built up Area 1st").Set(buildArea1 * areaConvert);
+            ProjectInfo.LookupParameter("Achieved Gross External Area 1st").Set(totalBuild1 * areaConvert);
             ProjectInfo.LookupParameter("Achieved Area Intensity 1st").Set(kint1);
             ProjectInfo.LookupParameter("Achieved Built up Density 1st").Set(density1);
-            ProjectInfo.LookupParameter("Achieved Built up Area 2nd").Set(buildArea2);
-            ProjectInfo.LookupParameter("Achieved Gross External Area 2nd").Set(totalBuild2);
+            ProjectInfo.LookupParameter("Achieved Built up Area 2nd").Set(buildArea2 * areaConvert);
+            ProjectInfo.LookupParameter("Achieved Gross External Area 2nd").Set(totalBuild2 * areaConvert);
             ProjectInfo.LookupParameter("Achieved Area Intensity 2nd").Set(kint2);
             ProjectInfo.LookupParameter("Achieved Built up Density 2nd").Set(density2);
-            ProjectInfo.LookupParameter("Achieved Green Area 1st").Set(greenArea1);
+            ProjectInfo.LookupParameter("Achieved Green Area 1st").Set(greenArea1 * areaConvert);
             ProjectInfo.LookupParameter("Achieved Green Area Percentage 1st").Set(percentage1);
-            ProjectInfo.LookupParameter("Achieved Green Area 2nd").Set(greenArea2);
+            ProjectInfo.LookupParameter("Achieved Green Area 2nd").Set(greenArea2 * areaConvert);
             ProjectInfo.LookupParameter("Achieved Green Area Percentage 2nd").Set(percentage2);
             transaction.Commit();
         }
