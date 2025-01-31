@@ -1062,7 +1062,8 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue 
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            double commonAreaPercent = Math.Round(area.LookupParameter("A Instance Price C1/C2").AsDouble() / totalC1C2 * 100, 2, MidpointRounding.AwayFromZero);
+                            double commonAreaPercent = Math.Round(area.LookupParameter("A Instance Price C1/C2").AsDouble() 
+                                / totalC1C2 * 100, 3, MidpointRounding.AwayFromZero);
                             area.LookupParameter("A Instance Common Area %").Set(commonAreaPercent);
                         }
                     }
@@ -1209,8 +1210,8 @@ namespace AreaCalculations
                         if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" 
                             && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            double buildingPercentPermit = Math.Round((area.LookupParameter("A Instance Price C1/C2").AsDouble() 
-                                                            / totalPlotC1C2IMP) * 100, 3, MidpointRounding.AwayFromZero);
+                            double buildingPercentPermit = Math.Round(area.LookupParameter("A Instance Price C1/C2").AsDouble() 
+                                                            / totalPlotC1C2IMP * 100, 3, MidpointRounding.AwayFromZero);
                             area.LookupParameter("A Instance Building Permit %").Set(buildingPercentPermit);
                         }
                     }
@@ -1626,48 +1627,67 @@ namespace AreaCalculations
                 // plot row
                 Range plotRange = workSheet.Range[$"A{x}", $"O{x}"];
                 object[] plotStrings = new[] { "УПИ:", $"{Math.Round(plotAreasImp[plotName] / areaConvert, 2)}", "кв.м.", "", 
-                    "Самостоятелни обекти и паркоместа:", "", "", "", "", "", "Забележки:", "", "", "", "", "" };
+                    "Самостоятелни обекти и паркоместа:", "", "", "", "", "", "Забележки:", "", "", "", "", "" };                
                 plotRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, plotStrings);
+                workSheet.Cells[x, 2] = Math.Round(plotAreasImp[plotName] / areaConvert, 2, MidpointRounding.AwayFromZero);
+                workSheet.get_Range($"B{x}", $"B{x}").NumberFormat = "0.00";
+                workSheet.get_Range($"B{x}", $"B{x}").HorizontalAlignment = XlHAlign.xlHAlignLeft;
                 plotRange.Font.Bold = true;
 
                 // build up area row
                 x++;
                 Range baRange = workSheet.Range[$"A{x}", $"O{x}"];
                 object[] baStrings = new[] { "ЗП:", $"{Math.Round(plotBuildAreas[plotName], 2)}", "кв.м.", "", "Ателиета:", "", "", "0", "бр", "", 
-                    "", "", "", "", "", ""};
+                    "", "", "", "", "", ""};                
                 baRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, baStrings);
+                workSheet.Cells[x, 2] = Math.Round(plotBuildAreas[plotName], 2, MidpointRounding.AwayFromZero);
+                workSheet.get_Range($"B{x}", $"B{x}").NumberFormat = "0.00";
+                workSheet.get_Range($"B{x}", $"B{x}").HorizontalAlignment = XlHAlign.xlHAlignLeft;
                 setBoldRange(workSheet, "A", "C", x);
 
                 // total build area row
                 x++;
                 Range tbaRange = workSheet.Range[$"A{x}", $"O{x}"];
                 string[] tbaStrings = new[] { "РЗП (надземна):", $"{Math.Round(plotTotalBuild[plotName], 2)}", "кв.м.", "",
-                    "Апартаменти:", "", "", "0", "бр", "", "от площта на общите части са приспаднати XX.XX кв.м.", "", "", "", "", ""};
+                    "Апартаменти:", "", "", "0", "бр", "", "от площта на общите части са приспаднати XX.XX кв.м.", "", "", "", "", ""};                
                 tbaRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, tbaStrings);
+                workSheet.Cells[x, 2] = Math.Round(plotTotalBuild[plotName], 2, MidpointRounding.AwayFromZero);
+                workSheet.get_Range($"B{x}", $"B{x}").NumberFormat = "0.00";
+                workSheet.get_Range($"B{x}", $"B{x}").HorizontalAlignment = XlHAlign.xlHAlignLeft;
                 setBoldRange(workSheet, "A", "C", x);
 
                 // underground row
                 x++;
                 Range uRange = workSheet.Range[$"A{x}", $"O{x}"];
                 string[] uStrings = new[] { "РЗП (подземна):", $"{Math.Round(plotUndergroundAreas[plotName], 2)}", "кв.м.", "", 
-                    "Магазини:", "", "", "0", "бр", "", "", "", "", "", "" };
+                    "Магазини:", "", "", "0", "бр", "", "", "", "", "", "" };                
                 uRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, uStrings);
+                workSheet.Cells[x, 2] = Math.Round(plotUndergroundAreas[plotName], 2, MidpointRounding.AwayFromZero);
+                workSheet.get_Range($"B{x}", $"B{x}").NumberFormat = "0.00";
+                workSheet.get_Range($"B{x}", $"B{x}").HorizontalAlignment = XlHAlign.xlHAlignLeft;
                 setBoldRange(workSheet, "A", "C", x);
 
                 // underground + tba row
                 x++;
                 Range utbaRange = workSheet.Range[$"A{x}", $"O{x}"];
                 string[] utbaStrings = new[] { "РЗП общо:", $"{Math.Round(plotUndergroundAreas[plotName], 2) + Math.Round(plotTotalBuild[plotName], 2)}", 
-                    "кв.м.", "", "Офиси", "", "", "0", "бр", "", "", "", "", "", "" };
+                    "кв.м.", "", "Офиси", "", "", "0", "бр", "", "", "", "", "", "" };                
                 utbaRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, utbaStrings);
+                workSheet.Cells[x, 2] = Math.Round(plotUndergroundAreas[plotName], 2, MidpointRounding.AwayFromZero) 
+                    + Math.Round(plotTotalBuild[plotName], 2, MidpointRounding.AwayFromZero);
+                workSheet.get_Range($"B{x}", $"B{x}").NumberFormat = "0.00";
+                workSheet.get_Range($"B{x}", $"B{x}").HorizontalAlignment = XlHAlign.xlHAlignLeft;
                 setBoldRange(workSheet, "A", "C", x);
 
                 // CO row
                 x++;
                 Range coRange = workSheet.Range[$"A{x}", $"O{x}"];
                 string[] coStrings = new[] { "Общо СО", $"{Math.Round(plotIndividualAreas[plotName], 2)}", "кв.м.", "", 
-                    "Гаражи", "", "", "0", "бр", "", "", "", "", "", "", "" };
+                    "Гаражи", "", "", "0", "бр", "", "", "", "", "", "", "" };                
                 coRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, coStrings);
+                workSheet.Cells[x, 2] = Math.Round(plotIndividualAreas[plotName], 2, MidpointRounding.AwayFromZero);
+                workSheet.get_Range($"B{x}", $"B{x}").NumberFormat = "0.00";
+                workSheet.get_Range($"B{x}", $"B{x}").HorizontalAlignment = XlHAlign.xlHAlignLeft;
                 setBoldRange(workSheet, "A", "C", x);
 
                 // CA row
@@ -1676,6 +1696,9 @@ namespace AreaCalculations
                 string[] caStrings = new[] { "Общо ОЧ", $"{Math.Round(plotCommonAreas[plotName], 2)}", "кв.м.", "", 
                     "Складове", "", "", "0", "бр", "", "", "", "", "", "" };
                 caRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, caStrings);
+                workSheet.Cells[x, 2] = Math.Round(plotCommonAreas[plotName], 2, MidpointRounding.AwayFromZero);
+                workSheet.get_Range($"B{x}", $"B{x}").NumberFormat = "0.00";
+                workSheet.get_Range($"B{x}", $"B{x}").HorizontalAlignment = XlHAlign.xlHAlignLeft;
                 setBoldRange(workSheet, "A", "C", x);
 
                 // land row
@@ -1684,6 +1707,10 @@ namespace AreaCalculations
                 string[] landStrings = new[] { "Земя към СО:", $"{Math.Round(plotAreasImp[plotName] / areaConvert, 2) - Math.Round(plotLandAreas[plotName], 2)}"
                     , "кв.м.", "", "Паркоместа", "", "", "0", "бр", "", "", "", "", "", "" };
                 landRange.set_Value(XlRangeValueDataType.xlRangeValueDefault, landStrings);
+                workSheet.Cells[x, 2] = Math.Round(plotAreasImp[plotName] / areaConvert, 2, MidpointRounding.AwayFromZero) 
+                    - Math.Round(plotLandAreas[plotName], 2, MidpointRounding.AwayFromZero);
+                workSheet.get_Range($"B{x}", $"B{x}").NumberFormat = "0.00";
+                workSheet.get_Range($"B{x}", $"B{x}").HorizontalAlignment = XlHAlign.xlHAlignLeft;
                 setBoldRange(workSheet, "A", "C", x);
 
                 // set borders
@@ -1710,14 +1737,6 @@ namespace AreaCalculations
                         workSheet.Cells[x, 1] = $"ПЛОЩООБРАЗУВАНЕ САМОСТОЯТЕЛНИ ОБЕКТИ - {property}";
 
                         setMergeBordersColorAndAlignment(workSheet, "A", "O", x, true, 35, false, true, false, true, true);
-
-                        //
-                        //
-                        //
-
-                        //
-                        //
-                        //
 
                         x++;
                         Range indivdualRange = workSheet.Range[$"A{x}", $"O{x}"];

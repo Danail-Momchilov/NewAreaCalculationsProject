@@ -19,17 +19,21 @@ namespace AreaCalculations
                 UIDocument uidoc = commandData.Application.ActiveUIDocument;
                 Document doc = uidoc.Document;
 
-                // define a ProjectInfo Updater object
-                ProjInfoUpdater ProjInfo = new ProjInfoUpdater(doc.ProjectInformation, doc);
-                
+                ProjInfoUpdater ProjInfo = new ProjInfoUpdater(doc);
+
                 // check if all parameters are loaded in Project Info
                 if (ProjInfo.CheckProjectInfoParameters() != "")
                 {
                     TaskDialog projInfoParametrersError = new TaskDialog("Липсващи параметри");
                     projInfoParametrersError.MainInstruction = ProjInfo.CheckProjectInfoParameters();
                     projInfoParametrersError.Show();
+                    string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "warnings.txt");
+                    File.WriteAllText(path, projInfoParametrersError.MainInstruction);
                     return Result.Failed;
                 }
+
+                ProjInfo = new ProjInfoUpdater(doc.ProjectInformation, doc);
+                
                 // check whether Plot Type parameter is assigned correctly
                 if (!ProjInfo.isPlotTypeCorrect)
                 {
@@ -37,6 +41,8 @@ namespace AreaCalculations
                     plotTypeError.MainInstruction = "За да продължите напред, моля попълнете параметър 'Plot Type' " +
                         "с една от четирите посочени опции: СТАНДАРТНО УПИ, ЪГЛОВО УПИ, УПИ В ДВЕ ЗОНИ, ДВЕ УПИ!";
                     plotTypeError.Show();
+                    string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "warnings.txt");
+                    File.WriteAllText(path, plotTypeError.MainInstruction);
                     return Result.Failed;
                 }
 

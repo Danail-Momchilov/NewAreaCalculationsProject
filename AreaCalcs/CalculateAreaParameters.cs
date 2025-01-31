@@ -22,11 +22,11 @@ namespace AreaCalculations
 
                 // reminder to use the previous commands prior to starting this one
                 TaskDialog dialog = new TaskDialog("Напомняне");
-                dialog.MainInstruction = "Моля, преди да пуснете инструмента, се уверете че имате успешно и коректно изчислени Plot Parameters и Area Coefficients (wink) ;) ;)";
+                dialog.MainInstruction = "Моля, преди да пуснете инструмента, се уверете че имате успешно " +
+                    "и коректно изчислени Plot Parameters и Area Coefficients!";
                 dialog.Show();
 
-                // define a ProjectInfo Updater object
-                ProjInfoUpdater projInfo = new ProjInfoUpdater(doc.ProjectInformation, doc);
+                ProjInfoUpdater projInfo = new ProjInfoUpdater(doc);
 
                 // check if all parameters are loaded in Project Info
                 if (projInfo.CheckProjectInfoParameters() != "")
@@ -34,14 +34,21 @@ namespace AreaCalculations
                     TaskDialog projInfoParametrersError = new TaskDialog("Липсващи параметри");
                     projInfoParametrersError.MainInstruction = projInfo.CheckProjectInfoParameters();
                     projInfoParametrersError.Show();
+                    string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "warnings.txt");
+                    File.WriteAllText(path, projInfoParametrersError.MainInstruction);
                     return Result.Failed;
                 }
+
+                projInfo = new ProjInfoUpdater(doc.ProjectInformation, doc);
+
                 // check whether Plot Type parameter is assigned correctly
                 if (!projInfo.isPlotTypeCorrect)
                 {
                     TaskDialog plotTypeError = new TaskDialog("Неправилно въведен Plot Type");
                     plotTypeError.MainInstruction = "За да продължите напред, моля попълнете параметър 'Plot Type' с една от четирите посочени опции: СТАНДАРТНО УПИ, ЪГЛОВО УПИ, УПИ В ДВЕ ЗОНИ, ДВЕ УПИ!";
                     plotTypeError.Show();
+                    string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "warnings.txt");
+                    File.WriteAllText(path, plotTypeError.MainInstruction);
                     return Result.Failed;
                 }
 

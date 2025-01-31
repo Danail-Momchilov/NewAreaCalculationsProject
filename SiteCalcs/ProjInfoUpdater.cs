@@ -66,6 +66,10 @@ namespace AreaCalculations
                     break;
             }
         }
+        public ProjInfoUpdater(Document doc)
+        {
+            this.ProjectInfo = doc.ProjectInformation;
+        }
         private static bool hasValue(Parameter param)
         {
             if (param.HasValue)
