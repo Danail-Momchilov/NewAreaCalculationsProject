@@ -3,7 +3,7 @@
 	<AddIn Type="Application">
 		<Name>AreaCalculations</Name>
 		<Publisher>IPA</Publisher>
-		<Assembly>C:\Program Files\MIPA\AreaCalculations\AreaCalculations.dll</Assembly>
+		<Assembly>C:\Program Files\IPA\AreaCalculations\AreaCalculations.dll</Assembly>
 		<AddInId>0DD7A44A-A4B3-4491-ACAD-7A7E15E7DC81</AddInId>
 		<FullClassName>AreaCalculations.App</FullClassName>
 		<Text>Demo</Text>
