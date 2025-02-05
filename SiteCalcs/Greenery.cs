@@ -26,6 +26,12 @@ namespace AreaCalculations
 
             return result;
         }
+        private double semiSmartRoundLength(Element element, string parameterName)
+        {
+            double result = Math.Round(element.LookupParameter(parameterName).AsDouble() * lengthConvert, 2, MidpointRounding.AwayFromZero);
+
+            return result;
+        }
         public string errorReport = "";
         double areaConvert = 10.7639104167096;
         double lengthConvert = 30.48;
@@ -50,7 +56,8 @@ namespace AreaCalculations
                             if ((wall.LookupParameter("Unconnected Height").AsDouble() * lengthConvert) <= 200)
                                 greenArea += semiSmartRound(wall, "Area");
                             else
-                                greenArea += semiSmartRound(wall, "Length") / 100 * 2;
+                                greenArea += Math.Round(semiSmartRoundLength(wall, "Length") / 100 * 2,
+                                    2, MidpointRounding.AwayFromZero);
                         }
                     }
 
@@ -62,14 +69,15 @@ namespace AreaCalculations
                         if (railingType.LookupParameter("Green Area").AsInteger() == 1)
                         {
                             if (semiSmartRound(railingType, "Railing Height") <= 200)
-                                greenArea += Math.Round(semiSmartRound(railing, "Length") / 100 * semiSmartRound(railingType, "Railing Height") / 100, 
-                                    2, MidpointRounding.AwayFromZero);
+                                greenArea += Math.Round(semiSmartRoundLength(railing, "Length") / 100 * 
+                                    semiSmartRoundLength(railingType, "Railing Height") / 100, 2, MidpointRounding.AwayFromZero);
                             else
-                                greenArea += semiSmartRound(railing, "Length") / 100;
+                                greenArea += Math.Round(semiSmartRoundLength(railing, "Length") / 100 * 2,
+                                    2, MidpointRounding.AwayFromZero);
                         }
                     }
 
-                    achievedPercentage = Math.Round(((greenArea * 100) / plotAreas[0]), 2);
+                    achievedPercentage = Math.Round(greenArea * 100 / plotAreas[0], 2);
                     greenAreas.Add(greenArea);
                     achievedPercentages.Add(achievedPercentage);
                 }
@@ -85,7 +93,8 @@ namespace AreaCalculations
                             else if (floor.LookupParameter("A Instance Area Plot").AsString() == plotNames[1])
                                 greenArea2 += semiSmartRound(floor, "Area");
                             else
-                                errorReport += $"Плоча с id: {floor.Id} има попълнен параметър A Instance Area Plot, чиято стойност не отговаря на нито едно от двете въведени имена за УПИ\n";
+                                errorReport += $"Плоча с id: {floor.Id} има попълнен параметър A Instance Area Plot, " +
+                                    $"чиято стойност не отговаря на нито едно от двете въведени имена за УПИ\n";
                         }
                     }
 
@@ -99,7 +108,8 @@ namespace AreaCalculations
                                 if (wall.LookupParameter("Unconnected Height").AsDouble() * lengthConvert <= 200)
                                     wallArea += semiSmartRound(wall, "Area");
                                 else
-                                    wallArea += semiSmartRound(wall, "Length") / 100 * 2;
+                                    wallArea += Math.Round(semiSmartRoundLength(wall, "Length") / 100 * 2,
+                                    2, MidpointRounding.AwayFromZero);
                             }
                             if (wall.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
                                 greenArea1 += wallArea;
@@ -120,11 +130,12 @@ namespace AreaCalculations
                             double railingArea = 0;
                             if (railingType.LookupParameter("Green Area").AsInteger() == 1)
                             {
-                                if (semiSmartRound(railingType, "Railing Height") / 100 <= 2)
-                                    railingArea += Math.Round(semiSmartRound(railing, "length") / 100
-                                        * semiSmartRound(railingType, "Railing Height") / 100, 2, MidpointRounding.AwayFromZero);
+                                if (semiSmartRound(railingType, "Railing Height") <= 200)
+                                    railingArea += Math.Round(semiSmartRoundLength(railing, "Length") / 100 *
+                                    semiSmartRoundLength(railingType, "Railing Height") / 100, 2, MidpointRounding.AwayFromZero);
                                 else
-                                    railingArea += Math.Round(railing.LookupParameter("Length").AsDouble() * lengthConvert / 100 * 2, 2, MidpointRounding.AwayFromZero);
+                                    railingArea += Math.Round(semiSmartRoundLength(railing, "Length") / 100 * 2,
+                                    2, MidpointRounding.AwayFromZero);
                             }
                             if (railing.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
                                 greenArea1 += railingArea;
