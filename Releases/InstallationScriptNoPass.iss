@@ -9,7 +9,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{75B951C9-A0E1-43AA-BB76-DDEAF1781D38}
+AppId={{825A671D-7BEF-423F-A0A9-78C813267F15}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -19,10 +19,8 @@ LicenseFile=B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsPr
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
 OutputDir=B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\Releases
-OutputBaseFilename=IPA-AreaCalculationsV1.00
+OutputBaseFilename=IPA-AreaCalculationsNoPass
 SetupIconFile=B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\installerIcon.ico
-Password=ipaMipa
-Encryption=yes
 SolidCompression=yes
 WizardStyle=modern
 
