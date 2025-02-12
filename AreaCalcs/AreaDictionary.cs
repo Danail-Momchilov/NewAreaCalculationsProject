@@ -757,15 +757,15 @@ namespace AreaCalculations
         private Dictionary<List<object>, Room> returnAdjascentRooms(Area area)
         {
             string areaNumber = area.LookupParameter("Number").AsString();
-            double areaArea = Math.Round(area.LookupParameter("A Instance Gross Area")?.AsDouble() ?? 0.0, 3);
-            double commonAreaPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3);
-            double commonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 2);
-            double specialCommonArea = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() / areaConvert ?? 0.0, 2);
+            double areaArea = Math.Round(area.LookupParameter("A Instance Gross Area")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
+            double commonAreaPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
+            double commonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 2, MidpointRounding.AwayFromZero);
+            double specialCommonArea = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() / areaConvert ?? 0.0, 2, MidpointRounding.AwayFromZero);
             double totalCommonArea = commonArea + specialCommonArea;
-            double totalArea = Math.Round(area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0, 2);
-            double buildingRight = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3);
-            double landPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3);
-            double landArea = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3);
+            double totalArea = Math.Round(area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0, 2, MidpointRounding.AwayFromZero);
+            double buildingRight = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
+            double landPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
+            double landArea = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3, MidpointRounding.AwayFromZero);
 
             Dictionary<string, List<object>> keyValuePairs = new Dictionary<string, List<object>>();
 
@@ -793,31 +793,31 @@ namespace AreaCalculations
                 List<double> listData = new List<double>();
                 listData.Add(group.Count());
 
-                double percentage = Math.Round(group.First().LookupParameter("Area").AsDouble() * 100/areaArea, 3);
+                double percentage = Math.Round(group.First().LookupParameter("Area").AsDouble() * 100/areaArea, 3, MidpointRounding.AwayFromZero);
                 listData.Add(percentage);
 
-                double percentageShare = Math.Round(percentage * commonAreaPercent / 100, 3);
+                double percentageShare = Math.Round(percentage * commonAreaPercent / 100, 3, MidpointRounding.AwayFromZero);
                 listData.Add(percentageShare);
 
-                double commonAreaShare = Math.Round(percentage * commonArea / 100, 2);
+                double commonAreaShare = Math.Round(percentage * commonArea / 100, 2, MidpointRounding.AwayFromZero);
                 listData.Add(commonAreaShare);
 
-                double commonAreaSpecialShare = Math.Round(percentage * specialCommonArea / 100, 2);
+                double commonAreaSpecialShare = Math.Round(percentage * specialCommonArea / 100, 2, MidpointRounding.AwayFromZero);
                 listData.Add(commonAreaSpecialShare);
 
-                double commonAreaTotalShare = Math.Round(percentage * totalCommonArea / 100, 2);
+                double commonAreaTotalShare = Math.Round(percentage * totalCommonArea / 100, 2, MidpointRounding.AwayFromZero);
                 listData.Add(commonAreaTotalShare);
 
-                double totalAreaShare = Math.Round(percentage * totalArea / 100, 2);
+                double totalAreaShare = Math.Round(percentage * totalArea / 100, 2, MidpointRounding.AwayFromZero);
                 listData.Add(totalAreaShare);
 
-                double buildingRightShare = Math.Round(percentage * buildingRight / 100, 3);
+                double buildingRightShare = Math.Round(percentage * buildingRight / 100, 3, MidpointRounding.AwayFromZero);
                 listData.Add(buildingRightShare);
 
-                double landPercentageShare = Math.Round(percentage * landPercentage / 100, 3);
+                double landPercentageShare = Math.Round(percentage * landPercentage / 100, 3, MidpointRounding.AwayFromZero);
                 listData.Add(landPercentageShare);
 
-                double landAreaShare = Math.Round(percentage * landArea / 100, 2);
+                double landAreaShare = Math.Round(percentage * landArea / 100, 2, MidpointRounding.AwayFromZero);
                 listData.Add(landAreaShare);
 
                 // add the list to the dictionary as a key
@@ -850,9 +850,16 @@ namespace AreaCalculations
             calculateParkingAreaSurplus(percentageDict, commonArea, totalCommonAreaShare, 3);
             calculateParkingAreaSurplus(percentageDict, specialCommonArea, totalCommonAreaSpecialShare, 4);
             calculateParkingAreaSurplus(percentageDict, totalCommonArea, totalCommonAreaTotalShare, 5);
-            calculateParkingAreaSurplus(percentageDict, totalArea, totalAreaTotalShare, 6);
             calculateParkingAreaSurplus(percentageDict, landArea, totalLandAreaShare, 9);
             
+            // fix eventual total area inaccuracy
+            foreach (List<double> listData in percentageDict.Keys)
+            {
+                double roomArea = Math.Round(percentageDict[listData].First().Area / areaConvert, 2, MidpointRounding.AwayFromZero);
+
+                listData[6] = roomArea + listData[5];
+            }
+
             // construct new dictionary
             Dictionary<List<object>, Room> flattenedDict = new Dictionary<List<object>, Room>();
 
@@ -1604,6 +1611,9 @@ namespace AreaCalculations
             workSheet.Range["E:F"].ColumnWidth = 10;
             workSheet.Range["G:O"].ColumnWidth = 10;
 
+            workSheet.Range["Q:Q"].ColumnWidth = 15;
+            workSheet.Range["R:R"].ColumnWidth = 10;
+
             int x = 1;
 
             // general formatting
@@ -1913,7 +1923,8 @@ namespace AreaCalculations
 
                         List<int> linesToExclude = new List<int>();
                         List<int> linesToExcludeLand = new List<int>();
-                        // List<int> linesToExcludeParking = new List<int>();
+
+                        string levelHeightStr = "";
 
                         foreach (Area area in sortedAreas)
                         {
@@ -1939,7 +1950,6 @@ namespace AreaCalculations
                                 {
                                     levels.Add(area.LookupParameter("Level").AsValueString());
                                     double levelHeight = Math.Round(doc.GetElement(area.LookupParameter("Level").AsElementId()).LookupParameter("Elevation").AsDouble() * lengthConvert / 100, 3);
-                                    string levelHeightStr;
 
                                     if (levelHeight < 0)
                                     {
@@ -2010,6 +2020,10 @@ namespace AreaCalculations
                                     setWrapRange(workSheet, "B", "B", x);
 
                                     setExcelDecimalsFormatting(workSheet, x);
+
+                                    // additional temporary fileds
+                                    workSheet.Cells[x, 17] = $"КОТА {levelHeightStr}";
+                                    workSheet.Cells[x, 18] = $"{Math.Round(100 * (areaCommonAreaSpecial + areaCommonArea) / areaTotalArea, 3, MidpointRounding.AwayFromZero)}";
                                 }
                                 catch
                                 {
