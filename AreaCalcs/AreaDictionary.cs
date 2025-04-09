@@ -24,6 +24,7 @@ namespace AreaCalculations
     {
         private readonly double areaConvert = 10.7639104167096;
         private readonly double lengthConvert = 30.48;
+        public string errorMessage { get; set; }
         public Dictionary<string, Dictionary<string, List<Area>>> AreasOrganizer { get; set; }
         public List<string> plotNames { get; set; }
         public Dictionary<string, Dictionary<string, double>> propertyCommonAreas { get; set; }
@@ -118,6 +119,12 @@ namespace AreaCalculations
                     // TODO
                 }
             }
+
+            // set gross area
+            setGrossArea();
+
+            // calculate primary area
+            this.errorMessage = calculatePrimaryArea();
 
             // based on AreasOrganizer, construct the plotBuildAreas dictionary
             foreach (string plotName in plotNames)
@@ -371,17 +378,9 @@ namespace AreaCalculations
                 }
             }
         }
-        private int ExtractLevelNumber(string levelString)
+        private double ExtractLevelHeight(Level level)
         {
-            if (!string.IsNullOrEmpty(levelString))
-            {
-                var match = Regex.Match(levelString, @"\d+");
-                return match.Success ? int.Parse(match.Value) : int.MaxValue;
-            }
-            else
-            {
-                return 0;
-            }            
+            return level.Elevation;
         }
         private string ReorderEntrance(string entranceName)
         {
@@ -917,17 +916,17 @@ namespace AreaCalculations
         }        
         private double smartRound(Area area, string parameterName)
         {
-            double result = Math.Round(area.LookupParameter(parameterName).AsDouble() / areaConvert , 2, MidpointRounding.AwayFromZero) * areaConvert;
+            double result = Math.Round(area.LookupParameter(parameterName)?.AsDouble() / areaConvert ??0, 2, MidpointRounding.AwayFromZero) * areaConvert;
 
             return result;
         }
         private double smartSemiRound(Area area, string parameterName)
         {
-            double result = Math.Round(area.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero);
+            double result = Math.Round(area.LookupParameter(parameterName)?.AsDouble() / areaConvert ??0, 2, MidpointRounding.AwayFromZero);
 
             return result;
         }
-        public void setGrossArea()
+        private void setGrossArea()
         {
             transaction.Start();
 
@@ -946,7 +945,7 @@ namespace AreaCalculations
 
             transaction.Commit();
         }
-        public string calculatePrimaryArea()
+        private string calculatePrimaryArea()
         {
             string errorMessage = "";
             List<string> missingNumbers = new List<string>();
@@ -959,11 +958,13 @@ namespace AreaCalculations
                 {
                     foreach (Area secArea in AreasOrganizer[plotName][property])
                     {
-                        if (secArea.LookupParameter("A Instance Area Primary").HasValue && secArea.LookupParameter("A Instance Area Primary").AsString() != "" && secArea.Area != 0)
+                        if (secArea.LookupParameter("A Instance Area Primary").HasValue && 
+                            secArea.LookupParameter("A Instance Area Primary").AsString() != "" && secArea.Area != 0)
                         {
                             bool wasFound = false;
 
-                            string[] mainAreaNumbers = secArea.LookupParameter("A Instance Area Primary").AsString().Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries)
+                            string[] mainAreaNumbers = secArea.LookupParameter("A Instance Area Primary").AsString().Split(new char[] { '+' }, 
+                                StringSplitOptions.RemoveEmptyEntries)
                                 .Select(s => s.Trim())
                                 .ToArray();
 
@@ -1178,7 +1179,8 @@ namespace AreaCalculations
                 {                 
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue 
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && 
+                            !(area.LookupParameter("A Instance Area Primary").HasValue 
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
                             double gross = area.LookupParameter("A Instance Gross Area").AsDouble();
@@ -1323,7 +1325,8 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && !(area.LookupParameter("A Instance Area Primary").HasValue 
+                        if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ" && 
+                            !(area.LookupParameter("A Instance Area Primary").HasValue 
                             && area.LookupParameter("A Instance Area Primary").AsString() != "") && area.Area != 0)
                         {
                             try
@@ -1335,7 +1338,7 @@ namespace AreaCalculations
 
                                 area.LookupParameter("A Instance Property Common Area %").Set(commonAreaPercent);
                             }
-                            catch
+                            catch 
                             {
                                 errorReport += $"{area.Id} {area.Name} A Instance Common Area = {area.LookupParameter("A Instance Common Area").AsDouble()} " +
                                     $"/ A Instance Total Area = {area.LookupParameter("A Instance Total Area").AsDouble()}";
@@ -1475,6 +1478,7 @@ namespace AreaCalculations
             areaAdjRangeStr.Font.Italic = true;
 
             Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"O{x}"];
+            areaAdjRangeDouble.NumberFormat = "0.00";
 
             if (isLand)
             {
@@ -1890,7 +1894,7 @@ namespace AreaCalculations
                                 //.Where(area => !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                                 .Where(area => !area.LookupParameter("A Instance Area Group").AsString().Equals("ЗЕМЯ"))
                                 .OrderBy(area => ReorderEntrance(area.LookupParameter("A Instance Area Entrance").AsString()))
-                                .ThenBy(area => ExtractLevelNumber(area.LookupParameter("Level").AsValueString()))
+                                .ThenBy(area => ExtractLevelHeight(area.Level))
                                 .ThenBy(area => area.LookupParameter("Number").AsString())
                                 .ToList();
 
@@ -1903,7 +1907,7 @@ namespace AreaCalculations
                         List<Area> sortedAreasGround = areasToSort
                                 .Where(area => area.LookupParameter("A Instance Area Group").AsString().ToLower().Equals("земя"))
                                 .OrderBy(area => ReorderEntrance(area.LookupParameter("A Instance Area Entrance").AsString()))
-                                .ThenBy(area => ExtractLevelNumber(area.LookupParameter("Level").AsValueString()))
+                                .ThenBy(area => ExtractLevelHeight(area.Level))
                                 .ThenBy(area => area.LookupParameter("Number").AsString())
                                 .ToList();
 
@@ -1997,8 +2001,14 @@ namespace AreaCalculations
                                     double areaRLP = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 2, MidpointRounding.AwayFromZero);
 
                                     string[] areaStringData = new[] { areaNumber, areaName };
-                                    object[] areasDoubleData = new object[] { areaArea, areaSubjected, ACCO, C1C2, DBNull.Value, areaCommonPercent, areaCommonArea, areaCommonAreaSpecial, 
+                                    object[] areasDoubleData = new object[] { };
+
+                                    if (property.ToLower() != "земя")
+                                    {
+                                        areasDoubleData = new object[] { areaArea, areaSubjected, ACCO, C1C2, DBNull.Value, areaCommonPercent, areaCommonArea, areaCommonAreaSpecial,
                                         areaCommonArea + areaCommonAreaSpecial, areaTotalArea, areaPermitPercent, areaRLPPercentage, areaRLP};
+                                    }
+                                    else { }
                                     
                                     for (int i = 0; i < areasDoubleData.Length; i++)
                                     {

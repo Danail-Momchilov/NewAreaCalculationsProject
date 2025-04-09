@@ -54,10 +54,6 @@ namespace AreaCalculations
 
                 // area dictionary instance and additional plot parameters variables
                 AreaDictionary areaDict = new AreaDictionary(doc);
-                // set value to the A Instance Gross Area Parameter
-                areaDict.setGrossArea();
-                // find all secondary areas for each primary one, add their total area to the sum and check for errors
-                string errrorMessage = areaDict.calculatePrimaryArea();
                 // calculate C1/C2 coefficients
                 areaDict.calculateC1C2();
                 // calculate common area percentages
@@ -71,13 +67,14 @@ namespace AreaCalculations
                 // calculate A Instance RLP Area
                 areaDict.calculateRlpArea();
                 // calculate A Instance Common Area Special
-                areaDict.calculateSpecialCommonAreas();
-                // calculate A Instance Common Area Percentage
-                errrorMessage += areaDict.calculateInstancePropertyCommonAreaPercentage();
+                areaDict.calculateSpecialCommonAreas();                
                 // after calculations are complete, redistribute the final surplus left
                 areaDict.redistributeSurplus();
                 // calculate A Instance Total Area
                 areaDict.calculateTotalArea();
+                // calculate A Instance Common Area Percentage
+                string errrorMessage = areaDict.calculateInstancePropertyCommonAreaPercentage();
+
 
                 if (errrorMessage != "")
                 {

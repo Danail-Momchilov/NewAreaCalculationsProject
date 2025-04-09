@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "IPA-AreaCalculations"
-#define MyAppVersion "1.00"
+#define MyAppVersion "1.03"
 #define MyAppPublisher "IPA Architecture and More"
 #define MyAppExeName "MyProg-x64.exe"
 
@@ -12,22 +12,36 @@
 AppId={{75B951C9-A0E1-43AA-BB76-DDEAF1781D38}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;AppVerName={#MyAppName} {#MyAppVersion}
+AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-CreateAppDir=no
+CreateAppDir=yes
+DefaultDirName=C:\Program Files\IPA\AreaCalculations
+DisableDirPage=yes
+DisableProgramGroupPage=yes
 LicenseFile=B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\LICENSE.txt
-; Uncomment the following line to run in non administrative install mode (install for current user only).
+; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir=B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\Releases
-OutputBaseFilename=IPA-AreaCalculationsV1.00
+OutputBaseFilename=IPA-AreaCalculationsV1.03
 SetupIconFile=B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\installerIcon.ico
 Password=ipaMipa
 Encryption=yes
 SolidCompression=yes
 WizardStyle=modern
+AppMutex={#MyAppName}
+UninstallDisplayIcon={sys}\SHELL32.dll,4
+UninstallDisplayName={#MyAppName} {#MyAppVersion}
+UsePreviousAppDir=yes
+UsePreviousGroup=yes
+CloseApplications=yes
+RestartApplications=no
+UninstallRestartComputer=no
+AllowCancelDuringInstall=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
+
+; Removed the [Tasks] section for desktop icon
 
 [Files]
 Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\bin\Release\AreaCalculations.dll"; DestDir: "C:\Program Files\IPA\AreaCalculations\"; Flags: ignoreversion
@@ -39,5 +53,55 @@ Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProje
 Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\areaIcon.png"; DestDir: "C:\Program Files\IPA\AreaCalculations\"; Flags: ignoreversion
 Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\excelIcon.png"; DestDir: "C:\Program Files\IPA\AreaCalculations\"; Flags: ignoreversion
 Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\plotIcon.png"; DestDir: "C:\Program Files\IPA\AreaCalculations\"; Flags: ignoreversion
+Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\installerIcon.ico"; DestDir: "C:\Program Files\IPA\AreaCalculations\"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
+[Registry]
+; Clean up any old registry entries that might exist
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\IPA-AreaCalculations"; Flags: deletekey
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\IPA-AreaCalculations_is1"; Flags: deletekey
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; Flags: deletekey
+
+; Create new registry entries with consistent key
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{75B951C9-A0E1-43AA-BB76-DDEAF1781D38}_is1"; ValueType: string; ValueName: "DisplayName"; ValueData: "{#MyAppName} {#MyAppVersion}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{75B951C9-A0E1-43AA-BB76-DDEAF1781D38}_is1"; ValueType: string; ValueName: "UninstallString"; ValueData: "{uninstallexe}"
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{75B951C9-A0E1-43AA-BB76-DDEAF1781D38}_is1"; ValueType: string; ValueName: "DisplayVersion"; ValueData: "{#MyAppVersion}"
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{75B951C9-A0E1-43AA-BB76-DDEAF1781D38}_is1"; ValueType: string; ValueName: "Publisher"; ValueData: "{#MyAppPublisher}"
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{75B951C9-A0E1-43AA-BB76-DDEAF1781D38}_is1"; ValueType: string; ValueName: "DisplayIcon"; ValueData: "C:\Program Files\IPA\AreaCalculations\installerIcon.ico"
+
+[Code]
+// This function runs before the installation starts
+function InitializeSetup(): Boolean;
+var
+  ResultCode: Integer;
+begin
+  // Try to uninstall previous versions
+  if RegKeyExists(HKEY_LOCAL_MACHINE, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\IPA-AreaCalculations_is1') then
+  begin
+    Exec(ExpandConstant('{sys}\msiexec.exe'), '/x{75B951C9-A0E1-43AA-BB76-DDEAF1781D38} /qn', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  end;
+  
+  // Always continue with setup
+  Result := True;
+end;
+
+// This function runs after installation is complete
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+  begin
+    // Clean up any old registry entries that might still exist
+    RegDeleteKeyIncludingSubkeys(HKEY_LOCAL_MACHINE, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\IPA-AreaCalculations');
+    RegDeleteKeyIncludingSubkeys(HKEY_LOCAL_MACHINE, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\IPA-AreaCalculations_is1');
+  end;
+end;
+
+[InstallDelete]
+Type: filesandordirs; Name: "C:\Program Files\IPA\AreaCalculations\*"
+
+[UninstallDelete]
+Type: filesandordirs; Name: "C:\Program Files\IPA\AreaCalculations"
+Type: files; Name: "C:\ProgramData\Autodesk\Revit\Addins\2021\AreaCalculations.addin"
+Type: files; Name: "C:\ProgramData\Autodesk\Revit\Addins\2022\AreaCalculations.addin"
+Type: files; Name: "C:\ProgramData\Autodesk\Revit\Addins\2023\AreaCalculations.addin"
+Type: files; Name: "C:\ProgramData\Autodesk\Revit\Addins\2024\AreaCalculations.addin"
