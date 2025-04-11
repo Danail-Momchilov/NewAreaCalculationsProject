@@ -2008,7 +2008,11 @@ namespace AreaCalculations
                                         areasDoubleData = new object[] { areaArea, areaSubjected, ACCO, C1C2, DBNull.Value, areaCommonPercent, areaCommonArea, areaCommonAreaSpecial,
                                         areaCommonArea + areaCommonAreaSpecial, areaTotalArea, areaPermitPercent, areaRLPPercentage, areaRLP};
                                     }
-                                    else { }
+                                    else 
+                                    {
+                                        areasDoubleData = new object[] { areaArea, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, 
+                                        DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, areaRLPPercentage, areaRLP};
+                                    }
                                     
                                     for (int i = 0; i < areasDoubleData.Length; i++)
                                     {

@@ -159,6 +159,6 @@ B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\De
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\Excel\SheetNameWindow.baml
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.g.resources
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.csproj.CoreCompileInputs.cache
-B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.csproj.CopyComplete
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.dll
 B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.pdb
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\AreaCalculations.csproj.CopyComplete

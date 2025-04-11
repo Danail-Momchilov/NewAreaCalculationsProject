@@ -295,7 +295,7 @@ namespace AreaCalculations
         public void SetAllTwoZones(double plotArea, double buildArea, double totalBuild, double kint, double density, double greenArea, double achievedPercentage)
         {
             transaction.Start();
-            ProjectInfo.LookupParameter("Plot Area").Set(plotArea);
+            ProjectInfo.LookupParameter("Plot Area").Set(plotArea * areaConvert);
             ProjectInfo.LookupParameter("Required Built up Density")
                 .Set((ProjectInfo.LookupParameter("Required Built up Density 1st").AsDouble() + ProjectInfo.LookupParameter("Required Built up Density 2nd").AsDouble()) / 2);
             ProjectInfo.LookupParameter("Required Built up Area")
