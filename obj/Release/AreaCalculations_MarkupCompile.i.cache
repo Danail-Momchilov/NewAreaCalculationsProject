@@ -4,17 +4,17 @@
 library
 C#
 .cs
-B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Debug\
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\
 AreaCalculations
 none
 false
-DEBUG;TRACE
+TRACE
 
 2665413183
 1330752128
-14-1592104647
+14-1542720174
 20786773190
 AreaCalcs\AreaCoefficientsWindow.xaml;Excel\SheetNameWindow.xaml;
 
-True
+False
 

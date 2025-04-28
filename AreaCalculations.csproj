@@ -38,9 +38,13 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI">
       <HintPath>C:\Program Files\Autodesk\Revit 2021\RevitAPI.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <Private>False</Private>
     </Reference>
     <Reference Include="RevitAPIUI">
       <HintPath>C:\Program Files\Autodesk\Revit 2021\RevitAPIUI.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -73,6 +77,7 @@
     <Compile Include="SiteCalcs\ProjInfoUpdater.cs" />
     <Compile Include="SiteCalcs\SiteCalcs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SmartRound\SmartRound.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.addin" />

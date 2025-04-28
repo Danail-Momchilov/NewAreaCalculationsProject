@@ -18,38 +18,29 @@ namespace AreaCalculations
         public List<string> plotNames { get; set; } = new List<string>();
         public bool isPlotTypeCorrect = true;
         double areaConvert = 10.7639104167096;
-        private double smartRoundProjInfo(ProjectInfo projectInfo, string parameterName)
-        {
-            double result = Math.Round(projectInfo.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero) * areaConvert;
-
-            return result;
-        }
-        private double semiRoundProjInfo(ProjectInfo projectInfo, string parameterName)
-        {
-            double result = Math.Round(projectInfo.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero);
-
-            return result;
-        }
+        private SmartRound smartRounder { get; set; }
         public ProjInfoUpdater(ProjectInfo projectInfo, Document Doc)
         {
             this.ProjectInfo = projectInfo;
             this.doc = Doc;
             this.transaction = new Transaction(doc, "Update Project Info");
+            this.smartRounder = new SmartRound(doc);
 
             switch (ProjectInfo.LookupParameter("Plot Type").AsString())
             {
                 case "СТАНДАРТНО УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
-                    plotAreas.Add(semiRoundProjInfo(projectInfo, "Plot Area"));
+                    plotAreas.Add(smartRounder.sqFeetToSqMeters(projectInfo.LookupParameter("Plot Area").AsDouble()));
                     break;
 
                 case "ЪГЛОВО УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
-                    plotAreas.Add(semiRoundProjInfo(projectInfo, "Plot Area"));
+                    plotAreas.Add(smartRounder.sqFeetToSqMeters(projectInfo.LookupParameter("Plot Area").AsDouble()));
                     break;
 
                 case "УПИ В ДВЕ ЗОНИ":
-                    double plotAr = semiRoundProjInfo(projectInfo, "Zone Area 1st") + semiRoundProjInfo(projectInfo, "Zone Area 2nd");
+                    double plotAr = smartRounder.sqFeetToSqMeters(projectInfo.LookupParameter("Zone Area 1st").AsDouble()) 
+                        + smartRounder.sqFeetToSqMeters(projectInfo.LookupParameter("Zone Area 2nd").AsDouble());
                     plotAreas.Add(plotAr);
                     plotNames.Add(projectInfo.LookupParameter("Plot Number").AsString());
                     break;
@@ -57,8 +48,8 @@ namespace AreaCalculations
                 case "ДВЕ УПИ":
                     plotNames.Add(projectInfo.LookupParameter("Plot Number 1st").AsString());
                     plotNames.Add(projectInfo.LookupParameter("Plot Number 2nd").AsString());
-                    plotAreas.Add(semiRoundProjInfo(projectInfo, "Plot Area 1st"));
-                    plotAreas.Add(semiRoundProjInfo(projectInfo, "Plot Area 2nd"));
+                    plotAreas.Add(smartRounder.sqFeetToSqMeters(projectInfo.LookupParameter("Plot Area 1st").AsDouble()));
+                    plotAreas.Add(smartRounder.sqFeetToSqMeters(projectInfo.LookupParameter("Plot Area 2nd").AsDouble()));
                     break;
 
                 default:

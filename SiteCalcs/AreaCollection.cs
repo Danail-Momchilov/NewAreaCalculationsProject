@@ -19,12 +19,7 @@ namespace AreaCalculations
         public Document doc { get; set; }
         Transaction transaction { get; set; }
         private double areaConvert = 10.7639104167096;
-        private double semiRoundArea(Area area, string parameterName)
-        {
-            double result = Math.Round(area.LookupParameter(parameterName).AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero);
-
-            return result;
-        }
+        private SmartRound smartRound { get; set; }
         private bool updateIfNoValue(Parameter param, double value)
         {
             if (param.HasValue && param.AsValueString() != "" && param.AsDouble() != 0)
@@ -38,6 +33,7 @@ namespace AreaCalculations
         public AreaCollection(Document document)
         {
             this.doc = document;
+            this.smartRound = new SmartRound(document);
 
             ParameterValueProvider provider = new ParameterValueProvider(new ElementId(BuiltInParameter.ROOM_AREA));
             FilterNumericRuleEvaluator evaluator = new FilterNumericGreater();
@@ -51,6 +47,7 @@ namespace AreaCalculations
         public AreaCollection(Document document, List<string> plotNames)
         {
             this.doc = document;
+            this.smartRound = new SmartRound(document);
 
             ParameterValueProvider provider = new ParameterValueProvider(new ElementId(BuiltInParameter.ROOM_AREA));
             FilterNumericRuleEvaluator evaluator = new FilterNumericGreater();
@@ -77,25 +74,25 @@ namespace AreaCalculations
                     if (plotNames.Count == 1)
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНА")
-                            this.build[0] += semiRoundArea(area, "Area");
+                            this.build[0] += smartRound.sqFeetToSqMeters(area.LookupParameter("Area").AsDouble());
                         if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА")
-                            this.totalBuild[0] += semiRoundArea(area, "Area");
+                            this.totalBuild[0] += smartRound.sqFeetToSqMeters(area.LookupParameter("Area").AsDouble());
                     }
                     else if (plotNames.Count == 2)
                     {
                         if (area.LookupParameter("A Instance Area Location").AsString() == "НАЗЕМНА" || area.LookupParameter("A Instance Area Location").AsString() == "ПОЛУПОДЗЕМНА")
                         {
                             if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
-                                this.build[0] += semiRoundArea(area, "Area");
+                                this.build[0] += smartRound.sqFeetToSqMeters(area.LookupParameter("Area").AsDouble());
                             else if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[1])
-                                this.build[1] += semiRoundArea(area, "Area");
+                                this.build[1] += smartRound.sqFeetToSqMeters(area.LookupParameter("Area").AsDouble());
                         }
                         else if (area.LookupParameter("A Instance Area Location").AsString() == "НАДЗЕМНА")
                         {
                             if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[0])
-                                this.totalBuild[0] += semiRoundArea(area, "Area");
+                                this.totalBuild[0] += smartRound.sqFeetToSqMeters(area.LookupParameter("Area").AsDouble());
                             else if (area.LookupParameter("A Instance Area Plot").AsString() == plotNames[1])
-                                this.totalBuild[1] += semiRoundArea(area, "Area");
+                                this.totalBuild[1] += smartRound.sqFeetToSqMeters(area.LookupParameter("Area").AsDouble());
                         }
                     }
                     else
