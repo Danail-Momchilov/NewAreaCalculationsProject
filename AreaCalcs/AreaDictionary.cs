@@ -406,11 +406,11 @@ namespace AreaCalculations
             {
                 foreach (Area area in areaGroup[group])
                 {
-                    buildingPermitTotal += Math.Round(area.LookupParameter(parameterName).AsDouble(), 3);
+                    buildingPermitTotal += Math.Round(area.LookupParameter(parameterName).AsDouble(), 3, MidpointRounding.AwayFromZero);
                 }
             }
 
-            double surplus = Math.Round(100 - buildingPermitTotal, 3);
+            double surplus = Math.Round(100 - buildingPermitTotal, 3, MidpointRounding.AwayFromZero);
             int counter = 0;
             int loopCounter = 0;
 
@@ -524,7 +524,7 @@ namespace AreaCalculations
             {
                 foreach (Area area in areaGroup[group])
                 {
-                    totalAreaSum += Math.Round(area.LookupParameter(parameterNameArea).AsDouble() / areaConvert, 2);
+                    totalAreaSum += smartRounder.sqFeetToSqMeters(area.LookupParameter(parameterNameArea)?.AsDouble() ?? 0.0);
                 }
             }
 
@@ -567,7 +567,7 @@ namespace AreaCalculations
                     foreach (Area area in areaGroup[group])
                     {
                         // calculate the updated area
-                        double calculatedArea = Math.Round(area.LookupParameter(parameterNameArea).AsDouble() / areaConvert + finalDeduction, 2);
+                        double calculatedArea = Math.Round(smartRounder.sqFeetToSqMeters(area.LookupParameter(parameterNameArea)?.AsDouble() ?? 0.0) + finalDeduction, 2);
                         area.LookupParameter(parameterNameArea).Set(Math.Round(calculatedArea * areaConvert, 2));
 
                         areaSurplus -= finalDeduction;
@@ -631,11 +631,11 @@ namespace AreaCalculations
                 foreach (Area area in areaGroup[group])
                 {
                     if (area.LookupParameter("A Instance Common Area Special").HasValue &&
-                        Math.Round(area.LookupParameter("A Instance Common Area Special").AsDouble() / areaConvert, 2) != 0 &&
+                        smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area Special")?.AsDouble() ?? 0.0) != 0 &&
                         area.LookupParameter("A Instance Common Area Special").AsString() != "")
                     {
                         // calculate the updated area
-                        double calculatedArea = Math.Round(area.LookupParameter(parameterNameArea).AsDouble() / areaConvert + finalDeduction, 2);
+                        double calculatedArea = Math.Round(smartRounder.sqFeetToSqMeters(area.LookupParameter(parameterNameArea)?.AsDouble() ?? 0.0) + finalDeduction, 2);
                         area.LookupParameter(parameterNameArea).Set(Math.Round(calculatedArea * areaConvert, 2));
 
                         surplus -= finalDeduction;
@@ -758,15 +758,15 @@ namespace AreaCalculations
         private Dictionary<List<object>, Room> returnAdjascentRooms(Area area)
         {
             string areaNumber = area.LookupParameter("Number").AsString();
-            double areaArea = Math.Round(area.LookupParameter("A Instance Gross Area")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
+            double areaArea = Math.Round(area.LookupParameter("A Instance Gross Area")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero); // WHY 0.000 PRECISION FOR AREA???
             double commonAreaPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
-            double commonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 2, MidpointRounding.AwayFromZero);
-            double specialCommonArea = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() / areaConvert ?? 0.0, 2, MidpointRounding.AwayFromZero);
+            double commonArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area")?.AsDouble() ?? 0.0);
+            double specialCommonArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area Special")?.AsDouble() ?? 0.0);
             double totalCommonArea = commonArea + specialCommonArea;
-            double totalArea = Math.Round(area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0, 2, MidpointRounding.AwayFromZero);
+            double totalArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Total Area")?.AsDouble() ?? 0.0);
             double buildingRight = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
             double landPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
-            double landArea = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3, MidpointRounding.AwayFromZero);
+            double landArea = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3, MidpointRounding.AwayFromZero); // WHY 0.000 PRECISION FOR AREA???
 
             Dictionary<string, List<object>> keyValuePairs = new Dictionary<string, List<object>>();
 
@@ -1028,7 +1028,7 @@ namespace AreaCalculations
                     && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                 {
                     area.LookupParameter("A Instance Price C1/C2").Set(Math.Round(area.LookupParameter("A Instance Gross Area").AsDouble()
-                        * area.LookupParameter("A Coefficient Multiplied").AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero));
+                        * area.LookupParameter("A Coefficient Multiplied").AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero)); // NO IDEA WHY THAT WORKS
                 }
             }
 
@@ -1147,7 +1147,7 @@ namespace AreaCalculations
                                 double percentage = Math.Round(mainArea.LookupParameter("A Instance Price C1/C2").AsDouble() * 100 / sumC1C2, 
                                     3, MidpointRounding.AwayFromZero);
 
-                                double areaToAdd = Math.Round((percentage * area.Area / 100) / areaConvert, 2, MidpointRounding.AwayFromZero) * areaConvert;
+                                double areaToAdd = smartRounder.sqFeetToSqMeters(area.Area) * percentage / 100 * areaConvert;
 
                                 mainArea.LookupParameter("A Instance Common Area Special")
                                     .Set(mainArea.LookupParameter("A Instance Common Area Special").AsDouble() + areaToAdd);
@@ -1975,19 +1975,19 @@ namespace AreaCalculations
 
                                     string areaNumber = area.LookupParameter("Number").AsString() ?? "SOMETHING'S WRONG";
                                     string areaName = area.LookupParameter("Name")?.AsString() ?? "SOMETHING'S WRONG";
-                                    double areaArea = Math.Round(area.LookupParameter("A Instance Gross Area")?.AsDouble() / areaConvert ?? 0.0, 2, MidpointRounding.AwayFromZero);
+                                    double areaArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Gross Area")?.AsDouble() ?? 0.0);
                                     // TODO: rework properly for adjascent area
                                     object areaSubjected = DBNull.Value;
                                     // TODO: rework properly for adjascent area
                                     double ACCO = area.LookupParameter("A Coefficient Multiplied")?.AsDouble() ?? 0.0;
-                                    double C1C2 = Math.Round(area.LookupParameter("A Instance Price C1/C2")?.AsDouble() ?? 0.0, 2, MidpointRounding.AwayFromZero);
+                                    double C1C2 = Math.Round(area.LookupParameter("A Instance Price C1/C2")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
                                     double areaCommonPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
-                                    double areaCommonArea = Math.Round(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0, 2, MidpointRounding.AwayFromZero);
-                                    double areaCommonAreaSpecial = Math.Round(area.LookupParameter("A Instance Common Area Special")?.AsDouble() / areaConvert ?? 0.0, 2, MidpointRounding.AwayFromZero);
-                                    double areaTotalArea = Math.Round((area.LookupParameter("A Instance Total Area")?.AsDouble() / areaConvert ?? 0.0), 2, MidpointRounding.AwayFromZero);
+                                    double areaCommonArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0);
+                                    double areaCommonAreaSpecial = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area Special")?.AsDouble() ?? 0.0);
+                                    double areaTotalArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Total Area")?.AsDouble() ?? 0.0);
                                     double areaPermitPercent = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
                                     double areaRLPPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
-                                    double areaRLP = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 2, MidpointRounding.AwayFromZero);
+                                    double areaRLP = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance RLP Area")?.AsDouble() ?? 0.0);
 
                                     string[] areaStringData = new[] { areaNumber, areaName };
                                     object[] areasDoubleData = new object[] { };
@@ -2154,7 +2154,8 @@ namespace AreaCalculations
 
                                         Range areaAdjRangeDouble = workSheet.Range[$"C{x}", $"O{x}"];
                                         areaAdjRangeDouble.set_Value(XlRangeValueDataType.xlRangeValueDefault, new object[] {
-                                                        Math.Round(room.LookupParameter("Area").AsDouble() / areaConvert, 2), DBNull.Value, DBNull.Value, DBNull.Value, 
+                                                        smartRounder.sqFeetToSqMeters(room.LookupParameter("Area").AsDouble()),
+                                                        DBNull.Value, DBNull.Value, DBNull.Value, 
                                                         key[1], key[2], key[3], key[4], key[5], key[6], key[7], key[8], key[9], DBNull.Value, DBNull.Value});
 
                                         Borders areaAdjRangeBorders = areaAdjRangeDouble.Borders;

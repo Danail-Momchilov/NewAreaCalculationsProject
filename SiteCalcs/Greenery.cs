@@ -65,7 +65,7 @@ namespace AreaCalculations
                             if (smartRounder.feetToCentimeters(railingType.LookupParameter("Railing Height").AsDouble()) <= 200)
                                 greenArea += Math.Round(
                                     smartRounder.feetToCentimeters(railing.LookupParameter("Length").AsDouble()) / 100 * 
-                                    smartRounder.feetToCentimeters(railing.LookupParameter("Railing Height").AsDouble()),
+                                    smartRounder.feetToCentimeters(railingType.LookupParameter("Railing Height").AsDouble()) / 100,
                                     2, MidpointRounding.AwayFromZero);
                             else
                                 greenArea += Math.Round(
