@@ -1027,8 +1027,10 @@ namespace AreaCalculations
                 if (area.LookupParameter("A Instance Area Category").AsString() == "САМОСТОЯТЕЛЕН ОБЕКТ"
                     && !(area.LookupParameter("A Instance Area Primary").HasValue && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                 {
-                    area.LookupParameter("A Instance Price C1/C2").Set(Math.Round(area.LookupParameter("A Instance Gross Area").AsDouble()
-                        * area.LookupParameter("A Coefficient Multiplied").AsDouble() / areaConvert, 2, MidpointRounding.AwayFromZero)); // NO IDEA WHY THAT WORKS
+                    area.LookupParameter("A Instance Price C1/C2").Set(
+                            smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Gross Area")?.AsDouble() ?? 0.0)
+                            * area.LookupParameter("A Coefficient Multiplied").AsDouble()
+                            );
                 }
             }
 
@@ -1089,8 +1091,11 @@ namespace AreaCalculations
                         {
                             double commonArea;
 
-                            commonArea = Math.Round(area.LookupParameter("A Instance Common Area %").AsDouble() * propertyCommonArea / 100, 
-                                2, MidpointRounding.AwayFromZero) * areaConvert;
+                            commonArea = 
+                                Math.Round(
+                                area.LookupParameter("A Instance Common Area %").AsDouble() * propertyCommonArea / 100, 2, MidpointRounding.AwayFromZero)
+                                * areaConvert;
+
                             area.LookupParameter("A Instance Common Area").Set(commonArea);
                         }
                     }
@@ -1520,7 +1525,7 @@ namespace AreaCalculations
         {
             workSheet.get_Range($"C{row}", $"D{row}").NumberFormat = "0.00";
             workSheet.get_Range($"E{row}", $"E{row}").NumberFormat = "0.0";
-            workSheet.get_Range($"F{row}", $"F{row}").NumberFormat = "0.00";
+            workSheet.get_Range($"F{row}", $"F{row}").NumberFormat = "0.000";
             workSheet.get_Range($"G{row}", $"H{row}").NumberFormat = "0.000";
             workSheet.get_Range($"I{row}", $"L{row}").NumberFormat = "0.00";
             workSheet.get_Range($"M{row}", $"N{row}").NumberFormat = "0.000";
@@ -1982,7 +1987,7 @@ namespace AreaCalculations
                                     double ACCO = area.LookupParameter("A Coefficient Multiplied")?.AsDouble() ?? 0.0;
                                     double C1C2 = Math.Round(area.LookupParameter("A Instance Price C1/C2")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
                                     double areaCommonPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
-                                    double areaCommonArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area")?.AsDouble() / areaConvert ?? 0.0);
+                                    double areaCommonArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area")?.AsDouble() ?? 0.0);
                                     double areaCommonAreaSpecial = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area Special")?.AsDouble() ?? 0.0);
                                     double areaTotalArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Total Area")?.AsDouble() ?? 0.0);
                                     double areaPermitPercent = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
