@@ -758,7 +758,7 @@ namespace AreaCalculations
         private Dictionary<List<object>, Room> returnAdjascentRooms(Area area)
         {
             string areaNumber = area.LookupParameter("Number").AsString();
-            double areaArea = Math.Round(area.LookupParameter("A Instance Gross Area")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero); // WHY 0.000 PRECISION FOR AREA???
+            double areaArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Gross Area")?.AsDouble() ?? 0.0);
             double commonAreaPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
             double commonArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area")?.AsDouble() ?? 0.0);
             double specialCommonArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area Special")?.AsDouble() ?? 0.0);
@@ -794,7 +794,9 @@ namespace AreaCalculations
                 List<double> listData = new List<double>();
                 listData.Add(group.Count());
 
-                double percentage = Math.Round(group.First().LookupParameter("Area").AsDouble() * 100/areaArea, 3, MidpointRounding.AwayFromZero);
+                double percentage = Math.Round(
+                    smartRounder.sqFeetToSqMeters(group.First().LookupParameter("Area").AsDouble()) * 100/areaArea, 
+                    3, MidpointRounding.AwayFromZero);
                 listData.Add(percentage);
 
                 double percentageShare = Math.Round(percentage * commonAreaPercent / 100, 3, MidpointRounding.AwayFromZero);
@@ -1298,8 +1300,8 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        double calculatedArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance RLP Area %").AsDouble())
-                            * remainingPlotArea / 100 * areaConvert;
+                        double calculatedArea = area.LookupParameter("A Instance RLP Area %").AsDouble()
+                            * remainingPlotArea / 100;
 
                         area.LookupParameter("A Instance RLP Area").Set(calculatedArea);
                     }
@@ -2189,7 +2191,7 @@ namespace AreaCalculations
                         //colorRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.AliceBlue);
 
                         // set a formula for the total area sum of F1/F2
-                        setSumFormulaExcludingRows(workSheet, "C", x, startLine, endLine, linesToExclude);
+                        // setSumFormulaExcludingRows(workSheet, "C", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "C", "C", x);
 
                         // set a formula for the total sum of adjascent areas
@@ -2201,33 +2203,33 @@ namespace AreaCalculations
                         sumC1C2.Formula = $"=SUM(F{startLine}:F{endLine})";
 
                         // set a formula for the total sum of Common Areas 
-                        setSumFormulaExcludingRows(workSheet, "H", x, startLine, endLine, linesToExclude);
+                        // setSumFormulaExcludingRows(workSheet, "H", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "H", "H", x);
 
                         // set a formula for the total sum of Special Common Areas Percentage
-                        setSumFormulaExcludingRows(workSheet, "I", x, startLine, endLine, linesToExclude);
+                        // setSumFormulaExcludingRows(workSheet, "I", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "I", "I", x);
 
                         // set a formula for the total sum of Special Common Areas Percentage
-                        setSumFormulaExcludingRows(workSheet, "J", x, startLine, endLine, linesToExclude);
+                        // setSumFormulaExcludingRows(workSheet, "J", x, startLine, endLine, linesToExclude);
 
                         // set a formula for the total sum of all common areas
-                        setSumFormulaExcludingRows(workSheet, "K", x, startLine, endLine, linesToExclude);
+                        // setSumFormulaExcludingRows(workSheet, "K", x, startLine, endLine, linesToExclude);
 
                         // set a formula for the total sum of Total Area
-                        setSumFormulaExcludingRows(workSheet, "L", x, startLine, endLine, linesToExclude);
+                        // setSumFormulaExcludingRows(workSheet, "L", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "L", "L", x);
 
                         // set a formula for the total sum of Building Right Percentage
-                        setSumFormulaExcludingRows(workSheet, "M", x, startLine, endLine, linesToExclude);
+                        // setSumFormulaExcludingRows(workSheet, "M", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "M", "M", x);
 
                         // set a formula for the total sum of Land Area Percentage
-                        setSumFormulaExcludingRows(workSheet, "N", x, startLine, endLine, linesToExcludeLand);
+                        // setSumFormulaExcludingRows(workSheet, "N", x, startLine, endLine, linesToExcludeLand);
                         setBoldRange(workSheet, "N", "N", x);
 
                         // set a formula for the total sum of Land Area
-                        setSumFormulaExcludingRows(workSheet, "O", x, startLine, endLine, linesToExcludeLand);
+                        // setSumFormulaExcludingRows(workSheet, "O", x, startLine, endLine, linesToExcludeLand);
                         setBoldRange(workSheet, "O", "O", x);
 
                         // set coloring for the summed up rows

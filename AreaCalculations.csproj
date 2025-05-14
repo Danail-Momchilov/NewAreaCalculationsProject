@@ -60,6 +60,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AboutStack\AboutInfo.cs" />
+    <Compile Include="AboutStack\VersionInfo.cs" />
     <Compile Include="App.cs" />
     <Compile Include="AreaCalcs\AreaCoefficients.cs" />
     <Compile Include="AreaCalcs\CalculateAreaParameters.cs" />
@@ -124,6 +126,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>if exist "$(AppData)\Roaming\Autodesk\Revit\Addins\2021" copy "$(ProjectDir)*.addin" "$(AppData)\Roaming\Autodesk\Revit\Addins\2021"
