@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AboutStack\AboutInfo.cs" />
+    <Compile Include="AboutStack\ResourceInfo.cs" />
     <Compile Include="AboutStack\VersionInfo.cs" />
     <Compile Include="App.cs" />
     <Compile Include="AreaCalcs\AreaCoefficients.cs" />

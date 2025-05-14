@@ -32,7 +32,7 @@ namespace AreaCalculations
             PushButtonData smallButton2 = new PushButtonData("Version", "V", assembName, "AreaCalculations.VersionInfo");
             smallButton2.Image = new BitmapImage(new Uri(path + @"\version.png"));
 
-            PushButtonData smallButton3 = new PushButtonData("Resources", "R", assembName, "AreaCalculations.VersionInfo");
+            PushButtonData smallButton3 = new PushButtonData("Resources", "R", assembName, "AreaCalculations.ResourceInfo");
             smallButton3.Image = new BitmapImage(new Uri(path + @"\education.png"));
 
             IList<RibbonItem> stackedButtons = areaCalcPanel.AddStackedItems(smallButton1, smallButton2, smallButton3);

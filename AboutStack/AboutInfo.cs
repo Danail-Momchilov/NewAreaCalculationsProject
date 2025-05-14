@@ -16,7 +16,10 @@ namespace AreaCalculations
         {
             try
             {
-                TaskDialog.Show("Test", "Test");
+                string licenceInfo = "Area Calculations Plugin for Autodesk Revit.\n" +
+                    "Developed by and a full intellectual property of IPA - Architecture and More";
+
+                TaskDialog.Show("About", licenceInfo);
 
                 return Result.Succeeded;
             }
