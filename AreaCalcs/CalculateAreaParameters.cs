@@ -74,7 +74,7 @@ namespace AreaCalculations
                 areaDict.calculateTotalArea();
                 // calculate A Instance Common Area Percentage
                 string errrorMessage = areaDict.calculateInstancePropertyCommonAreaPercentage();
-
+                errrorMessage += areaDict.errorMessage;
 
                 if (errrorMessage != "")
                 {

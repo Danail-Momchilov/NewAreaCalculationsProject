@@ -802,6 +802,9 @@ namespace AreaCalculations
                 double percentageShare = Math.Round(percentage * commonAreaPercent / 100, 3, MidpointRounding.AwayFromZero);
                 listData.Add(percentageShare);
 
+                // TODO: take this out in a separate method
+                //
+                //
                 double commonAreaShare = Math.Round(percentage * commonArea / 100, 2, MidpointRounding.AwayFromZero);
                 listData.Add(commonAreaShare);
 
@@ -822,6 +825,9 @@ namespace AreaCalculations
 
                 double landAreaShare = Math.Round(percentage * landArea / 100, 2, MidpointRounding.AwayFromZero);
                 listData.Add(landAreaShare);
+                //
+                //
+                // TODO: take this out in a separate method
 
                 // add the list to the dictionary as a key
                 percentageDict.Add(listData, new List<Room>());
@@ -831,6 +837,10 @@ namespace AreaCalculations
                 {
                     percentageDict[listData].Add(room);
                     totalPercentage += percentage;
+
+                    // TODO: add these to the separate method
+                    //
+                    //
                     totalPercentageShare += percentageShare;
                     totalBuildingRightShare += buildingRightShare;
                     totalLandPercentageShare += landPercentageShare;
@@ -840,11 +850,20 @@ namespace AreaCalculations
                     totalCommonAreaTotalShare += commonAreaTotalShare;
                     totalAreaTotalShare += totalAreaShare;
                     totalLandAreaShare += landAreaShare;
+                    //
+                    //
+                    // TODO: add these to the separate method
                 }
             }
             
             // redistribute surplus for percentage coefficients
             calculateParkingPercentSurplus(percentageDict, 100, totalPercentage, 1);
+            //
+            //
+            // TODO: call the method here
+            //
+            //
+
             calculateParkingPercentSurplus(percentageDict, commonAreaPercent, totalPercentageShare, 2);
             calculateParkingPercentSurplus(percentageDict, buildingRight, totalBuildingRightShare, 7);
             calculateParkingPercentSurplus(percentageDict, landPercentage, totalLandPercentageShare, 8);
@@ -1138,13 +1157,22 @@ namespace AreaCalculations
                             // find all the areas it is adjascent to and calculate their total C1C2 and add them to a list
                             foreach (string mainAreaNumber in mainAreaNumbers)
                             {
+                                bool wafFound = false;
+
                                 foreach (Area mainArea in AreasOrganizer[plotName][property])
                                 {
                                     if (mainArea.LookupParameter("Number").AsString() == mainAreaNumber)
                                     {
+                                        wafFound = true;
                                         sumC1C2 += mainArea.LookupParameter("A Instance Price C1/C2").AsDouble();
                                         mainAreaElements.Add(mainArea);
                                     }
+                                }
+
+                                if (!wafFound)
+                                {
+                                    errorMessage += $"Area {area.Name} | Id:{area.Id} " +
+                                        $"е зададена като подчинена на такава с несъществуващ номер: {mainAreaNumber}\n";
                                 }
                             }
 

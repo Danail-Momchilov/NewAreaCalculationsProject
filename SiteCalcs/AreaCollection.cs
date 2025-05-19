@@ -214,29 +214,33 @@ namespace AreaCalculations
                             $"/ id: {area.Id.ToString()} / Една Area не може да бъде подчинена сама на себе си\n";
                     }
 
+                    // THE WHOLE THING UNDERNEATH IS DISGUISTING... TO BE PROPERLY REVISED
                     if (area.LookupParameter("A Instance Area Primary").HasValue
                         && area.LookupParameter("A Instance Area Primary").AsString() != ""
                         && area.LookupParameter("A Instance Area Primary").AsString() != area.LookupParameter("Number").AsString())
                     {
-                        bool wasFound = false;
-
-                        ParameterValueProvider provider = new ParameterValueProvider(new ElementId(BuiltInParameter.ROOM_AREA));
-                        FilterNumericRuleEvaluator evaluator = new FilterNumericGreater();
-                        double epsilon = 0.0001;
-                        ElementParameterFilter filter = new ElementParameterFilter(new FilterDoubleRule(provider, evaluator, epsilon, 1E-6));
-
-                        FilteredElementCollector mainAreasCollector = new FilteredElementCollector(doc).
-                            OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().WherePasses(filter);
-
-                        foreach (Area mainArea in mainAreasCollector)
+                        if (!area.LookupParameter("A Instance Area Primary").AsString().Contains("+"))
                         {
-                            if (area.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString())
-                                wasFound = true;
-                        }
+                            bool wasFound = false;
 
-                        if (!wasFound)
-                            errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} " +
-                            $"/ id: {area.Id.ToString()} / Дадената Area е подчинена на несъществуваща такава\n";
+                            ParameterValueProvider provider = new ParameterValueProvider(new ElementId(BuiltInParameter.ROOM_AREA));
+                            FilterNumericRuleEvaluator evaluator = new FilterNumericGreater();
+                            double epsilon = 0.0001;
+                            ElementParameterFilter filter = new ElementParameterFilter(new FilterDoubleRule(provider, evaluator, epsilon, 1E-6));
+
+                            FilteredElementCollector mainAreasCollector = new FilteredElementCollector(doc).
+                                OfCategory(BuiltInCategory.OST_Areas).WhereElementIsNotElementType().WherePasses(filter);
+
+                            foreach (Area mainArea in mainAreasCollector)
+                            {
+                                if (area.LookupParameter("A Instance Area Primary").AsString() == mainArea.LookupParameter("Number").AsString())
+                                    wasFound = true;
+                            }
+
+                            if (!wasFound)
+                                errorMessage += $"Грешка: Area {area.LookupParameter("Number").AsString()} " +
+                                $"/ id: {area.Id.ToString()} / Дадената Area е подчинена на несъществуваща такава\n";
+                        }
                     }
                 }
             }
