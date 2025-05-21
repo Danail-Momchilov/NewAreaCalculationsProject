@@ -78,8 +78,19 @@ namespace AreaCalculations
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     string filePath = openFileDialog.FileName;
-                    areaDict.exportToExcel(filePath, window.sheetName.Text);
+                    string errormessage = areaDict.exportToExcel(filePath, window.sheetName.Text);
+
+                    if (errormessage != "")
+                    {
+                        TaskDialog exportError = new TaskDialog("Открити грешки");
+                        exportError.MainInstruction = errormessage;
+                        exportError.Show();
+                        string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "warnings.txt");
+                        File.WriteAllText(path, exportError.MainInstruction);
+                    }
                 }
+
+                TaskDialog.Show("Export", "Експортът завърши успешно!");
 
                 return Result.Succeeded;
             }

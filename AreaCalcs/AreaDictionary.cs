@@ -17,6 +17,8 @@ using Autodesk.Revit.DB.Architecture;
 using System.IO;
 using System.Windows.Documents;
 using System.Windows.Media.TextFormatting;
+using System.Security.AccessControl;
+using System.Windows.Forms;
 
 namespace AreaCalculations
 {
@@ -743,6 +745,27 @@ namespace AreaCalculations
 
             return hasAdjRooms;
         }
+        private string areAdjascentRoomsAndAreasEqual(Dictionary<List<object>, Room> adjascentRooms, List<Area> adjascentRegular, List<Area> adjascentLand, Area mainArea)
+        {
+            string errormessage = "";
+
+            double totalAdjascentAreas = smartRounder.sqFeetToSqMeters(mainArea.Area);
+            double totalAdjascentRooms = 0;
+
+            foreach (Area area in adjascentRegular)
+                totalAdjascentAreas += smartRounder.sqFeetToSqMeters(area.Area);
+
+            foreach (Area area in adjascentLand)
+                totalAdjascentAreas += smartRounder.sqFeetToSqMeters(area.Area);
+
+            foreach (List<object> calculations in adjascentRooms.Keys)
+                totalAdjascentRooms += smartRounder.sqFeetToSqMeters(adjascentRooms[calculations].Area);
+
+            if (totalAdjascentRooms != totalAdjascentAreas)
+                errormessage = $"Area {mainArea.Name} | Id: {mainArea.Id} | Сумата от площите на нейните подчинени Rooms и Areas се разминава. Моля да я проверите\n";
+
+            return errormessage;
+        }
         private bool areAllLandAreasAdjascent(string plotName)
         {
             bool areAllLandAdjascent = true;
@@ -754,6 +777,45 @@ namespace AreaCalculations
             }
 
             return areAllLandAdjascent;
+        }
+        private void setParkingShareParameters(Dictionary<List<double>, List<Room>> dict, Area area)
+        {
+            string areaNumber = area.LookupParameter("Number").AsString();
+            double areaArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Gross Area")?.AsDouble() ?? 0.0);
+            double commonAreaPercent = Math.Round(area.LookupParameter("A Instance Common Area %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
+            double commonArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area")?.AsDouble() ?? 0.0);
+            double specialCommonArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area Special")?.AsDouble() ?? 0.0);
+            double totalCommonArea = commonArea + specialCommonArea;
+            double totalArea = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Total Area")?.AsDouble() ?? 0.0);
+            double buildingRight = Math.Round(area.LookupParameter("A Instance Building Permit %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
+            double landPercentage = Math.Round(area.LookupParameter("A Instance RLP Area %")?.AsDouble() ?? 0.0, 3, MidpointRounding.AwayFromZero);
+            double landArea = Math.Round(area.LookupParameter("A Instance RLP Area")?.AsDouble() / areaConvert ?? 0.0, 3, MidpointRounding.AwayFromZero);
+
+            foreach (List<double> listData in dict.Keys)
+            {
+                double percentage = listData[1];
+
+                double commonAreaShare = Math.Round(percentage * commonArea / 100, 2, MidpointRounding.AwayFromZero);
+                listData.Add(commonAreaShare);
+
+                double commonAreaSpecialShare = Math.Round(percentage * specialCommonArea / 100, 2, MidpointRounding.AwayFromZero);
+                listData.Add(commonAreaSpecialShare);
+
+                double commonAreaTotalShare = Math.Round(percentage * totalCommonArea / 100, 2, MidpointRounding.AwayFromZero);
+                listData.Add(commonAreaTotalShare);
+
+                double totalAreaShare = Math.Round(percentage * totalArea / 100, 2, MidpointRounding.AwayFromZero);
+                listData.Add(totalAreaShare);
+
+                double buildingRightShare = Math.Round(percentage * buildingRight / 100, 3, MidpointRounding.AwayFromZero);
+                listData.Add(buildingRightShare);
+
+                double landPercentageShare = Math.Round(percentage * landPercentage / 100, 3, MidpointRounding.AwayFromZero);
+                listData.Add(landPercentageShare);
+
+                double landAreaShare = Math.Round(percentage * landArea / 100, 2, MidpointRounding.AwayFromZero);
+                listData.Add(landAreaShare);
+            }
         }
         private Dictionary<List<object>, Room> returnAdjascentRooms(Area area)
         {
@@ -802,33 +864,6 @@ namespace AreaCalculations
                 double percentageShare = Math.Round(percentage * commonAreaPercent / 100, 3, MidpointRounding.AwayFromZero);
                 listData.Add(percentageShare);
 
-                // TODO: take this out in a separate method
-                //
-                //
-                double commonAreaShare = Math.Round(percentage * commonArea / 100, 2, MidpointRounding.AwayFromZero);
-                listData.Add(commonAreaShare);
-
-                double commonAreaSpecialShare = Math.Round(percentage * specialCommonArea / 100, 2, MidpointRounding.AwayFromZero);
-                listData.Add(commonAreaSpecialShare);
-
-                double commonAreaTotalShare = Math.Round(percentage * totalCommonArea / 100, 2, MidpointRounding.AwayFromZero);
-                listData.Add(commonAreaTotalShare);
-
-                double totalAreaShare = Math.Round(percentage * totalArea / 100, 2, MidpointRounding.AwayFromZero);
-                listData.Add(totalAreaShare);
-
-                double buildingRightShare = Math.Round(percentage * buildingRight / 100, 3, MidpointRounding.AwayFromZero);
-                listData.Add(buildingRightShare);
-
-                double landPercentageShare = Math.Round(percentage * landPercentage / 100, 3, MidpointRounding.AwayFromZero);
-                listData.Add(landPercentageShare);
-
-                double landAreaShare = Math.Round(percentage * landArea / 100, 2, MidpointRounding.AwayFromZero);
-                listData.Add(landAreaShare);
-                //
-                //
-                // TODO: take this out in a separate method
-
                 // add the list to the dictionary as a key
                 percentageDict.Add(listData, new List<Room>());
 
@@ -837,32 +872,27 @@ namespace AreaCalculations
                 {
                     percentageDict[listData].Add(room);
                     totalPercentage += percentage;
-
-                    // TODO: add these to the separate method
-                    //
-                    //
                     totalPercentageShare += percentageShare;
-                    totalBuildingRightShare += buildingRightShare;
-                    totalLandPercentageShare += landPercentageShare;
-
-                    totalCommonAreaShare += commonAreaShare;
-                    totalCommonAreaSpecialShare += commonAreaSpecialShare;
-                    totalCommonAreaTotalShare += commonAreaTotalShare;
-                    totalAreaTotalShare += totalAreaShare;
-                    totalLandAreaShare += landAreaShare;
-                    //
-                    //
-                    // TODO: add these to the separate method
                 }
             }
             
             // redistribute surplus for percentage coefficients
             calculateParkingPercentSurplus(percentageDict, 100, totalPercentage, 1);
-            //
-            //
-            // TODO: call the method here
-            //
-            //
+            setParkingShareParameters(percentageDict, area);
+
+            foreach (List<double> listData in percentageDict.Keys)
+            {
+                foreach (Room room in percentageDict[listData])
+                {
+                    totalBuildingRightShare += listData[7];
+                    totalLandPercentageShare += listData[8];
+                    totalCommonAreaShare += listData[3];
+                    totalCommonAreaSpecialShare += listData[4];
+                    totalCommonAreaTotalShare += listData[5];
+                    totalAreaTotalShare += listData[6];
+                    totalLandAreaShare += listData[9];
+                }
+            }
 
             calculateParkingPercentSurplus(percentageDict, commonAreaPercent, totalPercentageShare, 2);
             calculateParkingPercentSurplus(percentageDict, buildingRight, totalBuildingRightShare, 7);
@@ -1602,8 +1632,10 @@ namespace AreaCalculations
 
             if (setHorizontalCenter) mergeRangeObject.HorizontalAlignment = XlHAlign.xlHAlignCenter;
         }
-        public void exportToExcel(string filePath, string sheetName)
+        public string exportToExcel(string filePath, string sheetName)
         {
+            string errormessage = "";
+
             Microsoft.Office.Interop.Excel.Application excelApplication = new Microsoft.Office.Interop.Excel.Application();
             Workbook workBook = excelApplication.Workbooks.Open(filePath, ReadOnly: false);
 
@@ -2072,21 +2104,37 @@ namespace AreaCalculations
 
                                 x++;
 
-                                if (!doesHaveRoomsAdjascent(area.LookupParameter("Number").AsString()))
-                                {
-                                    // identify adjascent areas
-                                    List<Area> adjascentAreasRegular = new List<Area>();
+                                // identify adjascent areas, if any
+                                List<Area> adjascentAreasRegular = new List<Area>();
 
-                                    foreach (Area areaSub in sortedAreas)
+                                foreach (Area areaSub in sortedAreas)
+                                {
+                                    string primaryArea = areaSub.LookupParameter("A Instance Area Primary").AsString();
+
+                                    if (primaryArea != null && primaryArea.Equals(area.LookupParameter("Number").AsString()))
                                     {
-                                        string primaryArea = areaSub.LookupParameter("A Instance Area Primary").AsString();
+                                        adjascentAreasRegular.Add(areaSub);
+                                    }
+                                }
+
+                                // also search for adjascent areas from within ground property group
+                                List<Area> adjascentAreasLand = new List<Area>();
+
+                                if (AreasOrganizer[plotName].ContainsKey("ЗЕМЯ"))
+                                {
+                                    foreach (Area areaGround in AreasOrganizer[plotName]["ЗЕМЯ"])
+                                    {
+                                        string primaryArea = areaGround.LookupParameter("A Instance Area Primary").AsString();
 
                                         if (primaryArea != null && primaryArea.Equals(area.LookupParameter("Number").AsString()))
                                         {
-                                            adjascentAreasRegular.Add(areaSub);
+                                            adjascentAreasLand.Add(areaGround);
                                         }
                                     }
+                                }
 
+                                if (!doesHaveRoomsAdjascent(area.LookupParameter("Number").AsString()))
+                                {
                                     if (adjascentAreasRegular.Count != 0)
                                     {
                                         adjascentAreasRegular.OrderBy(adjArea => adjArea.LookupParameter("Number").AsString()).ToList();
@@ -2099,22 +2147,6 @@ namespace AreaCalculations
                                             linesToExclude.Add(x);
                                             linesToExcludeLand.Add(x);
                                             x++;
-                                        }
-                                    }
-
-                                    // also search for adjascent areas from within ground property group
-                                    List<Area> adjascentAreasLand = new List<Area>();
-
-                                    if (AreasOrganizer[plotName].ContainsKey("ЗЕМЯ"))
-                                    {
-                                        foreach (Area areaGround in AreasOrganizer[plotName]["ЗЕМЯ"])
-                                        {
-                                            string primaryArea = areaGround.LookupParameter("A Instance Area Primary").AsString();
-
-                                            if (primaryArea != null && primaryArea.Equals(area.LookupParameter("Number").AsString()))
-                                            {
-                                                adjascentAreasLand.Add(areaGround);
-                                            }
                                         }
                                     }
 
@@ -2206,6 +2238,8 @@ namespace AreaCalculations
 
                                         x++;
                                     }
+
+                                    errormessage += areAdjascentRoomsAndAreasEqual(adjascentRooms, adjascentAreasRegular, adjascentAreasLand, area);
                                 }
                             }
                         }
@@ -2219,7 +2253,7 @@ namespace AreaCalculations
                         //colorRange.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.AliceBlue);
 
                         // set a formula for the total area sum of F1/F2
-                        // setSumFormulaExcludingRows(workSheet, "C", x, startLine, endLine, linesToExclude);
+                        setSumFormulaExcludingRows(workSheet, "C", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "C", "C", x);
 
                         // set a formula for the total sum of adjascent areas
@@ -2231,33 +2265,33 @@ namespace AreaCalculations
                         sumC1C2.Formula = $"=SUM(F{startLine}:F{endLine})";
 
                         // set a formula for the total sum of Common Areas 
-                        // setSumFormulaExcludingRows(workSheet, "H", x, startLine, endLine, linesToExclude);
+                        setSumFormulaExcludingRows(workSheet, "H", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "H", "H", x);
 
                         // set a formula for the total sum of Special Common Areas Percentage
-                        // setSumFormulaExcludingRows(workSheet, "I", x, startLine, endLine, linesToExclude);
+                        setSumFormulaExcludingRows(workSheet, "I", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "I", "I", x);
 
                         // set a formula for the total sum of Special Common Areas Percentage
-                        // setSumFormulaExcludingRows(workSheet, "J", x, startLine, endLine, linesToExclude);
+                        setSumFormulaExcludingRows(workSheet, "J", x, startLine, endLine, linesToExclude);
 
                         // set a formula for the total sum of all common areas
-                        // setSumFormulaExcludingRows(workSheet, "K", x, startLine, endLine, linesToExclude);
+                        setSumFormulaExcludingRows(workSheet, "K", x, startLine, endLine, linesToExclude);
 
                         // set a formula for the total sum of Total Area
-                        // setSumFormulaExcludingRows(workSheet, "L", x, startLine, endLine, linesToExclude);
+                        setSumFormulaExcludingRows(workSheet, "L", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "L", "L", x);
 
                         // set a formula for the total sum of Building Right Percentage
-                        // setSumFormulaExcludingRows(workSheet, "M", x, startLine, endLine, linesToExclude);
+                        setSumFormulaExcludingRows(workSheet, "M", x, startLine, endLine, linesToExclude);
                         setBoldRange(workSheet, "M", "M", x);
 
                         // set a formula for the total sum of Land Area Percentage
-                        // setSumFormulaExcludingRows(workSheet, "N", x, startLine, endLine, linesToExcludeLand);
+                        setSumFormulaExcludingRows(workSheet, "N", x, startLine, endLine, linesToExcludeLand);
                         setBoldRange(workSheet, "N", "N", x);
 
                         // set a formula for the total sum of Land Area
-                        // setSumFormulaExcludingRows(workSheet, "O", x, startLine, endLine, linesToExcludeLand);
+                        setSumFormulaExcludingRows(workSheet, "O", x, startLine, endLine, linesToExcludeLand);
                         setBoldRange(workSheet, "O", "O", x);
 
                         // set coloring for the summed up rows
@@ -2286,6 +2320,8 @@ namespace AreaCalculations
 
             workBook.Save();
             workBook.Close();
+
+            return errormessage;
         }
     }
 }
