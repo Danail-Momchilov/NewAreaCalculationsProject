@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "IPA-AreaCalculations"
-#define MyAppVersion "1.04"
+#define MyAppVersion "1.05"
 #define MyAppPublisher "IPA Architecture and More"
 #define MyAppExeName "MyProg-x64.exe"
 
@@ -22,7 +22,7 @@ LicenseFile=B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsPr
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir=B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\Releases
-OutputBaseFilename=IPA-AreaCalculationsV1.04
+OutputBaseFilename=IPA-AreaCalculationsV1.05
 SetupIconFile=B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\installerIcon.ico
 Password=ipaMipa
 Encryption=yes
@@ -53,7 +53,9 @@ Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProje
 Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\areaIcon.png"; DestDir: "C:\Program Files\IPA\AreaCalculations\"; Flags: ignoreversion
 Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\excelIcon.png"; DestDir: "C:\Program Files\IPA\AreaCalculations\"; Flags: ignoreversion
 Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\plotIcon.png"; DestDir: "C:\Program Files\IPA\AreaCalculations\"; Flags: ignoreversion
-Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\installerIcon.ico"; DestDir: "C:\Program Files\IPA\AreaCalculations\"; Flags: ignoreversion
+Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\education.png"; DestDir: "C:\Program Files\IPA\AreaCalculations\"; Flags: ignoreversion
+Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\info.png"; DestDir: "C:\Program Files\IPA\AreaCalculations\"; Flags: ignoreversion
+Source: "B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\version.png"; DestDir: "C:\Program Files\IPA\AreaCalculations\"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
