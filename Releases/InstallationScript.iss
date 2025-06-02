@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "IPA-AreaCalculations"
-#define MyAppVersion "1.05"
+#define MyAppVersion "1.06"
 #define MyAppPublisher "IPA Architecture and More"
 #define MyAppExeName "MyProg-x64.exe"
 
@@ -22,7 +22,7 @@ LicenseFile=B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsPr
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir=B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\Releases
-OutputBaseFilename=IPA-AreaCalculationsV1.05
+OutputBaseFilename=IPA-AreaCalculationsV1.06
 SetupIconFile=B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\img\installerIcon.ico
 Password=ipaMipa
 Encryption=yes

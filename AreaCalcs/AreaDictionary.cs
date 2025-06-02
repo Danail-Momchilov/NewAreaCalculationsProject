@@ -977,7 +977,8 @@ namespace AreaCalculations
                 {
                     foreach (Area area in AreasOrganizer[plotName][property])
                     {
-                        area.LookupParameter("A Instance Gross Area").Set(area.LookupParameter("Area").AsDouble());
+                        double calculatedValue = smartRounder.sqFeetToSqMeters(area.LookupParameter("Area").AsDouble()) * areaConvert;
+                        area.LookupParameter("A Instance Gross Area").Set(calculatedValue);
                     }
                 }
             }
@@ -1020,8 +1021,9 @@ namespace AreaCalculations
                                             if (secArea.LookupParameter("A Instance Area Category").AsString().ToLower() == "самостоятелен обект")
                                             {
                                                 mainArea.LookupParameter("A Instance Gross Area").Set(
-                                                    mainArea.LookupParameter("A Instance Gross Area").AsDouble() +
-                                                    secArea.LookupParameter("Area").AsDouble());
+                                                    (smartRounder.sqFeetToSqMeters(mainArea.LookupParameter("A Instance Gross Area").AsDouble()) +
+                                                    smartRounder.sqFeetToSqMeters(secArea.LookupParameter("Area").AsDouble())) * areaConvert
+                                                    );
                                             }
                                         }
                                     }
@@ -1238,12 +1240,12 @@ namespace AreaCalculations
                             !(area.LookupParameter("A Instance Area Primary").HasValue 
                             && area.LookupParameter("A Instance Area Primary").AsString() != ""))
                         {
-                            double gross = area.LookupParameter("A Instance Gross Area").AsDouble();
-                            double common = area.LookupParameter("A Instance Common Area").AsDouble();
-                            double commonSpecial = area.LookupParameter("A Instance Common Area Special").AsDouble();
+                            double gross = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Gross Area").AsDouble());
+                            double common = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area").AsDouble());
+                            double commonSpecial = smartRounder.sqFeetToSqMeters(area.LookupParameter("A Instance Common Area Special").AsDouble());
                             double total = gross + common + commonSpecial;
 
-                            area.LookupParameter("A Instance Total Area").Set(total);
+                            area.LookupParameter("A Instance Total Area").Set(total * areaConvert);
                         }
                     }
                 }
