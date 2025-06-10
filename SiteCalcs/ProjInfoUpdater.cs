@@ -153,12 +153,14 @@ namespace AreaCalculations
                 if (ProjectInfo.LookupParameter("Urban Index") == null) { missingParameters += "Липсва параметър 'Urban Index', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Urban Index 1st") == null) { missingParameters += "Липсва параметър 'Urban Index 1st', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Urban Index 2nd") == null) { missingParameters += "Липсва параметър 'Urban Index 2nd', моля заредете го и опитайте отново...\n"; }
+                /*
                 if (ProjectInfo.LookupParameter("Required Urban Building Height") == null) { missingParameters += "Липсва параметър 'Required Urban Building Height', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Urban Building Height 1st") == null) { missingParameters += "Липсва параметър 'Required Urban Building Height 1st', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Urban Building Height 2nd") == null) { missingParameters += "Липсва параметър 'Required Urban Building Height 2nd', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Permit Building Height") == null) { missingParameters += "Липсва параметър 'Required Permit Building Height', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Permit Building Height 1st") == null) { missingParameters += "Липсва параметър 'Required Permit Building Height 1st', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Permit Building Height 2nd") == null) { missingParameters += "Липсва параметър 'Required Permit Building Height 2nd', моля заредете го и опитайте отново...\n"; }
+                */
                 if (ProjectInfo.LookupParameter("Required Built up Density") == null) { missingParameters += "Липсва параметър 'Required Built up Density', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Built up Density 1st") == null) { missingParameters += "Липсва параметър 'Required Built up Density 1st', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Built up Density 2nd") == null) { missingParameters += "Липсва параметър 'Required Built up Density 2nd', моля заредете го и опитайте отново...\n"; }
@@ -177,12 +179,14 @@ namespace AreaCalculations
                 if (ProjectInfo.LookupParameter("Required Green Area") == null) { missingParameters += "Липсва параметър 'Required Green Area', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Green Area 1st") == null) { missingParameters += "Липсва параметър 'Required Green Area 1st', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Green Area 2nd") == null) { missingParameters += "Липсва параметър 'Required Green Area 2nd', моля заредете го и опитайте отново...\n"; }
+                /*
                 if (ProjectInfo.LookupParameter("Required Way of Construction") == null) { missingParameters += "Липсва параметър 'Required Way of Construction', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Way of Construction 1st") == null) { missingParameters += "Липсва параметър 'Required Way of Construction 1st', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Way of Construction 2nd") == null) { missingParameters += "Липсва параметър 'Required Way of Construction 2nd', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Specifics") == null) { missingParameters += "Липсва параметър 'Required Specifics', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Specifics 1st") == null) { missingParameters += "Липсва параметър 'Required Specifics 1st', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Specifics 2nd") == null) { missingParameters += "Липсва параметър 'Required Specifics 2nd', моля заредете го и опитайте отново...\n"; }
+                */
                 if (ProjectInfo.LookupParameter("Achieved Building Height") == null) { missingParameters += "Липсва параметър 'Achieved Building Height', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Achieved Building Height 1st") == null) { missingParameters += "Липсва параметър 'Achieved Building Height 1st', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Achieved Building Height 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Building Height 2nd', моля заредете го и опитайте отново...\n"; }
@@ -204,12 +208,12 @@ namespace AreaCalculations
                 if (ProjectInfo.LookupParameter("Achieved Green Area") == null) { missingParameters += "Липсва параметър 'Achieved Green Area', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Achieved Green Area 1st") == null) { missingParameters += "Липсва параметър 'Achieved Green Area 1st', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Achieved Green Area 2nd") == null) { missingParameters += "Липсва параметър 'Achieved Green Area 2nd', моля заредете го и опитайте отново...\n"; }
+                /*
                 if (ProjectInfo.LookupParameter("Required Motor Vehicle Places") == null) { missingParameters += "Липсва параметър 'Required Motor Vehicle Places', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Motor Vehicle Places 1st") == null) { missingParameters += "Липсва параметър 'Required Motor Vehicle Places 1st', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Motor Vehicle Places 2nd") == null) { missingParameters += "Липсва параметър 'Required Motor Vehicle Places 2nd', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
-                if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
-                if (ProjectInfo.LookupParameter("Achieved Area Intensity") == null) { missingParameters += "Липсва параметър 'Achieved Area Intensity', моля заредете го и опитайте отново...\n"; }
+                */
                 if (ProjectInfo.LookupParameter("Required Electrical Vehicle Places") == null) { missingParameters += "Required Electrical Vehicle Places', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Electrical Vehicle Places 1st") == null) { missingParameters += "Липсва параметър 'Required Electrical Vehicle Places 1st', моля заредете го и опитайте отново...\n"; }
                 if (ProjectInfo.LookupParameter("Required Electrical Vehicle Places 2nd") == null) { missingParameters += "Липсва параметър 'Required Electrical Vehicle Places 2nd', моля заредете го и опитайте отново...\n"; }
