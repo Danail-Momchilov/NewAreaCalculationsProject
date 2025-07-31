@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Office.Interop.Excel;
 using Document = Autodesk.Revit.DB.Document;
+using TaskDialog = Autodesk.Revit.UI.TaskDialog;
+using Range = Microsoft.Office.Interop.Excel.Range;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using static System.Net.Mime.MediaTypeNames;

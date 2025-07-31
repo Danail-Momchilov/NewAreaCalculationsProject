@@ -1,89 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{241A5378-9D1E-434B-8D74-005952A0B595}</ProjectGuid>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AreaCalculations</RootNamespace>
-    <AssemblyName>AreaCalculations</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <ApplicationManifest>manifest.addin</ApplicationManifest>
+    <PostBuildEvent>if exist "$(AppData)\Roaming\Autodesk\Revit\Addins\2026" copy "$(ProjectDir)manifest.addin" "$(AppData)\Roaming\Autodesk\Revit\Addins\2026"
+if exist "$(AppData)\Roaming\Autodesk\Revit\Addins\2026" copy "$(ProjectDir)$(OutputPath)*.dll" "$(AppData)\Roaming\Autodesk\Revit\Addins\2026"
+if exist "$(AppData)\Roaming\Autodesk\Revit\Addins\2026" copy "$(ProjectDir)$(OutputPath)\img\*.png" "$(AppData)\Roaming\Autodesk\REVIT\Addins\2026"</PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="RevitAPI">
-      <HintPath>C:\Program Files\Autodesk\Revit 2021\RevitAPI.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="RevitAPIUI">
-      <HintPath>C:\Program Files\Autodesk\Revit 2021\RevitAPIUI.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AboutStack\AboutInfo.cs" />
-    <Compile Include="AboutStack\ResourceInfo.cs" />
-    <Compile Include="AboutStack\VersionInfo.cs" />
-    <Compile Include="App.cs" />
-    <Compile Include="AreaCalcs\AreaCoefficients.cs" />
-    <Compile Include="AreaCalcs\CalculateAreaParameters.cs" />
-    <Compile Include="AreaCalcs\AreaDictionary.cs" />
-    <Compile Include="AreaCalcs\AreaCoefficientsWindow.xaml.cs">
-      <DependentUpon>AreaCoefficientsWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Excel\ExportToExcel.cs" />
-    <Compile Include="Excel\SheetNameWindow.xaml.cs">
-      <DependentUpon>SheetNameWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="SiteCalcs\AreaCollection.cs" />
-    <Compile Include="SiteCalcs\Greenery.cs" />
-    <Compile Include="SiteCalcs\OutputReport.cs" />
-    <Compile Include="SiteCalcs\ProjInfoUpdater.cs" />
-    <Compile Include="SiteCalcs\SiteCalcs.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SmartRound\SmartRound.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="manifest.addin" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="img\iconPlot.png" />
@@ -118,20 +47,11 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="AreaCalcs\AreaCoefficientsWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Excel\SheetNameWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
+    <Reference Include="RevitAPI">
+      <HintPath>C:\Program Files\Autodesk\Revit 2026\RevitAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="RevitAPIUI">
+      <HintPath>C:\Program Files\Autodesk\Revit 2026\RevitAPIUI.dll</HintPath>
+    </Reference>
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>if exist "$(AppData)\Roaming\Autodesk\Revit\Addins\2021" copy "$(ProjectDir)*.addin" "$(AppData)\Roaming\Autodesk\Revit\Addins\2021"
-if exist "$(AppData)\Roaming\Autodesk\Revit\Addins\2021" copy "$(ProjectDir)$(OutputPath)*.dll" "$(AppData)\Roaming\Autodesk\Revit\Addins\2021"
-if exist "$(AppData)\Roaming\Autodesk\Revit\Addins\2021" copy "$(ProjectDir)$(OutputPath)\img\*.png" "$(AppData)\Roaming\Autodesk\REVIT\Addins\2021"</PostBuildEvent>
-  </PropertyGroup>
 </Project>

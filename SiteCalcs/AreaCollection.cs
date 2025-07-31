@@ -103,6 +103,15 @@ namespace AreaCalculations
                     }
                 }
             }
+
+            //
+            //
+            //
+            TaskDialog.Show("Test", $"{this.build[0]}");
+            TaskDialog.Show("Test", $"{this.totalBuild[0]}");
+            //
+            //
+            //
         }
         public string CheckAreasParameters(List<string> plotNames, ProjectInfo projInfo)
         {

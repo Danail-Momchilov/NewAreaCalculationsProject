@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "SINyXq8YgSw=",
+  "success": true,
+  "projectFilePath": "B:\\06. BIM AUTOMATION\\02. C#\\AREA CALCULATIONS\\NewAreaCalculationsProject2025\\AreaCalculations.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Danail.Momchilov\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
+    "C:\\Users\\Danail.Momchilov\\.nuget\\packages\\system.data.datasetextensions\\4.5.0\\system.data.datasetextensions.4.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}
