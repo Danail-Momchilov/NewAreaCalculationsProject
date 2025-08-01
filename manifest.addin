@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+	<AddIn Type="Application">
+		<Name>AreaCalculations</Name>
+		<Publisher>IPA</Publisher>
+		<Assembly>AreaCalculations.dll</Assembly>
+		<AddInId>0DD7A44A-A4B3-4491-ACAD-7A7E15E7DC81</AddInId>
+		<FullClassName>AreaCalculations.App</FullClassName>
+		<Text>Demo</Text>
+		<Description>Automated area calculations for residential projects</Description>
+		<VendorId>Dany BIM</VendorId>
+		<VendorDescription>Danail Momchilov</VendorDescription>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+	</AddIn>
+</RevitAddIns>

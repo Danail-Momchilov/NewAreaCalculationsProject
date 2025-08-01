@@ -1,0 +1,19 @@
+﻿<Window x:Class="AreaCalculations.SheetNameWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AreaCalculations"
+             mc:Ignorable="d" 
+             SizeToContent="WidthAndHeight"
+             Title="Excel export"
+             ResizeMode="NoResize"
+             WindowStyle="SingleBorderWindow"
+             Background="White" 
+             Foreground="#EEE809">
+    <StackPanel Width="220">
+        <TextBox Name="sheetName" Height="20" Margin="5,7.5,5,7.5" Text="Sheet1" TextAlignment="Left" VerticalAlignment="Center"/>
+        <Button Height="20" Margin="5, 0, 5, 5" Name="inputButton" Content="ВЪВЕДИ" Background="#EEE809" Click="inputButtonClick"/>
+    </StackPanel>
+</Window>
+

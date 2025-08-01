@@ -1,0 +1,14 @@
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\bin\Release\AreaCalculations.dll
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\bin\Release\AreaCalculations.pdb
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\AreaCalculations.csproj.AssemblyReference.cache
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\AreaCalculations.csproj.ResolveComReference.cache
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\AreaCalcs\AreaCoefficientsWindow.g.cs
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\Excel\SheetNameWindow.g.cs
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\AreaCalculations_MarkupCompile.cache
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\AreaCalculations_MarkupCompile.lref
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\AreaCalcs\AreaCoefficientsWindow.baml
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\Excel\SheetNameWindow.baml
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\AreaCalculations.g.resources
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\AreaCalculations.csproj.CoreCompileInputs.cache
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\AreaCalculations.dll
+B:\06. BIM AUTOMATION\02. C#\AREA CALCULATIONS\NewAreaCalculationsProject\obj\Release\AreaCalculations.pdb
